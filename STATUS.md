@@ -1,8 +1,8 @@
 # NSI Portal — Build Status
 
-**Current Phase:** Phase 2 (in progress)
+**Current Phase:** Phase 3 (in progress)
 **Last Updated:** 2026-04-05
-**Last Session:** Row actions (edit/resend/revoke/deactivate/reactivate/delete with confirmation). Automated Playwright testing working.
+**Last Session:** Phase 3 started — Folder/Document migration + seed data, server actions (CRUD + signed download URLs), page shells with Spencer placeholders.
 
 ---
 
@@ -35,16 +35,17 @@
 - [ ] Bulk import: CSV upload, validation, batch create, batch invite (deferred to Phase 8 / pre-launch seeding)
 - [x] Status tracking: Draft → Invited → Active → Revoked → Inactive (derived from app_user fields via deriveStatus())
 
-### Phase 3: Document Library ✋
-- [ ] Database migration: Folder and Document tables
-- [ ] Supabase Storage: private documents bucket with RLS
-- [ ] /documents page: folder tree with expand/collapse
-- [ ] /documents/:slug page: file listing
-- [ ] Document download: signed URL generation
-- [ ] Admin inline controls: upload, drag-and-drop, folder CRUD, file delete
-- [ ] Seed data: folder hierarchy from design spec
+### Phase 3: Document Library
+- [x] Database migration: Folder and Document tables (applied)
+- [ ] Supabase Storage: private documents bucket with RLS (needs manual creation in dashboard)
+- [x] /documents page: two-panel layout, folder tree with expand/collapse + empty state
+- [x] /documents/[...slug] page: file listing with download, breadcrumb nav
+- [x] Document download: signed URL generation (60s expiry)
+- [x] Admin controls: upload (drag-and-drop + file picker), folder CRUD, file delete
+- [x] Server-side file upload via uploadDocument action
+- [x] Seed data: folder hierarchy from design spec (6 top-level folders)
 
-### Phase 4: Member Directory ✋
+### Phase 4: Member Directory
 - [ ] /directory page: table/list view of active members
 - [ ] Search: filter by name, lot number, email
 - [ ] Custom fields system: CustomField + CustomFieldValue tables
@@ -62,7 +63,7 @@
 - [ ] Notification emails via Resend (new post → notify_new_post users)
 - [ ] Notification preferences on /profile page
 
-### Phase 6: Group Email ✋
+### Phase 6: Group Email
 - [ ] Database migration: Group, UserGroup, EmailLog tables
 - [ ] /admin/groups page: group CRUD, member assignment
 - [ ] /email/compose page: group selector, rich text, recipient preview, confirmation

@@ -110,8 +110,10 @@ if (await addBtn.isVisible()) {
   }
 }
 
-await capture("54-sign-in", "/sign-in");
-await capture("55-sign-up-no-ticket", "/sign-up");
+await capture("54-documents", "/documents");
+await capture("55-documents-folder", "/documents/strata-documents");
+await capture("56-sign-in", "/sign-in");
+await capture("57-sign-up-no-ticket", "/sign-up");
 
 // --- Mobile screenshots ---
 await page.setViewportSize({ width: 375, height: 812 });
