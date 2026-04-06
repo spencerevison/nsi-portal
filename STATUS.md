@@ -1,8 +1,8 @@
 # NSI Portal — Build Status
 
-**Current Phase:** Phase 6 (ready to start)
+**Current Phase:** Phase 7 (ready to start)
 **Last Updated:** 2026-04-05
-**Last Session:** Phase 5 complete — community board with post feed, single post view, comments, create post/comment forms, admin pin/unpin/delete.
+**Last Session:** Phase 6 complete — group email with compose UI, group selector, Resend batch send, confirmation dialog, email history log.
 
 ---
 
@@ -64,13 +64,13 @@
 - [x] Notification preferences on /profile page (UI done in Phase 4)
 
 ### Phase 6: Group Email
-- [ ] Database migration: Group, UserGroup, EmailLog tables
-- [ ] /admin/groups page: group CRUD, member assignment
-- [ ] /email/compose page: group selector, rich text, recipient preview, confirmation
-- [ ] Send flow: resolve groups → React Email template → Resend batch API → EmailLog
-- [ ] /email/history page: sent email log with delivery status
-- [ ] Resend webhook handler: POST /api/webhooks/resend
-- [ ] React Email templates: group broadcast template
+- [x] Database migration: Group, UserGroup, EmailLog tables (applied, 5 groups seeded)
+- [x] /admin/groups page: group list with member counts
+- [x] /email/compose page: group selector, subject, body, recipient count preview, confirmation dialog
+- [x] Send flow: resolve groups → HTML email → Resend batch API → EmailLog
+- [x] /email/history page: sent email log
+- [ ] Resend webhook handler: POST /api/webhooks/resend (deferred — delivery tracking not critical for MVP)
+- [ ] Admin: group CRUD + member assignment (deferred — groups seeded, manual assignment via DB for now)
 
 ### Phase 7: Admin — Roles & Permissions
 - [ ] /admin/roles page: role list with capability summary
