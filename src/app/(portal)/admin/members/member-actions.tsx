@@ -64,15 +64,10 @@ export function MemberActions({
       <DropdownMenu>
         <DropdownMenuTrigger
           disabled={pending}
-          className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex size-8 items-center justify-center rounded-lg"
         >
           <span className="sr-only">Actions</span>
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 15 15"
-            fill="currentColor"
-          >
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor">
             <circle cx="7.5" cy="2.5" r="1.5" />
             <circle cx="7.5" cy="7.5" r="1.5" />
             <circle cx="7.5" cy="12.5" r="1.5" />

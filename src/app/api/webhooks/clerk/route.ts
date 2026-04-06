@@ -78,11 +78,14 @@ export async function POST(req: Request) {
 
   // already linked to a DIFFERENT clerk account? reject to prevent takeover
   if (existing.clerk_id && existing.clerk_id !== clerkId) {
-    console.error("app_user already linked to a different clerk_id — rejecting", {
-      email,
-      existing: existing.clerk_id,
-      incoming: clerkId,
-    });
+    console.error(
+      "app_user already linked to a different clerk_id — rejecting",
+      {
+        email,
+        existing: existing.clerk_id,
+        incoming: clerkId,
+      },
+    );
     return new Response("Already linked to another account", { status: 409 });
   }
 

@@ -56,7 +56,7 @@ export function DirectoryView({
     <>
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
           placeholder="Search by name, lot number, or email..."
           value={search}
@@ -86,7 +86,7 @@ export function DirectoryView({
                   <TableRow>
                     <TableCell
                       colSpan={4 + customFields.length}
-                      className="py-8 text-center text-muted-foreground"
+                      className="text-muted-foreground py-8 text-center"
                     >
                       {search
                         ? "No members match your search."
@@ -112,10 +112,7 @@ export function DirectoryView({
                       {m.email}
                     </TableCell>
                     {customFields.map((f) => (
-                      <TableCell
-                        key={f.id}
-                        className="text-muted-foreground"
-                      >
+                      <TableCell key={f.id} className="text-muted-foreground">
                         {formatFieldValue(
                           m.custom_fields[f.id]?.value ?? null,
                           f.name,
@@ -143,12 +140,12 @@ export function DirectoryView({
                   </span>
                 </div>
                 {m.lot_number && (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                  <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs">
                     Lot {m.lot_number}
                   </span>
                 )}
               </div>
-              <div className="space-y-1 text-sm text-muted-foreground">
+              <div className="text-muted-foreground space-y-1 text-sm">
                 {m.phone && <div>{m.phone}</div>}
                 <div className="truncate">{m.email}</div>
                 {customFields.map((f) => {
@@ -168,7 +165,7 @@ export function DirectoryView({
           </Card>
         ))}
         {filtered.length === 0 && (
-          <p className="py-8 text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground py-8 text-center text-sm">
             {search ? "No members match your search." : "No members yet."}
           </p>
         )}

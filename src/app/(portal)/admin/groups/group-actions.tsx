@@ -35,7 +35,7 @@ export function GroupActions({ group }: { group: GroupRow }) {
       <DropdownMenu>
         <DropdownMenuTrigger
           disabled={pending}
-          className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex size-8 items-center justify-center rounded-lg"
         >
           <MoreVertical className="size-4" />
         </DropdownMenuTrigger>
@@ -78,7 +78,11 @@ export function GroupActions({ group }: { group: GroupRow }) {
               <Input value={desc} onChange={(e) => setDesc(e.target.value)} />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditOpen(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={pending}>

@@ -54,7 +54,7 @@ export default async function EmailHistoryPage() {
                 <TableRow>
                   <TableCell
                     colSpan={5}
-                    className="py-8 text-center text-muted-foreground"
+                    className="text-muted-foreground py-8 text-center"
                   >
                     No emails sent yet.
                   </TableCell>
@@ -67,10 +67,7 @@ export default async function EmailHistoryPage() {
                     {log.target_groups.join(", ")}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    {formatDelivery(
-                      log.delivery_status,
-                      log.recipient_count,
-                    )}
+                    {formatDelivery(log.delivery_status, log.recipient_count)}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {log.sender_name}

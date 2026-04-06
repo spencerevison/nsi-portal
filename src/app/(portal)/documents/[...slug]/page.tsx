@@ -23,11 +23,11 @@ export default async function FolderPage({ params }: { params: Params }) {
   const canWrite = caps.has("documents.write");
 
   return (
-    <div className="rounded-lg border border-border bg-card">
+    <div className="border-border bg-card rounded-lg border">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+      <div className="border-border flex items-center justify-between border-b px-4 py-3">
         <div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <Link href="/documents" className="hover:text-foreground">
               Documents
             </Link>
@@ -40,7 +40,7 @@ export default async function FolderPage({ params }: { params: Params }) {
             <span>/</span>
           </div>
           <h2 className="font-semibold">{folder.name}</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-0.5 text-xs">
             {docs.length} {docs.length === 1 ? "file" : "files"}
           </p>
         </div>
@@ -52,12 +52,12 @@ export default async function FolderPage({ params }: { params: Params }) {
 
       {/* File list */}
       {docs.length === 0 && !canWrite && (
-        <div className="py-12 text-center text-sm text-muted-foreground">
+        <div className="text-muted-foreground py-12 text-center text-sm">
           No documents in this folder yet.
         </div>
       )}
 
-      <div className="divide-y divide-border">
+      <div className="divide-border divide-y">
         {docs.map((doc) => (
           <FileRow key={doc.id} doc={doc} canWrite={canWrite} />
         ))}

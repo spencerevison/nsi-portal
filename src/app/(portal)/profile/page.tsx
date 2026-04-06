@@ -14,7 +14,7 @@ export default async function ProfilePage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-semibold">Profile & Settings</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Manage your profile and notification preferences
         </p>
       </div>

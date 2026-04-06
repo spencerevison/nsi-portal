@@ -32,7 +32,9 @@ await mkdir(OUT, { recursive: true });
 await clerkSetup();
 
 const browser = await chromium.launch({ channel: "chrome", headless: true });
-const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+const ctx = await browser.newContext({
+  viewport: { width: 1280, height: 900 },
+});
 const page = await ctx.newPage();
 
 await setupClerkTestingToken({ page });
@@ -92,12 +94,17 @@ await capture("50-home", "/");
 await capture("51-admin-members", "/admin/members");
 
 // open Add Member form
-await page.goto("http://localhost:3000/admin/members", { waitUntil: "networkidle" });
+await page.goto("http://localhost:3000/admin/members", {
+  waitUntil: "networkidle",
+});
 const addBtn = page.getByRole("button", { name: "Add member" });
 if (await addBtn.isVisible()) {
   await addBtn.click();
   await page.waitForTimeout(500);
-  await page.screenshot({ path: `${OUT}/52-admin-add-form.png`, fullPage: true });
+  await page.screenshot({
+    path: `${OUT}/52-admin-add-form.png`,
+    fullPage: true,
+  });
   console.log("  52-admin-add-form");
 
   // open role select
@@ -105,7 +112,10 @@ if (await addBtn.isVisible()) {
   if (await trigger.isVisible()) {
     await trigger.click();
     await page.waitForTimeout(300);
-    await page.screenshot({ path: `${OUT}/53-admin-role-select.png`, fullPage: true });
+    await page.screenshot({
+      path: `${OUT}/53-admin-role-select.png`,
+      fullPage: true,
+    });
     console.log("  53-admin-role-select");
   }
 }

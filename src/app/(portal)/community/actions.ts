@@ -90,10 +90,7 @@ export async function togglePin(postId: string): Promise<ActionResult> {
 export async function deletePost(postId: string): Promise<ActionResult> {
   await requireCapability("community.moderate");
 
-  const { error } = await supabaseAdmin
-    .from("post")
-    .delete()
-    .eq("id", postId);
+  const { error } = await supabaseAdmin.from("post").delete().eq("id", postId);
 
   if (error) return { ok: false, error: "Failed to delete post" };
 
@@ -101,7 +98,10 @@ export async function deletePost(postId: string): Promise<ActionResult> {
   return { ok: true };
 }
 
-export async function deleteComment(commentId: string, postId: string): Promise<ActionResult> {
+export async function deleteComment(
+  commentId: string,
+  postId: string,
+): Promise<ActionResult> {
   await requireCapability("community.moderate");
 
   const { error } = await supabaseAdmin

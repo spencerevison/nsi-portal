@@ -96,9 +96,7 @@ export type UpdateMemberInput = {
   role_id: string;
 };
 
-export type UpdateMemberResult =
-  | { ok: true }
-  | { ok: false; error: string };
+export type UpdateMemberResult = { ok: true } | { ok: false; error: string };
 
 export async function updateMember(
   input: UpdateMemberInput,
@@ -196,7 +194,8 @@ export async function revokeInvitation(userId: string): Promise<ActionResult> {
     .single();
 
   if (error || !user) return { ok: false, error: "Member not found" };
-  if (user.accepted_at) return { ok: false, error: "Cannot revoke — already accepted" };
+  if (user.accepted_at)
+    return { ok: false, error: "Cannot revoke — already accepted" };
 
   // revoke in Clerk
   try {
@@ -259,7 +258,8 @@ export async function deleteMember(userId: string): Promise<ActionResult> {
     .single();
 
   if (fetchErr || !user) return { ok: false, error: "Member not found" };
-  if (user.active) return { ok: false, error: "Deactivate the member before deleting" };
+  if (user.active)
+    return { ok: false, error: "Deactivate the member before deleting" };
 
   // remove from Clerk if linked
   if (user.clerk_id) {

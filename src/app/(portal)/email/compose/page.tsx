@@ -21,7 +21,7 @@ export default async function ComposePage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-semibold">Send Email</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Send a group email to community members
         </p>
       </div>

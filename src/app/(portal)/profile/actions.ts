@@ -39,17 +39,15 @@ export async function updateCustomFieldValue(input: {
   const user = await getCurrentAppUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
-  const { error } = await supabaseAdmin
-    .from("custom_field_value")
-    .upsert(
-      {
-        user_id: user.id,
-        field_id: input.fieldId,
-        value: input.value,
-        visible: input.visible,
-      },
-      { onConflict: "user_id,field_id" },
-    );
+  const { error } = await supabaseAdmin.from("custom_field_value").upsert(
+    {
+      user_id: user.id,
+      field_id: input.fieldId,
+      value: input.value,
+      visible: input.visible,
+    },
+    { onConflict: "user_id,field_id" },
+  );
 
   if (error) {
     console.error("updateCustomFieldValue failed", error);

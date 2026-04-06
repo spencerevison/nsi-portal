@@ -8,7 +8,9 @@ export default async function HomePage() {
       <h1 className="text-2xl font-semibold">
         Welcome{user ? `, ${user.first_name}` : ""}
       </h1>
-      <p className="text-neutral-600">North Secretary Island Community Portal</p>
+      <p className="text-neutral-600">
+        North Secretary Island Community Portal
+      </p>
       {/* TODO: dashboard cards — recent docs, new posts, etc. */}
     </div>
   );

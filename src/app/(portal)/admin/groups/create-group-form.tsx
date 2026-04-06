@@ -48,7 +48,7 @@ export function CreateGroupForm() {
             <Label htmlFor="group-desc">Description (optional)</Label>
             <Input id="group-desc" name="description" />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <p className="text-destructive text-sm">{error}</p>}
           <div className="flex gap-2">
             <Button type="submit" disabled={pending}>
               {pending ? "Creating..." : "Create"}
@@ -56,7 +56,10 @@ export function CreateGroupForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => { setError(null); setOpen(false); }}
+              onClick={() => {
+                setError(null);
+                setOpen(false);
+              }}
             >
               Cancel
             </Button>

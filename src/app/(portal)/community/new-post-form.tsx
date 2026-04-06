@@ -55,7 +55,12 @@ export function NewPostForm() {
         <form onSubmit={onSubmit} className="space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="post-title">Title</Label>
-            <Input id="post-title" name="title" required placeholder="What's on your mind?" />
+            <Input
+              id="post-title"
+              name="title"
+              required
+              placeholder="What's on your mind?"
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="post-body">Message</Label>
@@ -65,10 +70,10 @@ export function NewPostForm() {
               required
               rows={4}
               placeholder="Share something with the community..."
-              className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3"
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <p className="text-destructive text-sm">{error}</p>}
           <div className="flex gap-2">
             <Button type="submit" disabled={pending}>
               {pending ? "Posting..." : "Post"}

@@ -23,7 +23,7 @@ export function CommentActions({
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={pending}
-        className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-md p-1"
       >
         <MoreVertical className="size-3.5" />
       </DropdownMenuTrigger>
@@ -31,7 +31,9 @@ export function CommentActions({
         <DropdownMenuItem
           className="text-destructive"
           onClick={() =>
-            startTransition(async () => { await deleteComment(commentId, postId); })
+            startTransition(async () => {
+              await deleteComment(commentId, postId);
+            })
           }
         >
           Delete

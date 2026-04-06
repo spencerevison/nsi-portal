@@ -1,7 +1,4 @@
-import {
-  listDirectoryMembers,
-  listCustomFields,
-} from "@/lib/directory";
+import { listDirectoryMembers, listCustomFields } from "@/lib/directory";
 import { DirectoryView } from "./directory-view";
 
 export default async function DirectoryPage() {
@@ -17,7 +14,7 @@ export default async function DirectoryPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold">Member Directory</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {members.length} members
           </p>
         </div>

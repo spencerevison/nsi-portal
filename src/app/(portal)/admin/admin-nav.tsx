@@ -14,7 +14,7 @@ export function AdminNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-1 border-b border-border">
+    <nav className="border-border flex gap-1 border-b">
       {tabs.map((tab) => {
         const active = pathname.startsWith(tab.href);
         return (
@@ -25,7 +25,7 @@ export function AdminNav() {
               "-mb-px border-b-2 px-3 pb-2 text-sm transition-colors",
               active
                 ? "border-primary text-foreground font-medium"
-                : "border-transparent text-muted-foreground hover:text-foreground",
+                : "text-muted-foreground hover:text-foreground border-transparent",
             )}
           >
             {tab.label}
