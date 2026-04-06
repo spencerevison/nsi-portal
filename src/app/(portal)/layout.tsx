@@ -38,21 +38,50 @@ export default async function PortalLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b border-neutral-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
           <Link href="/" className="font-semibold">
             NSI Portal
           </Link>
           <nav className="flex items-center gap-6 text-sm text-neutral-600">
-            <Link href="/documents" className="hover:text-neutral-900 transition-colors">Documents</Link>
-            <Link href="/directory" className="hover:text-neutral-900 transition-colors">Directory</Link>
-            <Link href="/community" className="hover:text-neutral-900 transition-colors">Community</Link>
-            {caps.has("email.send") && <Link href="/email/compose" className="hover:text-neutral-900 transition-colors">Email</Link>}
-            {caps.has("admin.access") && <Link href="/admin" className="hover:text-neutral-900 transition-colors">Admin</Link>}
+            <Link
+              href="/documents"
+              className="transition-colors hover:text-neutral-900"
+            >
+              Documents
+            </Link>
+            <Link
+              href="/directory"
+              className="transition-colors hover:text-neutral-900"
+            >
+              Directory
+            </Link>
+            <Link
+              href="/community"
+              className="transition-colors hover:text-neutral-900"
+            >
+              Community
+            </Link>
+            {caps.has("email.send") && (
+              <Link
+                href="/email/compose"
+                className="transition-colors hover:text-neutral-900"
+              >
+                Email
+              </Link>
+            )}
+            {caps.has("admin.access") && (
+              <Link
+                href="/admin"
+                className="transition-colors hover:text-neutral-900"
+              >
+                Admin
+              </Link>
+            )}
             <UserMenu />
           </nav>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">
         {children}
       </main>
     </div>

@@ -84,7 +84,7 @@ export function ComposeForm({
     body.trim();
 
   return (
-    <div className="max-w-2xl space-y-4">
+    <div className="space-y-4">
       {result && (
         <div
           className={cn(
