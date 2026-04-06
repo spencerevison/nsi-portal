@@ -110,7 +110,9 @@ if (await addBtn.isVisible()) {
   }
 }
 
-await capture("54-documents", "/documents");
+await capture("54-directory", "/directory");
+await capture("55-profile", "/profile");
+await capture("56-documents", "/documents");
 await capture("55-documents-folder", "/documents/strata-documents");
 await capture("56-sign-in", "/sign-in");
 await capture("57-sign-up-no-ticket", "/sign-up");
