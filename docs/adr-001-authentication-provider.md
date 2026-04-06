@@ -129,6 +129,17 @@ Clerk handles: identity verification, session tokens, invitation emails, passwor
 
 The application handles: role-based capabilities, permission checks in middleware and API routes, admin-configurable role definitions, group membership, and all UI gating based on capabilities. This logic lives in Supabase tables (`Role`, `RoleCapability`, `User.role_id`) and is enforced in Next.js middleware and server-side checks.
 
+### Profile data ownership
+
+User profile data is split across two systems:
+
+- **Clerk owns:** name, email, avatar, password — managed via Clerk's `<UserButton />` and `<UserProfile />` components. These are "account" concerns.
+- **Supabase owns:** lot number, phone, groups, role, custom fields (kids, dogs), notification preferences, directory visibility — managed via the portal's `/profile` page. These are "community" concerns.
+
+The Supabase `app_user` table stores `first_name`, `last_name`, and `email` as cached copies of Clerk's data, used for directory display, search, and email resolution without querying Clerk's API. These are kept in sync via a Clerk `user.updated` webhook — when a member changes their name or email through Clerk's UI, the webhook handler updates the corresponding Supabase record. This webhook is handled by the same endpoint as the `user.created` webhook (invitation acceptance).
+
+This split means two profile management surfaces exist: Clerk's modal for account data, the portal's profile page for community data. The split is logical and low-friction — members rarely change their name or email, and when they do, the sync is automatic.
+
 ### Social SSO
 
 Not enabled at launch. The login screen will be email/password only to minimize confusion for less tech-savvy members. Google SSO can be enabled post-launch via a Clerk Dashboard toggle with no code changes. This decision can be revisited once the community is onboarded and comfortable with the portal.
