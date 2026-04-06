@@ -19,7 +19,7 @@ export default async function GroupsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Groups</h1>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-muted-foreground text-sm">
           {groups.length} groups
         </span>
       </div>
@@ -42,7 +42,7 @@ export default async function GroupsPage() {
                 <TableRow>
                   <TableCell
                     colSpan={4}
-                    className="py-8 text-center text-muted-foreground"
+                    className="text-muted-foreground py-8 text-center"
                   >
                     No groups yet.
                   </TableCell>

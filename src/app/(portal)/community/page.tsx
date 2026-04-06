@@ -20,7 +20,7 @@ export default async function CommunityPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold">Community</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Announcements and discussions
           </p>
         </div>
@@ -29,7 +29,7 @@ export default async function CommunityPage() {
 
       {posts.length === 0 && (
         <Card>
-          <CardContent className="py-12 text-center text-sm text-muted-foreground">
+          <CardContent className="text-muted-foreground py-12 text-center text-sm">
             No posts yet. Be the first to start a conversation.
           </CardContent>
         </Card>
@@ -52,10 +52,10 @@ export default async function CommunityPage() {
                   )}
                   <div className="min-w-0 flex-1">
                     <h2 className="text-sm font-semibold">{post.title}</h2>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                    <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
                       {post.body}
                     </p>
-                    <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="text-muted-foreground mt-2 flex items-center gap-3 text-xs">
                       <span className="flex items-center gap-1">
                         {post.author_name}
                       </span>
@@ -70,10 +70,7 @@ export default async function CommunityPage() {
                     </div>
                   </div>
                   {canModerate && (
-                    <PostActions
-                      postId={post.id}
-                      pinned={post.pinned}
-                    />
+                    <PostActions postId={post.id} pinned={post.pinned} />
                   )}
                 </div>
               </CardContent>

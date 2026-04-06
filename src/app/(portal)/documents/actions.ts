@@ -118,7 +118,8 @@ export async function uploadDocument(
   const file = formData.get("file") as File | null;
   const folderId = formData.get("folderId") as string | null;
 
-  if (!file || !folderId) return { ok: false, error: "File and folder required" };
+  if (!file || !folderId)
+    return { ok: false, error: "File and folder required" };
 
   // server-side validation
   const MAX_SIZE = 25 * 1024 * 1024; // 25 MB

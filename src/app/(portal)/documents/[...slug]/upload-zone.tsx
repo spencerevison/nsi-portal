@@ -27,7 +27,10 @@ export function UploadZone({
 
         const result = await uploadDocument(formData);
         if (!result.ok) {
-          console.error("Upload failed:", "error" in result ? result.error : "");
+          console.error(
+            "Upload failed:",
+            "error" in result ? result.error : "",
+          );
         }
       }
     });
@@ -52,7 +55,7 @@ export function UploadZone({
           handleFiles(e.dataTransfer.files);
         }}
       >
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {pending ? "Uploading..." : "Drop files here to upload"}
         </p>
       </div>
@@ -77,11 +80,11 @@ export function UploadZone({
         handleFiles(e.dataTransfer.files);
       }}
     >
-      <Upload className="mx-auto mb-2 size-5 text-muted-foreground" />
-      <p className="text-sm text-muted-foreground">
+      <Upload className="text-muted-foreground mx-auto mb-2 size-5" />
+      <p className="text-muted-foreground text-sm">
         {pending ? "Uploading..." : "Drag files here or click Upload"}
       </p>
-      <p className="mt-1 text-xs text-muted-foreground/70">
+      <p className="text-muted-foreground/70 mt-1 text-xs">
         PDF, DOC, images up to 25 MB
       </p>
       <input
@@ -117,7 +120,7 @@ export function UploadButton({ folderId }: { folderId: string }) {
       <button
         onClick={() => inputRef.current?.click()}
         disabled={pending}
-        className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+        className="border-border text-foreground hover:bg-muted flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50"
       >
         <Upload className="size-4" />
         {pending ? "Uploading..." : "Upload"}

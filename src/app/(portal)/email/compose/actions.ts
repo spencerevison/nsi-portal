@@ -58,8 +58,7 @@ export async function sendGroupEmail(input: {
 
     const result = await resend.batch.send(emails);
     emailIds =
-      result.data?.data?.map((d: { id: string }) => d.id).filter(Boolean) ??
-      [];
+      result.data?.data?.map((d: { id: string }) => d.id).filter(Boolean) ?? [];
   } catch (err) {
     console.error("resend send failed", err);
     return { ok: false, error: "Failed to send emails" };

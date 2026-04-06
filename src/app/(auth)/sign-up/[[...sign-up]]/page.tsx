@@ -1,7 +1,10 @@
 import { SignUp } from "@clerk/nextjs";
 import Link from "next/link";
 
-type SearchParams = Promise<{ __clerk_ticket?: string; __clerk_status?: string }>;
+type SearchParams = Promise<{
+  __clerk_ticket?: string;
+  __clerk_status?: string;
+}>;
 
 export default async function SignUpPage({
   searchParams,
@@ -19,8 +22,8 @@ export default async function SignUpPage({
       <div className="w-full max-w-md rounded-lg border border-neutral-200 bg-white p-8 shadow-sm">
         <h1 className="mb-2 text-xl font-semibold">Invitation required</h1>
         <p className="text-sm text-neutral-600">
-          The NSI portal is members-only. If you&rsquo;re a community member
-          and haven&rsquo;t received an invitation, contact the administrator.
+          The NSI portal is members-only. If you&rsquo;re a community member and
+          haven&rsquo;t received an invitation, contact the administrator.
         </p>
         <p className="mt-4 text-sm">
           <Link href="/sign-in" className="text-blue-600 hover:underline">

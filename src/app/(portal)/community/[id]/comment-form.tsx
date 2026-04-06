@@ -28,7 +28,7 @@ export function CommentForm({ postId }: { postId: string }) {
         required
         rows={2}
         placeholder="Write a comment..."
-        className="flex-1 rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 flex-1 rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3"
       />
       <Button type="submit" disabled={pending} className="self-end">
         {pending ? "..." : "Reply"}

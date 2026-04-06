@@ -40,7 +40,9 @@ export async function getGroup(groupId: string): Promise<GroupRow | null> {
 
 export async function listNonGroupMembers(
   groupId: string,
-): Promise<{ id: string; first_name: string; last_name: string; email: string }[]> {
+): Promise<
+  { id: string; first_name: string; last_name: string; email: string }[]
+> {
   // get members already in the group
   const { data: existing } = await supabaseAdmin
     .from("user_group")
@@ -95,7 +97,9 @@ export async function listGroups(): Promise<GroupRow[]> {
 
 export async function listGroupMembers(
   groupId: string,
-): Promise<{ user_id: string; email: string; first_name: string; last_name: string }[]> {
+): Promise<
+  { user_id: string; email: string; first_name: string; last_name: string }[]
+> {
   const { data, error } = await supabaseAdmin
     .from("user_group")
     .select("user_id, app_user:user_id ( email, first_name, last_name )")
@@ -149,7 +153,9 @@ export async function resolveRecipients(
   const groupIds = groups.map((g) => g.id);
   const { data: memberships } = await supabaseAdmin
     .from("user_group")
-    .select("app_user:user_id!inner ( email, first_name, last_name, active, accepted_at )")
+    .select(
+      "app_user:user_id!inner ( email, first_name, last_name, active, accepted_at )",
+    )
     .in("group_id", groupIds);
 
   // deduplicate by email

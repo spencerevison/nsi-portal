@@ -6,7 +6,9 @@ import { readFileSync } from "node:fs";
 
 const [, , email, first, last] = process.argv;
 if (!email) {
-  console.error('usage: node scripts/seed-admin.mjs email@example.com "First" "Last"');
+  console.error(
+    'usage: node scripts/seed-admin.mjs email@example.com "First" "Last"',
+  );
   process.exit(1);
 }
 

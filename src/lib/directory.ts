@@ -78,7 +78,10 @@ export async function listDirectoryMembers(): Promise<DirectoryMember[]> {
     .in("user_id", memberIds);
 
   // build lookup: userId → fieldId → {value, visible}
-  const cfMap = new Map<string, Map<string, { value: string | null; visible: boolean }>>();
+  const cfMap = new Map<
+    string,
+    Map<string, { value: string | null; visible: boolean }>
+  >();
   for (const v of cfValues ?? []) {
     if (!cfMap.has(v.user_id)) cfMap.set(v.user_id, new Map());
     cfMap.get(v.user_id)!.set(v.field_id, {
@@ -89,7 +92,8 @@ export async function listDirectoryMembers(): Promise<DirectoryMember[]> {
 
   return members.map((m) => {
     const role = m.role as unknown as { name: string } | null;
-    const userCf: Record<string, { value: string | null; visible: boolean }> = {};
+    const userCf: Record<string, { value: string | null; visible: boolean }> =
+      {};
     const userMap = cfMap.get(m.id);
     if (userMap) {
       for (const [fieldId, val] of userMap) {
@@ -135,7 +139,10 @@ export async function getProfileData(
     .eq("user_id", userId);
 
   const valueMap = new Map(
-    (values ?? []).map((v) => [v.field_id, { value: v.value, visible: v.visible }]),
+    (values ?? []).map((v) => [
+      v.field_id,
+      { value: v.value, visible: v.visible },
+    ]),
   );
 
   return {

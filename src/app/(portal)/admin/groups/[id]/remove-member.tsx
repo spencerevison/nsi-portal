@@ -23,7 +23,7 @@ export function RemoveMemberButton({
           await removeMemberFromGroup(groupId, userId);
         });
       }}
-      className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+      className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-md p-1 disabled:opacity-50"
       title={`Remove ${memberName}`}
     >
       <X className="size-4" />

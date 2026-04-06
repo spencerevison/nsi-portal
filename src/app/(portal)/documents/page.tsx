@@ -2,10 +2,10 @@ import { Folder } from "lucide-react";
 
 export default function DocumentsIndexPage() {
   return (
-    <div className="flex items-center justify-center rounded-lg border border-border bg-card p-12">
+    <div className="border-border bg-card flex items-center justify-center rounded-lg border p-12">
       <div className="text-center">
-        <Folder className="mx-auto mb-3 size-8 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
+        <Folder className="text-muted-foreground mx-auto mb-3 size-8" />
+        <p className="text-muted-foreground text-sm">
           Select a folder to view documents
         </p>
       </div>

@@ -16,11 +16,7 @@ import { RemoveMemberButton } from "./remove-member";
 
 type Params = Promise<{ id: string }>;
 
-export default async function GroupDetailPage({
-  params,
-}: {
-  params: Params;
-}) {
+export default async function GroupDetailPage({ params }: { params: Params }) {
   const { id } = await params;
   const group = await getGroup(id);
   if (!group) notFound();
@@ -34,7 +30,7 @@ export default async function GroupDetailPage({
     <div className="space-y-4">
       <Link
         href="/admin/groups"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
       >
         <ArrowLeft className="size-4" />
         Back to Groups
@@ -43,9 +39,9 @@ export default async function GroupDetailPage({
       <div>
         <h1 className="text-xl font-semibold">{group.name}</h1>
         {group.description && (
-          <p className="text-sm text-muted-foreground">{group.description}</p>
+          <p className="text-muted-foreground text-sm">{group.description}</p>
         )}
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           {members.length} {members.length === 1 ? "member" : "members"}
         </p>
       </div>
@@ -67,7 +63,7 @@ export default async function GroupDetailPage({
                 <TableRow>
                   <TableCell
                     colSpan={3}
-                    className="py-8 text-center text-muted-foreground"
+                    className="text-muted-foreground py-8 text-center"
                   >
                     No members in this group yet.
                   </TableCell>
