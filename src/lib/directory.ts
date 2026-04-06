@@ -16,6 +16,7 @@ export type DirectoryMember = {
   email: string;
   phone: string | null;
   lot_number: string | null;
+  avatar_url: string | null;
   role_name: string | null;
   custom_fields: Record<string, { value: string | null; visible: boolean }>;
 };
@@ -55,7 +56,7 @@ export async function listDirectoryMembers(): Promise<DirectoryMember[]> {
   const { data: members, error: membersErr } = await supabaseAdmin
     .from("app_user")
     .select(
-      `id, first_name, last_name, email, phone, lot_number,
+      `id, first_name, last_name, email, phone, lot_number, avatar_url,
        role:role_id ( name )`,
     )
     .eq("active", true)
@@ -105,6 +106,7 @@ export async function listDirectoryMembers(): Promise<DirectoryMember[]> {
       email: m.email,
       phone: m.phone,
       lot_number: m.lot_number,
+      avatar_url: m.avatar_url,
       role_name: role?.name ?? null,
       custom_fields: userCf,
     };

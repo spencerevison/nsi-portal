@@ -90,6 +90,7 @@ export async function POST(req: Request) {
     .update({
       clerk_id: clerkId,
       accepted_at: new Date().toISOString(),
+      avatar_url: evt.data.image_url ?? null,
     })
     .eq("id", existing.id);
 
