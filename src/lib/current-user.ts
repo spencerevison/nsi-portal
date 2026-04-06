@@ -39,7 +39,42 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
     .eq("clerk_id", clerkUser.id)
     .maybeSingle();
 
-  if (byClerk) return byClerk as AppUser;
+  if (byClerk) {
+    // sync Clerk-owned fields if they've changed
+    const clerkFirst = clerkUser.firstName ?? byClerk.first_name;
+    const clerkLast = clerkUser.lastName ?? byClerk.last_name;
+    const clerkEmail = clerkUser.emailAddresses
+      .find((e) => e.id === clerkUser.primaryEmailAddressId)
+      ?.emailAddress?.toLowerCase();
+    const clerkAvatar = clerkUser.imageUrl ?? null;
+
+    const needsSync =
+      clerkFirst !== byClerk.first_name ||
+      clerkLast !== byClerk.last_name ||
+      (clerkEmail && clerkEmail !== byClerk.email) ||
+      clerkAvatar !== (byClerk as Record<string, unknown>).avatar_url;
+
+    if (needsSync) {
+      await supabaseAdmin
+        .from("app_user")
+        .update({
+          first_name: clerkFirst,
+          last_name: clerkLast,
+          ...(clerkEmail ? { email: clerkEmail } : {}),
+          avatar_url: clerkAvatar,
+        })
+        .eq("id", byClerk.id);
+
+      return {
+        ...byClerk,
+        first_name: clerkFirst,
+        last_name: clerkLast,
+        email: clerkEmail ?? byClerk.email,
+      } as AppUser;
+    }
+
+    return byClerk as AppUser;
+  }
 
   // fallback: look up by primary email and link
   const primaryEmailId = clerkUser.primaryEmailAddressId;
