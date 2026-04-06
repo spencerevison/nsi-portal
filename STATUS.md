@@ -1,8 +1,8 @@
 # NSI Portal — Build Status
 
-**Current Phase:** Phase 3 (in progress)
+**Current Phase:** Phase 4 (ready to start)
 **Last Updated:** 2026-04-05
-**Last Session:** Phase 3 started — Folder/Document migration + seed data, server actions (CRUD + signed download URLs), page shells with Spencer placeholders.
+**Last Session:** Phase 3 complete — document library with folder tree, file upload/download/delete, all dialogs use shadcn Dialog (no native confirm/prompt). Phase 2 row actions complete with edit dialog.
 
 ---
 
