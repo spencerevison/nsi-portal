@@ -1,7 +1,7 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import { Settings } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 
 export function UserMenu() {
   return (
@@ -10,7 +10,7 @@ export function UserMenu() {
         <UserButton.Link
           href="/profile"
           label="Settings"
-          labelIcon={<Settings className="size-4" />}
+          labelIcon={<SlidersHorizontal className="size-4" />}
         />
         <UserButton.Action label="manageAccount" />
       </UserButton.MenuItems>

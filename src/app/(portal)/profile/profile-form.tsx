@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useClerk } from "@clerk/nextjs";
 import { X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ import {
 } from "./actions";
 
 export function ProfileForm({ profile }: { profile: ProfileData }) {
+  const { openUserProfile } = useClerk();
   const [pending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
 
@@ -65,18 +67,12 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
       <Card>
         <CardContent className="space-y-4">
           <h2 className="text-sm font-semibold">Profile Information</h2>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Name and email are managed in your{" "}
             <button
               type="button"
               className="text-primary underline underline-offset-2"
-              onClick={() => {
-                // trigger Clerk's manage account modal via the UserButton
-                const btn = document.querySelector<HTMLButtonElement>(
-                  '[data-clerk-user-button-trigger]'
-                );
-                btn?.click();
-              }}
+              onClick={() => openUserProfile()}
             >
               Account Settings
             </button>
@@ -84,17 +80,17 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
           </p>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Name</Label>
+              <Label className="text-muted-foreground text-xs">Name</Label>
               <p className="text-sm">
                 {profile.first_name} {profile.last_name}
               </p>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Email</Label>
+              <Label className="text-muted-foreground text-xs">Email</Label>
               <p className="text-sm">{profile.email}</p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="phone" className="text-xs text-muted-foreground">
+              <Label htmlFor="phone" className="text-muted-foreground text-xs">
                 Phone
               </Label>
               <Input
@@ -105,7 +101,10 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="lot_number" className="text-xs text-muted-foreground">
+              <Label
+                htmlFor="lot_number"
+                className="text-muted-foreground text-xs"
+              >
                 Lot Number
               </Label>
               <Input
@@ -123,7 +122,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
         <CardContent className="space-y-5">
           <div>
             <h2 className="text-sm font-semibold">Directory Information</h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               These fields are optional and visible in the member directory only
               if you choose to share them.
             </p>
@@ -159,7 +158,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
         <CardContent className="space-y-4">
           <div>
             <h2 className="text-sm font-semibold">Notification Preferences</h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Control which community board activity triggers an email. Group
               emails from admin/council are always delivered.
             </p>
@@ -167,7 +166,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
           <label className="flex items-center justify-between">
             <div>
               <span className="text-sm font-medium">New posts</span>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Get notified when someone creates a new post
               </p>
             </div>
@@ -175,14 +174,14 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
               type="checkbox"
               checked={notifyNewPost}
               onChange={(e) => setNotifyNewPost(e.target.checked)}
-              className="size-5 rounded border-input"
+              className="border-input size-5 rounded"
             />
           </label>
-          <div className="border-t border-border" />
+          <div className="border-border border-t" />
           <label className="flex items-center justify-between">
             <div>
               <span className="text-sm font-medium">Replies</span>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Get notified when someone comments on your post
               </p>
             </div>
@@ -190,7 +189,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
               type="checkbox"
               checked={notifyReplies}
               onChange={(e) => setNotifyReplies(e.target.checked)}
-              className="size-5 rounded border-input"
+              className="border-input size-5 rounded"
             />
           </label>
         </CardContent>
@@ -198,7 +197,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
 
       <div className="flex items-center justify-end gap-3">
         {saved && (
-          <span className="text-sm text-muted-foreground">Changes saved</span>
+          <span className="text-muted-foreground text-sm">Changes saved</span>
         )}
         <Button onClick={handleSave} disabled={pending}>
           {pending ? "Saving..." : "Save Changes"}
@@ -212,10 +211,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
 
 type FieldItem = Record<string, string>;
 
-function parseFieldValue(
-  value: string | null,
-  fieldName: string,
-): FieldItem[] {
+function parseFieldValue(value: string | null, fieldName: string): FieldItem[] {
   if (!value) return [];
   try {
     const arr = JSON.parse(value);
@@ -244,7 +240,10 @@ function CustomFieldEditor({
   const isChildren = fieldName === "Children";
 
   function addItem() {
-    onItemsChange([...items, isChildren ? { name: "", birthYear: "" } : { name: "" }]);
+    onItemsChange([
+      ...items,
+      isChildren ? { name: "", birthYear: "" } : { name: "" },
+    ]);
   }
 
   function removeItem(idx: number) {
@@ -260,20 +259,21 @@ function CustomFieldEditor({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <Label className="text-xs text-muted-foreground">{fieldName}</Label>
+        <Label className="text-muted-foreground text-xs">{fieldName}</Label>
         <button
           type="button"
           onClick={addItem}
-          className="text-xs font-medium text-primary hover:underline"
+          className="text-primary text-xs font-medium hover:underline"
         >
-          + Add {fieldName === "Children" ? "child" : fieldName.toLowerCase().replace(/s$/, "")}
+          + Add{" "}
+          {fieldName === "Children"
+            ? "child"
+            : fieldName.toLowerCase().replace(/s$/, "")}
         </button>
       </div>
 
       {items.length === 0 && (
-        <p className="text-xs italic text-muted-foreground">
-          None added yet.
-        </p>
+        <p className="text-muted-foreground text-xs italic">None added yet.</p>
       )}
 
       <div className="space-y-2">
@@ -296,7 +296,7 @@ function CustomFieldEditor({
             <button
               type="button"
               onClick={() => removeItem(i)}
-              className="rounded p-1 text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground rounded p-1"
             >
               <X className="size-4" />
             </button>
@@ -309,9 +309,9 @@ function CustomFieldEditor({
           type="checkbox"
           checked={visible}
           onChange={(e) => onVisibleChange(e.target.checked)}
-          className="rounded border-input"
+          className="border-input rounded"
         />
-        <span className="text-xs text-muted-foreground">
+        <span className="text-muted-foreground text-xs">
           Show in member directory
         </span>
       </label>
