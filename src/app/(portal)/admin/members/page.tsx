@@ -1,12 +1,32 @@
 import { listMembers, listRoles, type MemberStatus } from "@/lib/members";
 import { AddMemberForm } from "./add-member-form";
+import { MemberActions } from "./member-actions";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-const statusClasses: Record<MemberStatus, string> = {
-  Draft: "bg-neutral-100 text-neutral-700",
-  Invited: "bg-amber-100 text-amber-800",
-  Active: "bg-green-100 text-green-800",
-  Revoked: "bg-red-100 text-red-700",
-  Inactive: "bg-neutral-200 text-neutral-600",
+const statusVariant: Record<
+  MemberStatus,
+  { variant: "secondary" | "outline" | "destructive"; className?: string }
+> = {
+  Draft: { variant: "outline" },
+  Invited: {
+    variant: "secondary",
+    className: "bg-amber-100 text-amber-900 border-amber-200",
+  },
+  Active: {
+    variant: "secondary",
+    className: "bg-green-100 text-green-900 border-green-200",
+  },
+  Revoked: { variant: "destructive" },
+  Inactive: { variant: "secondary" },
 };
 
 export default async function MembersPage() {
@@ -16,59 +36,68 @@ export default async function MembersPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Members</h1>
-        <span className="text-sm text-neutral-500">
+        <span className="text-muted-foreground text-sm">
           {members.length} {members.length === 1 ? "member" : "members"}
         </span>
       </div>
 
       <AddMemberForm roles={roles} />
 
-      <div className="overflow-hidden rounded-md border border-neutral-200 bg-white">
-        <table className="w-full text-sm">
-          <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
-            <tr>
-              <th className="px-4 py-2 font-medium">Name</th>
-              <th className="px-4 py-2 font-medium">Email</th>
-              <th className="px-4 py-2 font-medium">Lot</th>
-              <th className="px-4 py-2 font-medium">Role</th>
-              <th className="px-4 py-2 font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-100">
-            {members.length === 0 && (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-4 py-8 text-center text-neutral-500"
-                >
-                  No members yet.
-                </td>
-              </tr>
-            )}
-            {members.map((m) => (
-              <tr key={m.id}>
-                <td className="px-4 py-2">
-                  {m.first_name} {m.last_name}
-                </td>
-                <td className="px-4 py-2 text-neutral-600">{m.email}</td>
-                <td className="px-4 py-2 text-neutral-600">
-                  {m.lot_number ?? "—"}
-                </td>
-                <td className="px-4 py-2 text-neutral-600">
-                  {m.role_name ?? "—"}
-                </td>
-                <td className="px-4 py-2">
-                  <span
-                    className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusClasses[m.status]}`}
+      <Card className="p-0">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Lot</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-12"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {members.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-muted-foreground py-8 text-center"
                   >
-                    {m.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    No members yet.
+                  </TableCell>
+                </TableRow>
+              )}
+              {members.map((m) => {
+                const s = statusVariant[m.status];
+                return (
+                  <TableRow key={m.id}>
+                    <TableCell className="font-medium">
+                      {m.first_name} {m.last_name}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {m.email}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {m.lot_number ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {m.role_name ?? "—"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={s.variant} className={s.className}>
+                        {m.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <MemberActions member={m} roles={roles} />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       {/* TODO: bulk import, row actions */}
     </div>
