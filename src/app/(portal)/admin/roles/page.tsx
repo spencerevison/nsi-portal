@@ -54,8 +54,13 @@ export default async function RolesPage() {
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {r.capabilities.length}
+                  <TableCell>
+                    <Link
+                      href={`/admin/roles/${r.id}`}
+                      className="text-muted-foreground hover:text-foreground hover:underline"
+                    >
+                      {r.capabilities.length} capabilities
+                    </Link>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {r.member_count}
