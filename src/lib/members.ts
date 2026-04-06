@@ -27,6 +27,7 @@ export type MemberRow = {
   first_name: string;
   last_name: string;
   lot_number: string | null;
+  role_id: string | null;
   role_name: string | null;
   status: MemberStatus;
   invited_at: string | null;
@@ -51,7 +52,7 @@ export async function listMembers(): Promise<MemberRow[]> {
   const { data, error } = await supabaseAdmin
     .from("app_user")
     .select(
-      `id, email, first_name, last_name, lot_number, active,
+      `id, email, first_name, last_name, lot_number, role_id, active,
        invited_at, accepted_at, revoked_at,
        role:role_id ( name )`,
     )
@@ -70,6 +71,7 @@ export async function listMembers(): Promise<MemberRow[]> {
       first_name: r.first_name,
       last_name: r.last_name,
       lot_number: r.lot_number,
+      role_id: r.role_id,
       role_name: role?.name ?? null,
       status: deriveStatus({
         active: r.active,
