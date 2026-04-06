@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { UserButton, SignOutButton } from "@clerk/nextjs";
+import { SignOutButton } from "@clerk/nextjs";
+import { UserMenu } from "./user-menu";
 import { getCurrentAppUser, getCurrentCapabilities } from "@/lib/current-user";
 
 export default async function PortalLayout({
@@ -47,7 +48,7 @@ export default async function PortalLayout({
             <Link href="/community">Community</Link>
             {caps.has("email.send") && <Link href="/email/compose">Email</Link>}
             {caps.has("admin.access") && <Link href="/admin">Admin</Link>}
-            <UserButton />
+            <UserMenu />
           </nav>
         </div>
       </header>

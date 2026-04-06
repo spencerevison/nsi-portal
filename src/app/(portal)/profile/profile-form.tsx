@@ -17,9 +17,9 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
   const [pending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
 
-  // profile fields
-  const [email, setEmail] = useState(profile.email);
+  // profile fields (name + email are managed by Clerk, read-only here)
   const [phone, setPhone] = useState(profile.phone ?? "");
+  const [lotNumber, setLotNumber] = useState(profile.lot_number ?? "");
 
   // notification prefs
   const [notifyNewPost, setNotifyNewPost] = useState(profile.notify_new_post);
@@ -39,7 +39,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
   function handleSave() {
     setSaved(false);
     startTransition(async () => {
-      await updateProfile({ email, phone });
+      await updateProfile({ phone, lotNumber });
 
       for (const cf of cfState) {
         await updateCustomFieldValue({
@@ -65,27 +65,33 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
       <Card>
         <CardContent className="space-y-4">
           <h2 className="text-sm font-semibold">Profile Information</h2>
+          <p className="text-xs text-muted-foreground">
+            Name and email are managed in your{" "}
+            <button
+              type="button"
+              className="text-primary underline underline-offset-2"
+              onClick={() => {
+                // trigger Clerk's manage account modal via the UserButton
+                const btn = document.querySelector<HTMLButtonElement>(
+                  '[data-clerk-user-button-trigger]'
+                );
+                btn?.click();
+              }}
+            >
+              Account Settings
+            </button>
+            .
+          </p>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">
-                First Name
-              </Label>
-              <Input value={profile.first_name} disabled />
+              <Label className="text-xs text-muted-foreground">Name</Label>
+              <p className="text-sm">
+                {profile.first_name} {profile.last_name}
+              </p>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Last Name</Label>
-              <Input value={profile.last_name} disabled />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-xs text-muted-foreground">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <Label className="text-xs text-muted-foreground">Email</Label>
+              <p className="text-sm">{profile.email}</p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="phone" className="text-xs text-muted-foreground">
@@ -99,10 +105,14 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">
+              <Label htmlFor="lot_number" className="text-xs text-muted-foreground">
                 Lot Number
               </Label>
-              <Input value={profile.lot_number ?? ""} disabled />
+              <Input
+                id="lot_number"
+                value={lotNumber}
+                onChange={(e) => setLotNumber(e.target.value)}
+              />
             </div>
           </div>
         </CardContent>
