@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,6 +25,7 @@ import type { RoleWithCapabilities } from "@/lib/roles";
 import { updateRole, deleteRole } from "./actions";
 
 export function RoleActions({ role }: { role: RoleWithCapabilities }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -41,8 +43,11 @@ export function RoleActions({ role }: { role: RoleWithCapabilities }) {
           <MoreVertical className="size-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => router.push(`/admin/roles/${role.id}`)}>
+            Edit capabilities
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
-            Edit
+            Rename
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

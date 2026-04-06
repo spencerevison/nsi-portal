@@ -5,7 +5,6 @@ export const ALL_CAPABILITIES = [
   { key: "documents.read", label: "Browse and download documents" },
   { key: "documents.write", label: "Upload, rename, delete documents and folders" },
   { key: "directory.read", label: "View member directory" },
-  { key: "directory.manage", label: "Edit other members' profiles" },
   { key: "email.send", label: "Compose and send group emails" },
   { key: "community.read", label: "View community board" },
   { key: "community.write", label: "Create posts and comments" },
