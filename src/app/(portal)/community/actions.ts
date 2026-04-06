@@ -17,6 +17,12 @@ export async function createPost(input: {
   if (!input.title.trim() || !input.body.trim()) {
     return { ok: false, error: "Title and body required" };
   }
+  if (input.title.length > 200) {
+    return { ok: false, error: "Title too long (max 200 characters)" };
+  }
+  if (input.body.length > 10000) {
+    return { ok: false, error: "Post too long (max 10,000 characters)" };
+  }
 
   const { data, error } = await supabaseAdmin
     .from("post")
@@ -47,6 +53,9 @@ export async function createComment(input: {
 
   if (!input.body.trim()) {
     return { ok: false, error: "Comment cannot be empty" };
+  }
+  if (input.body.length > 5000) {
+    return { ok: false, error: "Comment too long (max 5,000 characters)" };
   }
 
   const { error } = await supabaseAdmin.from("comment").insert({
