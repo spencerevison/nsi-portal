@@ -1,6 +1,6 @@
 # NSI Portal — Build Status
 
-**Current Phase:** Phase 7 (ready to start)
+**Current Phase:** Phase 8 (ready to start)
 **Last Updated:** 2026-04-05
 **Last Session:** Phase 6 complete — group email with compose UI, group selector, Resend batch send, confirmation dialog, email history log.
 
@@ -73,11 +73,11 @@
 - [x] Admin: group CRUD (create/edit/delete) + member assignment (add/remove via group detail page)
 
 ### Phase 7: Admin — Roles & Permissions
-- [ ] /admin/roles page: role list with capability summary
-- [ ] Role detail/edit: capability checkbox grid
-- [ ] Create/delete role with safeguards
+- [x] /admin/roles page: role list with capability count, member count, default badge
+- [x] Role detail/edit: capability checkbox grid grouped by category
+- [x] Create/delete role with safeguards (can't delete if members assigned)
 - [x] Role assignment on member edit form (done in Phase 2 edit dialog)
-- [ ] End-to-end capability verification
+- [x] Roles tab restored in admin nav
 
 ### Phase 8: Polish & Launch Prep
 - [ ] Responsive design audit (375px, 768px, 1440px)
