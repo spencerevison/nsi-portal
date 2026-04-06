@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { DirectoryMember, CustomField } from "@/lib/directory";
+import { MemberAvatar } from "./member-avatar";
 
 function formatFieldValue(value: string | null, fieldName: string): string {
   if (!value) return "";
@@ -96,7 +97,10 @@ export function DirectoryView({
                 {filtered.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="font-medium whitespace-nowrap">
-                      {m.first_name} {m.last_name}
+                      <div className="flex items-center gap-2">
+                        <MemberAvatar member={m} size="sm" />
+                        {m.first_name} {m.last_name}
+                      </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {m.lot_number ?? "—"}
@@ -132,9 +136,12 @@ export function DirectoryView({
           <Card key={m.id}>
             <CardContent className="p-4">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-semibold">
-                  {m.first_name} {m.last_name}
-                </span>
+                <div className="flex items-center gap-2">
+                  <MemberAvatar member={m} size="sm" />
+                  <span className="text-sm font-semibold">
+                    {m.first_name} {m.last_name}
+                  </span>
+                </div>
                 {m.lot_number && (
                   <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                     Lot {m.lot_number}

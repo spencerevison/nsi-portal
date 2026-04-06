@@ -66,6 +66,7 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
     .update({
       clerk_id: clerkUser.id,
       accepted_at: byEmail.accepted_at ?? new Date().toISOString(),
+      avatar_url: clerkUser.imageUrl ?? null,
     })
     .eq("id", byEmail.id);
 
