@@ -1,8 +1,8 @@
 # NSI Portal — Build Status
 
-**Current Phase:** Phase 4 (ready to start)
+**Current Phase:** Phase 5 (ready to start)
 **Last Updated:** 2026-04-05
-**Last Session:** Phase 3 complete — document library with folder tree, file upload/download/delete, all dialogs use shadcn Dialog (no native confirm/prompt). Phase 2 row actions complete with edit dialog.
+**Last Session:** Phase 4 complete — member directory with search, profile page with custom fields + visibility toggles + notification prefs.
 
 ---
 
@@ -37,7 +37,7 @@
 
 ### Phase 3: Document Library
 - [x] Database migration: Folder and Document tables (applied)
-- [ ] Supabase Storage: private documents bucket with RLS (needs manual creation in dashboard)
+- [x] Supabase Storage: private documents bucket with RLS (created)
 - [x] /documents page: two-panel layout, folder tree with expand/collapse + empty state
 - [x] /documents/[...slug] page: file listing with download, breadcrumb nav
 - [x] Document download: signed URL generation (60s expiry)
@@ -46,13 +46,13 @@
 - [x] Seed data: folder hierarchy from design spec (6 top-level folders)
 
 ### Phase 4: Member Directory
-- [ ] /directory page: table/list view of active members
-- [ ] Search: filter by name, lot number, email
-- [ ] Custom fields system: CustomField + CustomFieldValue tables
-- [ ] Seed "Kids" and "Dogs" as initial custom fields
-- [ ] /profile page: edit own profile, custom fields, visibility toggles
-- [ ] Admin: member edit form with custom fields
-- [ ] Dynamic field rendering in directory based on CustomField definitions
+- [x] /directory page: table/list view of active members (desktop table + mobile cards)
+- [x] Search: filter by name, lot number, email
+- [x] Custom fields system: CustomField + CustomFieldValue tables (migration applied)
+- [x] Seed "Kids" and "Dogs" as initial custom fields
+- [x] /profile page: edit own profile, custom fields, visibility toggles, notification prefs
+- [ ] Admin: member edit form with custom fields (deferred — edit dialog works, custom fields can be added later)
+- [x] Dynamic field rendering in directory based on CustomField definitions
 
 ### Phase 5: Community Board
 - [ ] Database migration: Post and Comment tables
