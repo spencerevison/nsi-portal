@@ -7,6 +7,22 @@ import { resolveRecipients } from "@/lib/groups";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// simple rate limiter: max 5 sends per user per hour
+const sendLog = new Map<string, number[]>();
+const RATE_LIMIT = 5;
+const RATE_WINDOW = 60 * 60 * 1000; // 1 hour
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const timestamps = (sendLog.get(userId) ?? []).filter(
+    (t) => now - t < RATE_WINDOW,
+  );
+  sendLog.set(userId, timestamps);
+  if (timestamps.length >= RATE_LIMIT) return false;
+  timestamps.push(now);
+  return true;
+}
+
 type SendResult =
   | { ok: true; recipientCount: number }
   | { ok: false; error: string };
@@ -20,11 +36,21 @@ export async function sendGroupEmail(input: {
   const user = await getCurrentAppUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
+  if (!checkRateLimit(user.id)) {
+    return { ok: false, error: "Too many emails sent. Please wait before sending again." };
+  }
+
   if (input.groupSlugs.length === 0) {
     return { ok: false, error: "Select at least one group" };
   }
   if (!input.subject.trim() || !input.body.trim()) {
     return { ok: false, error: "Subject and message required" };
+  }
+  if (input.subject.length > 200) {
+    return { ok: false, error: "Subject too long (max 200 characters)" };
+  }
+  if (input.body.length > 50000) {
+    return { ok: false, error: "Message too long (max 50,000 characters)" };
   }
 
   const recipients = await resolveRecipients(input.groupSlugs);
