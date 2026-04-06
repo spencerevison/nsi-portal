@@ -1,0 +1,207 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import type { GroupRow } from "@/lib/groups";
+import { sendGroupEmail } from "./actions";
+import { cn } from "@/lib/utils";
+
+export function ComposeForm({ groups }: { groups: GroupRow[] }) {
+  const [pending, startTransition] = useTransition();
+  const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [result, setResult] = useState<{
+    ok: boolean;
+    message: string;
+  } | null>(null);
+
+  const allSelected = selectedSlugs.includes("all");
+  const recipientCount = allSelected
+    ? groups.reduce((sum, g) => sum + g.member_count, 0)
+    : groups
+        .filter((g) => selectedSlugs.includes(g.slug))
+        .reduce((sum, g) => sum + g.member_count, 0);
+
+  function toggleGroup(slug: string) {
+    if (slug === "all") {
+      setSelectedSlugs(allSelected ? [] : ["all"]);
+      return;
+    }
+    setSelectedSlugs((prev) => {
+      const without = prev.filter((s) => s !== "all" && s !== slug);
+      return prev.includes(slug) ? without : [...without, slug];
+    });
+  }
+
+  function handleSend() {
+    setResult(null);
+    startTransition(async () => {
+      const res = await sendGroupEmail({
+        groupSlugs: selectedSlugs,
+        subject,
+        body,
+      });
+
+      setConfirmOpen(false);
+
+      if (res.ok) {
+        setResult({
+          ok: true,
+          message: `Email sent to ${res.recipientCount} recipients.`,
+        });
+        setSelectedSlugs([]);
+        setSubject("");
+        setBody("");
+      } else {
+        setResult({ ok: false, message: res.error });
+      }
+    });
+  }
+
+  const canSend =
+    selectedSlugs.length > 0 && subject.trim() && body.trim();
+
+  return (
+    <div className="max-w-2xl space-y-4">
+      {result && (
+        <div
+          className={cn(
+            "rounded-lg border p-3 text-sm",
+            result.ok
+              ? "border-green-200 bg-green-50 text-green-800"
+              : "border-destructive/20 bg-destructive/5 text-destructive",
+          )}
+        >
+          {result.message}
+        </div>
+      )}
+
+      <Card>
+        <CardContent className="space-y-4">
+          {/* Group selector */}
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Recipients</Label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => toggleGroup("all")}
+                className={cn(
+                  "rounded-lg border px-3 py-1.5 text-sm transition-colors",
+                  allSelected
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border hover:bg-muted",
+                )}
+              >
+                All Members
+              </button>
+              {groups.map((g) => (
+                <button
+                  key={g.id}
+                  type="button"
+                  disabled={allSelected}
+                  onClick={() => toggleGroup(g.slug)}
+                  className={cn(
+                    "rounded-lg border px-3 py-1.5 text-sm transition-colors disabled:opacity-40",
+                    selectedSlugs.includes(g.slug)
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border hover:bg-muted",
+                  )}
+                >
+                  {g.name}
+                  <span className="ml-1 text-xs opacity-70">
+                    ({g.member_count})
+                  </span>
+                </button>
+              ))}
+            </div>
+            {selectedSlugs.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {recipientCount} recipient{recipientCount !== 1 ? "s" : ""}
+              </p>
+            )}
+          </div>
+
+          {/* Subject */}
+          <div className="space-y-1.5">
+            <Label htmlFor="email-subject" className="text-xs text-muted-foreground">
+              Subject
+            </Label>
+            <Input
+              id="email-subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Email subject..."
+            />
+          </div>
+
+          {/* Body */}
+          <div className="space-y-1.5">
+            <Label htmlFor="email-body" className="text-xs text-muted-foreground">
+              Message
+            </Label>
+            <textarea
+              id="email-body"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              rows={8}
+              placeholder="Write your message..."
+              className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            />
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            Emails are sent to all members in the selected group(s). Members
+            cannot opt out of group emails.
+          </p>
+
+          <Button
+            disabled={!canSend || pending}
+            onClick={() => setConfirmOpen(true)}
+          >
+            {pending ? "Sending..." : "Send Email"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Confirmation dialog */}
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send email</DialogTitle>
+            <DialogDescription>
+              Send &ldquo;{subject}&rdquo; to{" "}
+              {allSelected
+                ? "all members"
+                : selectedSlugs.join(", ")}{" "}
+              ({recipientCount} recipient{recipientCount !== 1 ? "s" : ""})?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button disabled={pending} onClick={handleSend}>
+              {pending ? "Sending..." : "Send"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
