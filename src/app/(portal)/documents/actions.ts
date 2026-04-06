@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { requireCapability, getCurrentAppUser } from "@/lib/current-user";
 import { createSignedDownloadUrl } from "@/lib/documents";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
+import { slugify } from "@/lib/utils";
+import type { ActionResult } from "@/lib/action-result";
 
 // --- Folder CRUD ---
 
@@ -16,10 +16,7 @@ export async function createFolder(
   await requireCapability("documents.write");
   const user = await getCurrentAppUser();
 
-  const slug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+  const slug = slugify(name);
 
   if (!slug) return { ok: false, error: "Invalid folder name" };
 
@@ -55,10 +52,7 @@ export async function renameFolder(
 ): Promise<ActionResult> {
   await requireCapability("documents.write");
 
-  const slug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+  const slug = slugify(name);
 
   const { error } = await supabaseAdmin
     .from("folder")
@@ -77,18 +71,28 @@ export async function renameFolder(
 export async function deleteFolder(folderId: string): Promise<ActionResult> {
   await requireCapability("documents.write");
 
-  // cascade deletes documents (FK constraint), but we should also
-  // clean up storage. Get doc paths first.
+  // collect all folder IDs in the subtree (this folder + children)
+  const folderIds = [folderId];
+  const { data: children } = await supabaseAdmin
+    .from("folder")
+    .select("id")
+    .eq("parent_id", folderId);
+  if (children) {
+    folderIds.push(...children.map((c) => c.id));
+  }
+
+  // get ALL document storage paths across the entire subtree
   const { data: docs } = await supabaseAdmin
     .from("document")
     .select("storage_path")
-    .eq("folder_id", folderId);
+    .in("folder_id", folderIds);
 
   if (docs && docs.length > 0) {
     const paths = docs.map((d) => d.storage_path);
     await supabaseAdmin.storage.from("documents").remove(paths);
   }
 
+  // cascade delete removes child folders + documents in DB
   const { error } = await supabaseAdmin
     .from("folder")
     .delete()
@@ -116,6 +120,28 @@ export async function uploadDocument(
 
   if (!file || !folderId) return { ok: false, error: "File and folder required" };
 
+  // server-side validation
+  const MAX_SIZE = 25 * 1024 * 1024; // 25 MB
+  if (file.size > MAX_SIZE) {
+    return { ok: false, error: "File too large (max 25 MB)" };
+  }
+
+  const ALLOWED_TYPES = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "text/plain",
+  ];
+  if (file.type && !ALLOWED_TYPES.includes(file.type)) {
+    return { ok: false, error: "File type not allowed" };
+  }
+
   // generate a unique storage path preserving extension
   const ext = file.name.includes(".") ? "." + file.name.split(".").pop() : "";
   const storagePath = `${crypto.randomUUID()}${ext}`;
@@ -128,6 +154,8 @@ export async function uploadDocument(
     .upload(storagePath, buffer, {
       contentType: file.type,
       upsert: false,
+      duplex: "half",
+      metadata: { contentDisposition: "attachment" },
     });
 
   if (uploadErr) {
@@ -155,34 +183,6 @@ export async function uploadDocument(
   return { ok: true };
 }
 
-export async function createDocument(input: {
-  displayName: string;
-  storagePath: string;
-  folderId: string;
-  fileSize: number;
-  mimeType: string;
-}): Promise<ActionResult> {
-  await requireCapability("documents.write");
-  const user = await getCurrentAppUser();
-
-  const { error } = await supabaseAdmin.from("document").insert({
-    display_name: input.displayName,
-    storage_path: input.storagePath,
-    folder_id: input.folderId,
-    file_size: input.fileSize,
-    mime_type: input.mimeType,
-    uploaded_by: user?.id,
-  });
-
-  if (error) {
-    console.error("createDocument failed", error);
-    return { ok: false, error: "Failed to save document record" };
-  }
-
-  revalidatePath("/documents");
-  return { ok: true };
-}
-
 export async function deleteDocument(
   documentId: string,
 ): Promise<ActionResult> {
@@ -197,10 +197,7 @@ export async function deleteDocument(
 
   if (!doc) return { ok: false, error: "Document not found" };
 
-  // delete from storage
-  await supabaseAdmin.storage.from("documents").remove([doc.storage_path]);
-
-  // delete the row
+  // delete DB row first — if this fails, storage is still intact
   const { error } = await supabaseAdmin
     .from("document")
     .delete()
@@ -211,17 +208,28 @@ export async function deleteDocument(
     return { ok: false, error: "Failed to delete document" };
   }
 
+  // then clean up storage (orphaned blob is better than dangling DB record)
+  await supabaseAdmin.storage.from("documents").remove([doc.storage_path]);
+
   revalidatePath("/documents");
   return { ok: true };
 }
 
 export async function getDownloadUrl(
-  storagePath: string,
+  documentId: string,
 ): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
-  // any authenticated member with documents.read can download
   await requireCapability("documents.read");
 
-  const url = await createSignedDownloadUrl(storagePath);
+  // look up storage path from DB — prevents IDOR via arbitrary paths
+  const { data: doc } = await supabaseAdmin
+    .from("document")
+    .select("storage_path")
+    .eq("id", documentId)
+    .single();
+
+  if (!doc) return { ok: false, error: "Document not found" };
+
+  const url = await createSignedDownloadUrl(doc.storage_path);
   if (!url) return { ok: false, error: "Failed to generate download link" };
 
   return { ok: true, url };

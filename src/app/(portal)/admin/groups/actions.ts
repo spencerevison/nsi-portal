@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { requireCapability } from "@/lib/current-user";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
+import { slugify } from "@/lib/utils";
+import type { ActionResult } from "@/lib/action-result";
 
 export async function createGroup(
   name: string,
@@ -12,10 +12,7 @@ export async function createGroup(
 ): Promise<ActionResult & { groupId?: string }> {
   await requireCapability("groups.manage");
 
-  const slug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+  const slug = slugify(name);
 
   if (!slug) return { ok: false, error: "Invalid group name" };
 
@@ -48,10 +45,7 @@ export async function updateGroup(
 ): Promise<ActionResult> {
   await requireCapability("groups.manage");
 
-  const slug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+  const slug = slugify(name);
 
   const { error } = await supabaseAdmin
     .from("group_")

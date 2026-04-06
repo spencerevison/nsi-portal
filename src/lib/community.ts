@@ -132,20 +132,5 @@ export async function listComments(postId: string): Promise<CommentRow[]> {
   });
 }
 
-export function timeAgo(dateStr: string): string {
-  const now = new Date();
-  const d = new Date(dateStr);
-  const diffMs = now.getTime() - d.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  const weeks = Math.floor(diffDays / 7);
-  if (diffDays < 30) return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
-  return d.toLocaleDateString("en-CA", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
+// re-export timeAgo from utils for backward compat
+export { timeAgo } from "@/lib/utils";

@@ -149,7 +149,7 @@ export async function resolveRecipients(
   const groupIds = groups.map((g) => g.id);
   const { data: memberships } = await supabaseAdmin
     .from("user_group")
-    .select("app_user:user_id ( email, first_name, last_name )")
+    .select("app_user:user_id!inner ( email, first_name, last_name, active, accepted_at )")
     .in("group_id", groupIds);
 
   // deduplicate by email
@@ -160,7 +160,10 @@ export async function resolveRecipients(
       email: string;
       first_name: string;
       last_name: string;
+      active: boolean;
+      accepted_at: string | null;
     };
+    if (!user.active || !user.accepted_at) continue;
     if (!seen.has(user.email)) {
       seen.add(user.email);
       recipients.push({

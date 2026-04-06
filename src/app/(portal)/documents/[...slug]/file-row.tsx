@@ -39,7 +39,7 @@ export function FileRow({
 
   function handleDownload() {
     startTransition(async () => {
-      const result = await getDownloadUrl(doc.storage_path);
+      const result = await getDownloadUrl(doc.id);
       if (result.ok) {
         window.open(result.url, "_blank");
       }
