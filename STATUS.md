@@ -2,7 +2,7 @@
 
 **Current Phase:** Phase 5 (ready to start)
 **Last Updated:** 2026-04-05
-**Last Session:** Phase 4 complete — member directory with search, profile page with custom fields + visibility toggles + notification prefs.
+**Last Session:** Phase 4 complete. Resolved profile/account UX overlap — Clerk owns name/email/avatar, our Settings page owns phone/lot/custom fields/notifications. Added Settings link to UserButton dropdown, Clerk→app_user field sync on every request.
 
 ---
 
@@ -109,17 +109,13 @@
 ## Session Log
 
 ### 2026-04-05
-- Installed shadcn/ui (Base UI primitives) — added button, input, label, select, card, badge, table
-- Refactored /admin/members page + Add Member form to use shadcn components
-- Fixed dark-mode contrast (removed auto dark-mode CSS, locked to light)
-- Fixed Select dropdown: alignItemWithTrigger default changed to false, added items prop for label display
-- Fixed Turbopack bug: `@theme inline` CSS tokens not generated in dev mode — switched to `next dev --webpack`
-- Fixed font: `--font-sans` was self-referential in globals.css, changed to `var(--font-geist-sans)`
-- Fixed Button: replaced Base UI ButtonPrimitive with native `<button>` (className wasn't being applied)
-- Added admin tab nav with active state indicator (AdminNav client component using usePathname)
-- Set up automated Playwright testing: @clerk/testing + `+clerk_test@example.com` test user + `424242` OTP bypass
-- Consolidated into single `scripts/ui-test.mjs` — fully headless, no manual sign-in needed
-- Updated CLAUDE.md with shadcn, app_user naming, tooling conventions, Clerk test user setup
+- shadcn/ui setup, theming fixes (dark mode, font, Turbopack→webpack, Button)
+- Phase 2: admin nav tabs, row actions (edit/resend/revoke/deactivate/delete), edit member dialog
+- Phase 3: document library — folder tree, file upload/download/delete, drag-and-drop, admin kebab menus, replaced native confirm/prompt with shadcn dialogs
+- Phase 4: member directory with search + avatars, profile page with custom fields (Children/Dogs) + visibility toggles + notification prefs, CustomField/CustomFieldValue migration
+- Resolved profile/account UX overlap: Clerk owns name/email/avatar (synced to app_user on every request), Settings page owns phone/lot/custom fields/notifications
+- Added "Settings" link to Clerk UserButton dropdown via custom MenuItems
+- Automated Playwright testing with @clerk/testing + +clerk_test test user
 
 ### 2026-04-04
 - Completed all project documentation: 5 ADRs, system design doc, onboarding flow design, build sequence
