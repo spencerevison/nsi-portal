@@ -43,11 +43,11 @@ export default async function PortalLayout({
             NSI Portal
           </Link>
           <nav className="flex items-center gap-6 text-sm text-neutral-600">
-            <Link href="/documents">Documents</Link>
-            <Link href="/directory">Directory</Link>
-            <Link href="/community">Community</Link>
-            {caps.has("email.send") && <Link href="/email/compose">Email</Link>}
-            {caps.has("admin.access") && <Link href="/admin">Admin</Link>}
+            <Link href="/documents" className="hover:text-neutral-900 transition-colors">Documents</Link>
+            <Link href="/directory" className="hover:text-neutral-900 transition-colors">Directory</Link>
+            <Link href="/community" className="hover:text-neutral-900 transition-colors">Community</Link>
+            {caps.has("email.send") && <Link href="/email/compose" className="hover:text-neutral-900 transition-colors">Email</Link>}
+            {caps.has("admin.access") && <Link href="/admin" className="hover:text-neutral-900 transition-colors">Admin</Link>}
             <UserMenu />
           </nav>
         </div>
