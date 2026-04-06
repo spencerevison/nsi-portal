@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 const tabs = [
   { href: "/admin/members", label: "Members" },
   { href: "/admin/groups", label: "Groups" },
-  // Roles tab added in Phase 7 when /admin/roles page exists
+  { href: "/admin/roles", label: "Roles" },
 ];
 
 export function AdminNav() {
