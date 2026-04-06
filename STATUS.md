@@ -69,8 +69,8 @@
 - [x] /email/compose page: group selector, subject, body, recipient count preview, confirmation dialog
 - [x] Send flow: resolve groups → HTML email → Resend batch API → EmailLog
 - [x] /email/history page: sent email log
-- [ ] Resend webhook handler: POST /api/webhooks/resend (deferred — delivery tracking not critical for MVP)
-- [ ] Admin: group CRUD + member assignment (deferred — groups seeded, manual assignment via DB for now)
+- [x] Resend webhook handler: POST /api/webhooks/resend (delivery_status tracking on email_log)
+- [x] Admin: group CRUD (create/edit/delete) + member assignment (add/remove via group detail page)
 
 ### Phase 7: Admin — Roles & Permissions
 - [ ] /admin/roles page: role list with capability summary

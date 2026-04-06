@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { listGroups } from "@/lib/groups";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -8,6 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { CreateGroupForm } from "./create-group-form";
+import { GroupActions } from "./group-actions";
 
 export default async function GroupsPage() {
   const groups = await listGroups();
@@ -21,15 +24,17 @@ export default async function GroupsPage() {
         </span>
       </div>
 
+      <CreateGroupForm />
+
       <Card className="p-0">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Slug</TableHead>
                 <TableHead>Members</TableHead>
                 <TableHead>Description</TableHead>
+                <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -45,15 +50,22 @@ export default async function GroupsPage() {
               )}
               {groups.map((g) => (
                 <TableRow key={g.id}>
-                  <TableCell className="font-medium">{g.name}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {g.slug}
+                  <TableCell className="font-medium">
+                    <Link
+                      href={`/admin/groups/${g.id}`}
+                      className="hover:underline"
+                    >
+                      {g.name}
+                    </Link>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {g.member_count}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {g.description ?? "—"}
+                  </TableCell>
+                  <TableCell>
+                    <GroupActions group={g} />
                   </TableCell>
                 </TableRow>
               ))}

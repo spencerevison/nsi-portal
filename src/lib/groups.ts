@@ -16,8 +16,59 @@ export type EmailLogRow = {
   sender_name: string;
   target_groups: string[];
   recipient_count: number;
+  delivery_status: Record<string, number>;
   sent_at: string;
 };
+
+export async function getGroup(groupId: string): Promise<GroupRow | null> {
+  const { data, error } = await supabaseAdmin
+    .from("group_")
+    .select("id, name, slug, description, user_group(count)")
+    .eq("id", groupId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  const countArr = data.user_group as unknown as { count: number }[];
+  return {
+    id: data.id,
+    name: data.name,
+    slug: data.slug,
+    description: data.description,
+    member_count: countArr?.[0]?.count ?? 0,
+  };
+}
+
+export async function listNonGroupMembers(
+  groupId: string,
+): Promise<{ id: string; first_name: string; last_name: string; email: string }[]> {
+  // get members already in the group
+  const { data: existing } = await supabaseAdmin
+    .from("user_group")
+    .select("user_id")
+    .eq("group_id", groupId);
+
+  const existingIds = (existing ?? []).map((e) => e.user_id);
+
+  // get all active members not in the group
+  let query = supabaseAdmin
+    .from("app_user")
+    .select("id, first_name, last_name, email")
+    .eq("active", true)
+    .not("accepted_at", "is", null)
+    .order("last_name");
+
+  if (existingIds.length > 0) {
+    // supabase doesn't support "not in" directly; use filter
+    query = query.not("id", "in", `(${existingIds.join(",")})`);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    console.error("listNonGroupMembers failed", error);
+    return [];
+  }
+  return data ?? [];
+}
 
 export async function listGroups(): Promise<GroupRow[]> {
   const { data, error } = await supabaseAdmin
@@ -125,7 +176,7 @@ export async function listEmailLogs(): Promise<EmailLogRow[]> {
   const { data, error } = await supabaseAdmin
     .from("email_log")
     .select(
-      `id, subject, body, sent_by, target_groups, recipient_count, sent_at,
+      `id, subject, body, sent_by, target_groups, recipient_count, delivery_status, sent_at,
        sender:sent_by ( first_name, last_name )`,
     )
     .order("sent_at", { ascending: false })
@@ -151,6 +202,7 @@ export async function listEmailLogs(): Promise<EmailLogRow[]> {
         : "Unknown",
       target_groups: e.target_groups,
       recipient_count: e.recipient_count,
+      delivery_status: (e.delivery_status as Record<string, number>) ?? {},
       sent_at: e.sent_at,
     };
   });
