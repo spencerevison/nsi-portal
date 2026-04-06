@@ -128,6 +128,10 @@
   html {
     @apply font-sans;
   }
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
 }
 
 /* Clerk profile dropdown branding */
