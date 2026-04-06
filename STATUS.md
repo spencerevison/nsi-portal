@@ -1,8 +1,8 @@
 # NSI Portal — Build Status
 
-**Current Phase:** Phase 5 (ready to start)
+**Current Phase:** Phase 6 (ready to start)
 **Last Updated:** 2026-04-05
-**Last Session:** Phase 4 complete. Resolved profile/account UX overlap — Clerk owns name/email/avatar, our Settings page owns phone/lot/custom fields/notifications. Added Settings link to UserButton dropdown, Clerk→app_user field sync on every request.
+**Last Session:** Phase 5 complete — community board with post feed, single post view, comments, create post/comment forms, admin pin/unpin/delete.
 
 ---
 
@@ -55,13 +55,13 @@
 - [x] Dynamic field rendering in directory based on CustomField definitions
 
 ### Phase 5: Community Board
-- [ ] Database migration: Post and Comment tables
-- [ ] /community page: post feed (reverse chron, pinned first)
-- [ ] /community/:id page: single post with comments
-- [ ] Create post + comment forms
-- [ ] Admin controls: pin/unpin, delete others' posts
-- [ ] Notification emails via Resend (new post → notify_new_post users)
-- [ ] Notification preferences on /profile page
+- [x] Database migration: Post and Comment tables (applied)
+- [x] /community page: post feed (reverse chron, pinned first with amber styling)
+- [x] /community/:id page: single post with comments
+- [x] Create post + comment forms
+- [x] Admin controls: pin/unpin, delete posts/comments (capability-gated)
+- [ ] Notification emails via Resend (deferred — Resend integration in Phase 6)
+- [x] Notification preferences on /profile page (UI done in Phase 4)
 
 ### Phase 6: Group Email
 - [ ] Database migration: Group, UserGroup, EmailLog tables

@@ -1,0 +1,86 @@
+import Link from "next/link";
+import { Pin, MessageCircle, Clock } from "lucide-react";
+import { listPosts, timeAgo } from "@/lib/community";
+import { getCurrentCapabilities } from "@/lib/current-user";
+import { Card, CardContent } from "@/components/ui/card";
+import { NewPostForm } from "./new-post-form";
+import { PostActions } from "./post-actions";
+
+export default async function CommunityPage() {
+  const [posts, caps] = await Promise.all([
+    listPosts(),
+    getCurrentCapabilities(),
+  ]);
+
+  const canWrite = caps.has("community.write");
+  const canModerate = caps.has("community.moderate");
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold">Community</h1>
+          <p className="text-sm text-muted-foreground">
+            Announcements and discussions
+          </p>
+        </div>
+        {canWrite && <NewPostForm />}
+      </div>
+
+      {posts.length === 0 && (
+        <Card>
+          <CardContent className="py-12 text-center text-sm text-muted-foreground">
+            No posts yet. Be the first to start a conversation.
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="space-y-3">
+        {posts.map((post) => (
+          <Link key={post.id} href={`/community/${post.id}`}>
+            <Card
+              className={
+                post.pinned
+                  ? "border-amber-200 bg-amber-50/30"
+                  : "hover:border-border/80"
+              }
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  {post.pinned && (
+                    <Pin className="mt-0.5 size-4 shrink-0 text-amber-500" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-sm font-semibold">{post.title}</h2>
+                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                      {post.body}
+                    </p>
+                    <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        {post.author_name}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="size-3" />
+                        {timeAgo(post.created_at)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageCircle className="size-3" />
+                        {post.comment_count}
+                      </span>
+                    </div>
+                  </div>
+                  {canModerate && (
+                    <PostActions
+                      postId={post.id}
+                      pinned={post.pinned}
+                    />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
