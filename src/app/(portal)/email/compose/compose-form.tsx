@@ -78,7 +78,10 @@ export function ComposeForm({
   }
 
   const canSend =
-    selectedSlugs.length > 0 && subject.trim() && body.trim();
+    selectedSlugs.length > 0 &&
+    recipientCount > 0 &&
+    subject.trim() &&
+    body.trim();
 
   return (
     <div className="max-w-2xl space-y-4">
@@ -99,13 +102,13 @@ export function ComposeForm({
         <CardContent className="space-y-4">
           {/* Group selector */}
           <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Recipients</Label>
+            <Label className="text-muted-foreground text-xs">Recipients</Label>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => toggleGroup("all")}
                 className={cn(
-                  "rounded-lg border px-3 py-1.5 text-sm transition-colors",
+                  "cursor-pointer rounded-lg border px-3 py-1.5 text-sm transition-colors",
                   allSelected
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border hover:bg-muted",
@@ -120,7 +123,7 @@ export function ComposeForm({
                   disabled={allSelected}
                   onClick={() => toggleGroup(g.slug)}
                   className={cn(
-                    "rounded-lg border px-3 py-1.5 text-sm transition-colors disabled:opacity-40",
+                    "cursor-pointer rounded-lg border px-3 py-1.5 text-sm transition-colors disabled:cursor-default disabled:opacity-40",
                     selectedSlugs.includes(g.slug)
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border hover:bg-muted",
@@ -134,15 +137,22 @@ export function ComposeForm({
               ))}
             </div>
             {selectedSlugs.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                {recipientCount} recipient{recipientCount !== 1 ? "s" : ""}
+              <p
+                className={`text-xs ${recipientCount === 0 ? "text-destructive" : "text-muted-foreground"}`}
+              >
+                {recipientCount === 0
+                  ? "No members in selected group(s). Add members to the group first."
+                  : `${recipientCount} recipient${recipientCount !== 1 ? "s" : ""}`}
               </p>
             )}
           </div>
 
           {/* Subject */}
           <div className="space-y-1.5">
-            <Label htmlFor="email-subject" className="text-xs text-muted-foreground">
+            <Label
+              htmlFor="email-subject"
+              className="text-muted-foreground text-xs"
+            >
               Subject
             </Label>
             <Input
@@ -155,7 +165,10 @@ export function ComposeForm({
 
           {/* Body */}
           <div className="space-y-1.5">
-            <Label htmlFor="email-body" className="text-xs text-muted-foreground">
+            <Label
+              htmlFor="email-body"
+              className="text-muted-foreground text-xs"
+            >
               Message
             </Label>
             <textarea
@@ -164,11 +177,11 @@ export function ComposeForm({
               onChange={(e) => setBody(e.target.value)}
               rows={8}
               placeholder="Write your message..."
-              className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3"
             />
           </div>
 
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Emails are sent to all members in the selected group(s). Members
             cannot opt out of group emails.
           </p>
@@ -189,17 +202,12 @@ export function ComposeForm({
             <DialogTitle>Send email</DialogTitle>
             <DialogDescription>
               Send &ldquo;{subject}&rdquo; to{" "}
-              {allSelected
-                ? "all members"
-                : selectedSlugs.join(", ")}{" "}
-              ({recipientCount} recipient{recipientCount !== 1 ? "s" : ""})?
+              {allSelected ? "all members" : selectedSlugs.join(", ")} (
+              {recipientCount} recipient{recipientCount !== 1 ? "s" : ""})?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setConfirmOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
               Cancel
             </Button>
             <Button disabled={pending} onClick={handleSend}>
