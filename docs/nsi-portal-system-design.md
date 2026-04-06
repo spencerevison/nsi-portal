@@ -58,8 +58,8 @@ graph TB
 
 | Service | Owns | Does Not Own |
 |---------|------|-------------|
-| **Clerk** | User identity (email, password hash, sessions), invitation emails, password reset emails, optional 2FA, optional social SSO | Roles, capabilities, groups, profile data, authorization |
-| **Supabase** | Profile data, roles and capabilities, groups, documents metadata, community board posts, email logs, file storage | Authentication, session management, invitation flow |
+| **Clerk** | User identity (name, email, avatar, password hash, sessions), invitation emails, password reset emails, optional 2FA, optional social SSO, profile UI for account data | Roles, capabilities, groups, community profile data (lot number, custom fields), authorization |
+| **Supabase** | Community profile data (lot number, phone, custom fields, notification preferences), roles and capabilities, groups, documents metadata, community board posts, email logs, file storage. Caches name/email from Clerk for directory and search. | Authentication, session management, invitation flow |
 | **Resend** | Group email delivery, community board notification delivery, delivery event tracking | Email composition UI, recipient resolution, email scheduling |
 | **Vercel** | Application hosting, edge middleware, serverless functions, CI/CD | Data persistence, file storage, email delivery |
 
@@ -67,7 +67,7 @@ graph TB
 
 The system has three external integration points, each kept intentionally thin:
 
-1. **Clerk → Supabase (webhook):** When a member accepts an invitation and creates their account, Clerk fires a `user.created` webhook. The application matches the Clerk user to an existing pre-seeded Supabase profile by email and links them.
+1. **Clerk → Supabase (webhook):** Clerk fires webhooks on user lifecycle events. The `user.created` event (invitation acceptance) links the Clerk user to a pre-seeded Supabase profile. The `user.updated` event syncs name and email changes made through Clerk's profile UI back to the Supabase `app_user` record. Both events are handled by the same webhook endpoint.
 
 2. **Supabase → Resend (server action):** When Allison sends a group email, a server action resolves group membership from Supabase, then sends the email via Resend's batch API. Delivery events flow back via Resend webhooks to update the email log.
 
@@ -279,7 +279,7 @@ EmailLog
 /directory        -- Member directory (searchable table)
 /community        -- Community board (post feed)
 /community/:id    -- Single post with comments
-/profile          -- Edit own profile, notification preferences
+/profile          -- Edit community profile (lot number, phone, custom fields, notification preferences). Account data (name, email, avatar, password) managed via Clerk's built-in UI.
 ```
 
 ### Capability-Gated Routes
@@ -542,8 +542,8 @@ Environment variables:
 - `CLERK_SECRET_KEY`
 - `CLERK_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`
-- `SUPABASE_SECRET_KEY`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
 - `RESEND_API_KEY`
 - `RESEND_WEBHOOK_SECRET`
 
