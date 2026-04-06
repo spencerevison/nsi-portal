@@ -35,17 +35,17 @@ export async function sendGroupEmail(input: {
   // send via Resend batch API (max 100 per call)
   const fromAddress =
     process.env.RESEND_FROM_ADDRESS ?? "NSI Portal <noreply@resend.dev>";
-  let batchId: string | undefined;
+  let emailIds: string[] = [];
+  const senderName = `${escapeHtml(user.first_name)} ${escapeHtml(user.last_name)}`;
 
   try {
-    // Resend batch: send to each recipient individually
     const emails = recipients.map((r) => ({
       from: fromAddress,
       to: r.email,
       subject: input.subject.trim(),
       html: `
         <div style="font-family: sans-serif; max-width: 600px;">
-          <p>From: ${user.first_name} ${user.last_name}</p>
+          <p>From: ${senderName}</p>
           <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 16px 0;" />
           <div style="white-space: pre-wrap;">${escapeHtml(input.body.trim())}</div>
           <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 16px 0;" />
@@ -57,20 +57,23 @@ export async function sendGroupEmail(input: {
     }));
 
     const result = await resend.batch.send(emails);
-    batchId = result.data?.data?.[0]?.id;
+    emailIds =
+      result.data?.data?.map((d: { id: string }) => d.id).filter(Boolean) ??
+      [];
   } catch (err) {
     console.error("resend send failed", err);
     return { ok: false, error: "Failed to send emails" };
   }
 
-  // log it
+  // log it — store all email IDs so webhook can match any of them
   await supabaseAdmin.from("email_log").insert({
     subject: input.subject.trim(),
     body: input.body.trim(),
     sent_by: user.id,
     target_groups: input.groupSlugs,
     recipient_count: recipients.length,
-    resend_batch_id: batchId ?? null,
+    resend_batch_id: emailIds.length > 0 ? emailIds[0] : null,
+    resend_email_ids: emailIds,
   });
 
   return { ok: true, recipientCount: recipients.length };

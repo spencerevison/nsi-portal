@@ -34,7 +34,7 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
   const { data: byClerk } = await supabaseAdmin
     .from("app_user")
     .select(
-      "id, clerk_id, email, first_name, last_name, role_id, active, accepted_at",
+      "id, clerk_id, email, first_name, last_name, role_id, active, accepted_at, avatar_url",
     )
     .eq("clerk_id", clerkUser.id)
     .maybeSingle();
@@ -52,7 +52,7 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
       clerkFirst !== byClerk.first_name ||
       clerkLast !== byClerk.last_name ||
       (clerkEmail && clerkEmail !== byClerk.email) ||
-      clerkAvatar !== (byClerk as Record<string, unknown>).avatar_url;
+      clerkAvatar !== byClerk.avatar_url;
 
     if (needsSync) {
       await supabaseAdmin
@@ -94,6 +94,16 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
 
   if (!byEmail) return null;
 
+  // only link if not already linked to a different clerk account
+  if (byEmail.clerk_id && byEmail.clerk_id !== clerkUser.id) {
+    console.error("self-heal: app_user already linked to different clerk_id", {
+      email,
+      existing: byEmail.clerk_id,
+      incoming: clerkUser.id,
+    });
+    return null;
+  }
+
   // Link it. If the update fails we still return the row — user gets in,
   // we just log and retry linking on the next request.
   const { error: linkErr } = await supabaseAdmin
@@ -122,7 +132,7 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
  */
 export const getCurrentCapabilities = cache(async (): Promise<Set<string>> => {
   const user = await getCurrentAppUser();
-  if (!user?.role_id) return new Set();
+  if (!user?.role_id || !user.active) return new Set();
 
   const { data, error } = await supabaseAdmin
     .from("role_capability")

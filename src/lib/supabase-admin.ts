@@ -1,8 +1,5 @@
+import "server-only";
 import { createClient } from "@supabase/supabase-js";
-
-// server-only supabase client using the secret key.
-// bypasses RLS — only import from server actions, route handlers, webhooks.
-// never expose this to a client component.
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const secret = process.env.SUPABASE_SECRET_KEY;
 

@@ -76,15 +76,17 @@ export async function POST(req: Request) {
     return new Response("No matching profile", { status: 404 });
   }
 
-  // already linked? treat as idempotent success
+  // already linked to a DIFFERENT clerk account? reject to prevent takeover
   if (existing.clerk_id && existing.clerk_id !== clerkId) {
-    console.warn("app_user already linked to a different clerk_id", {
+    console.error("app_user already linked to a different clerk_id — rejecting", {
       email,
       existing: existing.clerk_id,
       incoming: clerkId,
     });
+    return new Response("Already linked to another account", { status: 409 });
   }
 
+  // idempotent: same clerk_id is fine (re-delivered webhook)
   const { error: updErr } = await supabaseAdmin
     .from("app_user")
     .update({

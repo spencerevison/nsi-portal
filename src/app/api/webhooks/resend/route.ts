@@ -2,14 +2,10 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
-// Resend delivery webhook — tracks email delivery status.
-// Events: email.delivered, email.bounced, email.complained
-
 type ResendEvent = {
   type: string;
   data: {
     email_id: string;
-    // other fields vary by event type
   };
 };
 
@@ -44,43 +40,32 @@ export async function POST(req: Request) {
     return new Response("Invalid signature", { status: 401 });
   }
 
-  const eventType = evt.type;
-  const emailId = evt.data.email_id;
-
-  // map event type to a status key
+  // map event type to status key
   let statusKey: string | null = null;
-  if (eventType === "email.delivered") statusKey = "delivered";
-  else if (eventType === "email.bounced") statusKey = "bounced";
-  else if (eventType === "email.complained") statusKey = "complained";
+  if (evt.type === "email.delivered") statusKey = "delivered";
+  else if (evt.type === "email.bounced") statusKey = "bounced";
+  else if (evt.type === "email.complained") statusKey = "complained";
 
-  if (!statusKey || !emailId) {
+  if (!statusKey || !evt.data.email_id) {
     return new Response(null, { status: 204 });
   }
 
-  // find the email_log by resend_batch_id or matching email_id
-  // Resend batch returns individual message IDs; we stored the first one
-  // For now, match any email_log where resend_batch_id matches
+  // find email_log containing this email ID in the resend_email_ids array
   const { data: log } = await supabaseAdmin
     .from("email_log")
-    .select("id, delivery_status")
-    .eq("resend_batch_id", emailId)
+    .select("id")
+    .contains("resend_email_ids", [evt.data.email_id])
     .maybeSingle();
 
   if (!log) {
-    // try broader match — the email_id might be from a batch member
-    // just log it and move on
-    console.warn("No email_log found for resend email_id:", emailId);
     return new Response(null, { status: 204 });
   }
 
-  // increment the counter for this status
-  const current = (log.delivery_status as Record<string, number>) ?? {};
-  current[statusKey] = (current[statusKey] ?? 0) + 1;
-
-  await supabaseAdmin
-    .from("email_log")
-    .update({ delivery_status: current })
-    .eq("id", log.id);
+  // atomic increment — no read-modify-write race
+  await supabaseAdmin.rpc("increment_delivery_status", {
+    log_id: log.id,
+    status_key: statusKey,
+  });
 
   return new Response(null, { status: 204 });
 }

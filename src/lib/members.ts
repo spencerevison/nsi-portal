@@ -41,8 +41,8 @@ export function deriveStatus(row: {
   accepted_at: string | null;
   revoked_at: string | null;
 }): MemberStatus {
-  if (!row.active) return "Inactive";
   if (row.revoked_at) return "Revoked";
+  if (!row.active) return "Inactive";
   if (row.accepted_at) return "Active";
   if (row.invited_at) return "Invited";
   return "Draft";
