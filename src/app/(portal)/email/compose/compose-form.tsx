@@ -17,7 +17,13 @@ import type { GroupRow } from "@/lib/groups";
 import { sendGroupEmail } from "./actions";
 import { cn } from "@/lib/utils";
 
-export function ComposeForm({ groups }: { groups: GroupRow[] }) {
+export function ComposeForm({
+  groups,
+  totalMembers,
+}: {
+  groups: GroupRow[];
+  totalMembers: number;
+}) {
   const [pending, startTransition] = useTransition();
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
   const [subject, setSubject] = useState("");
@@ -30,7 +36,7 @@ export function ComposeForm({ groups }: { groups: GroupRow[] }) {
 
   const allSelected = selectedSlugs.includes("all");
   const recipientCount = allSelected
-    ? groups.reduce((sum, g) => sum + g.member_count, 0)
+    ? totalMembers
     : groups
         .filter((g) => selectedSlugs.includes(g.slug))
         .reduce((sum, g) => sum + g.member_count, 0);
