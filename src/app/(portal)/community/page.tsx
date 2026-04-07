@@ -17,16 +17,15 @@ export default async function CommunityPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      {canWrite && <NewPostForm />}
+      {!canWrite && (
         <div>
           <h1 className="text-xl font-semibold">Community</h1>
           <p className="text-muted-foreground text-sm">
             Announcements and discussions
           </p>
         </div>
-      </div>
-
-      {canWrite && <NewPostForm />}
+      )}
 
       {posts.length === 0 && (
         <Card>

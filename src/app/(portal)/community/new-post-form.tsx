@@ -40,19 +40,29 @@ export function NewPostForm() {
     });
   }
 
-  if (!open) {
-    return (
-      <div className="flex justify-end">
+  const header = (
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-xl font-semibold">Community</h1>
+        <p className="text-muted-foreground text-sm">
+          Announcements and discussions
+        </p>
+      </div>
+      {!open && (
         <Button onClick={() => setOpen(true)}>
           <Plus className="size-4" />
           New Post
         </Button>
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
+
+  if (!open) return header;
 
   return (
-    <Card className="w-full">
+    <>
+      {header}
+      <Card className="w-full">
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-3">
           <div className="space-y-1.5">
@@ -94,5 +104,6 @@ export function NewPostForm() {
         </form>
       </CardContent>
     </Card>
+    </>
   );
 }
