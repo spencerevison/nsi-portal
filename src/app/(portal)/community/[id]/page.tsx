@@ -4,6 +4,7 @@ import { ArrowLeft, Pin, Clock } from "lucide-react";
 import { getPost, listComments, timeAgo } from "@/lib/community";
 import { getCurrentCapabilities } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
+import { MemberAvatar } from "../../directory/member-avatar";
 import { CommentForm } from "./comment-form";
 import { CommentActions } from "./comment-actions";
 
@@ -41,7 +42,17 @@ export default async function PostPage({ params }: { params: Params }) {
             <h1 className="text-lg font-semibold">{post.title}</h1>
           </div>
           <div className="text-muted-foreground mt-1 flex items-center gap-3 text-xs">
-            <span>{post.author_name}</span>
+            <span className="flex items-center gap-1.5">
+              <MemberAvatar
+                member={{
+                  first_name: post.author_name.split(" ")[0] ?? "",
+                  last_name: post.author_name.split(" ").slice(1).join(" "),
+                  avatar_url: post.author_avatar,
+                }}
+                size="sm"
+              />
+              {post.author_name}
+            </span>
             <span className="flex items-center gap-1">
               <Clock className="size-3" />
               {timeAgo(post.created_at)}
@@ -62,6 +73,14 @@ export default async function PostPage({ params }: { params: Params }) {
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                  <MemberAvatar
+                    member={{
+                      first_name: comment.author_name.split(" ")[0] ?? "",
+                      last_name: comment.author_name.split(" ").slice(1).join(" "),
+                      avatar_url: comment.author_avatar,
+                    }}
+                    size="sm"
+                  />
                   <span className="text-foreground font-medium">
                     {comment.author_name}
                   </span>

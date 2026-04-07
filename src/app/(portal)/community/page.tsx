@@ -3,6 +3,7 @@ import { Pin, MessageCircle, Clock } from "lucide-react";
 import { listPosts, timeAgo } from "@/lib/community";
 import { getCurrentCapabilities } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
+import { MemberAvatar } from "../directory/member-avatar";
 import { NewPostForm } from "./new-post-form";
 import { PostActions } from "./post-actions";
 
@@ -56,7 +57,15 @@ export default async function CommunityPage() {
                       {post.body}
                     </p>
                     <div className="text-muted-foreground mt-2 flex items-center gap-3 text-xs">
-                      <span className="flex items-center gap-1">
+                      <span className="flex items-center gap-1.5">
+                        <MemberAvatar
+                          member={{
+                            first_name: post.author_name.split(" ")[0] ?? "",
+                            last_name: post.author_name.split(" ").slice(1).join(" "),
+                            avatar_url: post.author_avatar,
+                          }}
+                          size="sm"
+                        />
                         {post.author_name}
                       </span>
                       <span className="flex items-center gap-1">
