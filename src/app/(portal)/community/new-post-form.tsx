@@ -42,10 +42,12 @@ export function NewPostForm() {
 
   if (!open) {
     return (
-      <Button onClick={() => setOpen(true)}>
-        <Plus className="size-4" />
-        New Post
-      </Button>
+      <div className="flex justify-end">
+        <Button onClick={() => setOpen(true)}>
+          <Plus className="size-4" />
+          New Post
+        </Button>
+      </div>
     );
   }
 
