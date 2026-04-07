@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { getCurrentAppUser, getCurrentCapabilities } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
+import { MemberAvatar } from "./directory/member-avatar";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { timeAgo } from "@/lib/utils";
 
@@ -45,7 +46,7 @@ export default async function HomePage() {
     .from("post")
     .select(
       `id, title, body, created_at,
-       author:author_id ( first_name, last_name ),
+       author:author_id ( first_name, last_name, avatar_url ),
        comment(count)`,
     )
     .eq("pinned", true)
@@ -56,7 +57,7 @@ export default async function HomePage() {
     .from("post")
     .select(
       `id, title, created_at,
-       author:author_id ( first_name, last_name )`,
+       author:author_id ( first_name, last_name, avatar_url )`,
     )
     .eq("pinned", false)
     .order("created_at", { ascending: false })
@@ -108,6 +109,7 @@ export default async function HomePage() {
               const author = post.author as unknown as {
                 first_name: string;
                 last_name: string;
+                avatar_url: string | null;
               } | null;
               const countArr = post.comment as unknown as { count: number }[];
               return (
@@ -124,7 +126,17 @@ export default async function HomePage() {
                             {post.body}
                           </p>
                           <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
-                            <span>
+                            <span className="flex items-center gap-1.5">
+                              {author && (
+                                <MemberAvatar
+                                  member={{
+                                    first_name: author.first_name,
+                                    last_name: author.last_name,
+                                    avatar_url: author.avatar_url,
+                                  }}
+                                  size="sm"
+                                />
+                              )}
                               {author
                                 ? `${author.first_name} ${author.last_name}`
                                 : "Unknown"}
@@ -161,14 +173,25 @@ export default async function HomePage() {
                 const author = post.author as unknown as {
                   first_name: string;
                   last_name: string;
+                  avatar_url: string | null;
                 } | null;
                 return (
                   <Link
                     key={post.id}
                     href={`/community/${post.id}`}
-                    className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted/50"
+                    className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
                   >
-                    <div className="min-w-0">
+                    {author && (
+                      <MemberAvatar
+                        member={{
+                          first_name: author.first_name,
+                          last_name: author.last_name,
+                          avatar_url: author.avatar_url,
+                        }}
+                        size="sm"
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
                       <h3 className="truncate text-sm font-medium">
                         {post.title}
                       </h3>
