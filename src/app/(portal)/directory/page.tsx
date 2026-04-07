@@ -19,7 +19,7 @@ export default async function DirectoryPage() {
         <div>
           <h1 className="text-xl font-semibold">Member Directory</h1>
           <p className="text-muted-foreground text-sm">
-            {members.length} members
+            {members.length} {members.length === 1 ? "member" : "members"}
           </p>
         </div>
       </div>
