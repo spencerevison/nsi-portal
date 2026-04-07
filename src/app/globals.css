@@ -6,7 +6,7 @@
 
 :root {
   color-scheme: light;
-  --background: oklch(1 0 0);
+  --background: oklch(98.426% 0.00749 260.893 / 0.334);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -84,13 +84,13 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 
   /* accent color ramp — swappable in one place */
-  --color-accent-50: #E6F1FB;
-  --color-accent-100: #B5D4F4;
-  --color-accent-200: #85B7EB;
-  --color-accent-400: #378ADD;
-  --color-accent-600: #185FA5;
-  --color-accent-800: #0C447C;
-  --color-accent-900: #042C53;
+  --color-accent-50: #e6f1fb;
+  --color-accent-100: #b5d4f4;
+  --color-accent-200: #85b7eb;
+  --color-accent-400: #378add;
+  --color-accent-600: #185fa5;
+  --color-accent-800: #0c447c;
+  --color-accent-900: #042c53;
 }
 
 .dark {
