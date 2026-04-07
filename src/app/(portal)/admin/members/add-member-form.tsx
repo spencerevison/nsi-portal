@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Plus } from "lucide-react";
 import { inviteMember } from "./actions";
 import type { RoleOption } from "@/lib/members";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,12 @@ export function AddMemberForm({ roles }: { roles: RoleOption[] }) {
   }
 
   if (!open) {
-    return <Button onClick={() => setOpen(true)}>Add member</Button>;
+    return (
+      <Button onClick={() => setOpen(true)}>
+        <Plus className="size-4" />
+        Add member
+      </Button>
+    );
   }
 
   return (

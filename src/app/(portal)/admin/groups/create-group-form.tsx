@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,7 +34,12 @@ export function CreateGroupForm() {
   }
 
   if (!open) {
-    return <Button onClick={() => setOpen(true)}>Create group</Button>;
+    return (
+      <Button onClick={() => setOpen(true)}>
+        <Plus className="size-4" />
+        Create group
+      </Button>
+    );
   }
 
   return (
