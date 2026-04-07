@@ -53,10 +53,10 @@ export default async function PortalLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <header className="relative border-b border-neutral-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-2">
           <Link href="/" className="flex items-center gap-2 font-semibold">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-nsi.svg" alt="NSI" className="size-7" />
+            <img src="/logo-nsi.svg" alt="NSI" className="size-9" />
             NSI Portal
           </Link>
           {/* Desktop nav */}
