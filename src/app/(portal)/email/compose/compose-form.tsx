@@ -110,7 +110,7 @@ export function ComposeForm({
                 className={cn(
                   "cursor-pointer rounded-lg border px-3 py-1.5 text-sm transition-colors",
                   allSelected
-                    ? "border-primary bg-primary text-primary-foreground"
+                    ? "border-accent-200 bg-accent-50 font-medium text-accent-800"
                     : "border-border hover:bg-muted",
                 )}
               >

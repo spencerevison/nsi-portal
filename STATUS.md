@@ -1,8 +1,8 @@
 # NSI Portal — Build Status
 
 **Current Phase:** Phase 8 (ready to start)
-**Last Updated:** 2026-04-05
-**Last Session:** Phase 6 complete — group email with compose UI, group selector, Resend batch send, confirmation dialog, email history log.
+**Last Updated:** 2026-04-06
+**Last Session:** All code review items addressed (P1-P4). Phase 7 complete — admin roles/permissions with capability checkbox grid. Removed unused directory.manage capability.
 
 ---
 
@@ -80,23 +80,19 @@
 - [x] Roles tab restored in admin nav
 
 ### Phase 8: Polish & Launch Prep
-- [ ] Responsive design audit (375px, 768px, 1440px)
-- [ ] Error state audit (per onboarding flow design doc)
-- [ ] Loading states (skeleton loaders / spinners)
+- [~] Responsive design audit (375px, 768px, 1440px) — known: mobile nav overflow needs hamburger menu
+- [x] Error state audit — error.tsx + loading.tsx at portal level (done in P4 hardening)
+- [x] Loading states — spinner at portal level (done in P4 hardening)
 - [ ] First-login welcome experience
-- [ ] Empty states
+- [ ] Empty states (dashboard cards on home page)
 - [ ] Accessibility pass
 - [ ] Supabase upgrade to Pro
 - [ ] Domain setup + DNS
 - [ ] Seed production data
 - [ ] Welcome email template
 - [ ] Admin guide for Allison
-
----
-
-## Legend
-
-✋ = Hand-coded by Spencer (interview prep — no AI code generation for these components)
+- [ ] Members table: search + sort (deferred from Phase 2)
+- [ ] Bulk CSV import (deferred from Phase 2)
 
 ---
 
@@ -107,6 +103,13 @@
 - **Phase 1 password reset:** Not explicitly tested but Clerk's `<SignIn />` includes "Forgot password?" link natively.
 
 ## Session Log
+
+### 2026-04-06
+- Phase 5: community board — post feed, single post view, comments, create forms, admin pin/unpin/delete
+- Phase 6: group email — compose UI, group selector, Resend batch send, email history, group CRUD + member assignment, Resend delivery webhook
+- Phase 7: admin roles/permissions — role list, capability checkbox grid, create/delete with safeguards
+- Code review: addressed all P1 (security), P2 (data integrity), P3 (refactors), P4 (hardening) items
+- Removed unused directory.manage capability
 
 ### 2026-04-05
 - shadcn/ui setup, theming fixes (dark mode, font, Turbopack→webpack, Button)

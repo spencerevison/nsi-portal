@@ -49,6 +49,9 @@ export async function POST(req: Request) {
 }
 
 // --- user.updated: sync profile fields back to app_user ---
+// Clerk's WebhookEvent["data"] doesn't expose all fields we need, so
+// we cast through Record to access them safely.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 async function handleUserUpdated(data: WebhookEvent["data"] & { id: string }) {
   const clerkId = data.id;

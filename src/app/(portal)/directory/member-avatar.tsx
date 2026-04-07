@@ -34,7 +34,7 @@ export function MemberAvatar({
   return (
     <div
       className={cn(
-        "bg-muted text-muted-foreground flex shrink-0 items-center justify-center rounded-full leading-none font-medium",
+        "bg-accent-600 text-accent-50 flex shrink-0 items-center justify-center rounded-full leading-none font-medium",
         sizes[size],
       )}
     >
