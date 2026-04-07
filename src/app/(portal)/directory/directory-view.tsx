@@ -32,6 +32,9 @@ function formatFieldValue(value: string | null, fieldName: string): string {
   }
 }
 
+type SortKey = "name" | "lot" | "phone" | "email";
+type SortDir = "asc" | "desc";
+
 export function DirectoryView({
   members,
   customFields,
@@ -40,6 +43,22 @@ export function DirectoryView({
   customFields: CustomField[];
 }) {
   const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }
+
+  const sortIndicator = (key: SortKey) => {
+    if (sortKey !== key) return null;
+    return sortDir === "asc" ? " ↑" : " ↓";
+  };
 
   const filtered = members.filter((m) => {
     if (!search) return true;
@@ -51,6 +70,24 @@ export function DirectoryView({
       m.email.toLowerCase().includes(q)
     );
   });
+
+  const sorted = [...filtered].sort((a, b) => {
+    const dir = sortDir === "asc" ? 1 : -1;
+    switch (sortKey) {
+      case "name":
+        return dir * (`${a.last_name} ${a.first_name}`).localeCompare(`${b.last_name} ${b.first_name}`);
+      case "lot":
+        return dir * (a.lot_number ?? "").localeCompare(b.lot_number ?? "", undefined, { numeric: true });
+      case "phone":
+        return dir * (a.phone ?? "").localeCompare(b.phone ?? "");
+      case "email":
+        return dir * a.email.localeCompare(b.email);
+      default:
+        return 0;
+    }
+  });
+
+  const thClass = "cursor-pointer select-none hover:text-foreground";
 
   return (
     <>
@@ -72,17 +109,25 @@ export function DirectoryView({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="w-16">Lot</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead className={thClass} onClick={() => toggleSort("name")}>
+                    Name{sortIndicator("name")}
+                  </TableHead>
+                  <TableHead className={`w-16 ${thClass}`} onClick={() => toggleSort("lot")}>
+                    Lot{sortIndicator("lot")}
+                  </TableHead>
+                  <TableHead className={thClass} onClick={() => toggleSort("phone")}>
+                    Phone{sortIndicator("phone")}
+                  </TableHead>
+                  <TableHead className={thClass} onClick={() => toggleSort("email")}>
+                    Email{sortIndicator("email")}
+                  </TableHead>
                   {customFields.map((f) => (
                     <TableHead key={f.id}>{f.name}</TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.length === 0 && (
+                {sorted.length === 0 && (
                   <TableRow>
                     <TableCell
                       colSpan={4 + customFields.length}
@@ -94,9 +139,9 @@ export function DirectoryView({
                     </TableCell>
                   </TableRow>
                 )}
-                {filtered.map((m) => (
+                {sorted.map((m) => (
                   <TableRow key={m.id}>
-                    <TableCell className="font-medium whitespace-nowrap">
+                    <TableCell className="whitespace-nowrap font-medium">
                       <div className="flex items-center gap-2">
                         <MemberAvatar member={m} size="sm" />
                         {m.first_name} {m.last_name}
@@ -112,7 +157,10 @@ export function DirectoryView({
                       {m.email}
                     </TableCell>
                     {customFields.map((f) => (
-                      <TableCell key={f.id} className="text-muted-foreground">
+                      <TableCell
+                        key={f.id}
+                        className="text-muted-foreground"
+                      >
                         {formatFieldValue(
                           m.custom_fields[f.id]?.value ?? null,
                           f.name,
@@ -129,7 +177,7 @@ export function DirectoryView({
 
       {/* Mobile cards */}
       <div className="space-y-2 md:hidden">
-        {filtered.map((m) => (
+        {sorted.map((m) => (
           <Card key={m.id}>
             <CardContent className="p-4">
               <div className="mb-2 flex items-center justify-between">
@@ -164,7 +212,7 @@ export function DirectoryView({
             </CardContent>
           </Card>
         ))}
-        {filtered.length === 0 && (
+        {sorted.length === 0 && (
           <p className="text-muted-foreground py-8 text-center text-sm">
             {search ? "No members match your search." : "No members yet."}
           </p>

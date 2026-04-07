@@ -80,19 +80,20 @@
 - [x] Roles tab restored in admin nav
 
 ### Phase 8: Polish & Launch Prep
-- [~] Responsive design audit (375px, 768px, 1440px) — known: mobile nav overflow needs hamburger menu
-- [x] Error state audit — error.tsx + loading.tsx at portal level (done in P4 hardening)
-- [x] Loading states — spinner at portal level (done in P4 hardening)
+- [x] Responsive design — mobile hamburger nav, accent color theming (B2 style)
+- [x] Error state audit — error.tsx + loading.tsx at portal level
+- [x] Loading states — spinner at portal level
+- [x] Home page dashboard (quick links, announcements, recent activity)
+- [x] Button icons on primary CTAs
+- [x] Members table: search + sort
 - [ ] First-login welcome experience
-- [ ] Empty states (dashboard cards on home page)
 - [ ] Accessibility pass
-- [ ] Supabase upgrade to Pro
-- [ ] Domain setup + DNS
+- [ ] Bulk CSV import (deferred from Phase 2)
+- [x] Supabase upgrade to Pro
+- [x] Domain setup + DNS (nsiportal.ca)
 - [ ] Seed production data
 - [ ] Welcome email template
 - [ ] Admin guide for Allison
-- [ ] Members table: search + sort (deferred from Phase 2)
-- [ ] Bulk CSV import (deferred from Phase 2)
 
 ---
 
