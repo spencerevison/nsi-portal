@@ -6,7 +6,7 @@
 
 :root {
   color-scheme: light;
-  --background: oklch(98.426% 0.00749 260.893 / 0.334);
+  --background: oklch(98.426% 0.00749 260.893 / 0.834);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -128,13 +128,13 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   /* inverted accent ramp for dark backgrounds */
-  --color-accent-50: #042C53;
-  --color-accent-100: #0C447C;
-  --color-accent-200: #185FA5;
-  --color-accent-400: #378ADD;
-  --color-accent-600: #85B7EB;
-  --color-accent-800: #B5D4F4;
-  --color-accent-900: #E6F1FB;
+  --color-accent-50: #042c53;
+  --color-accent-100: #0c447c;
+  --color-accent-200: #185fa5;
+  --color-accent-400: #378add;
+  --color-accent-600: #85b7eb;
+  --color-accent-800: #b5d4f4;
+  --color-accent-900: #e6f1fb;
 }
 
 @layer base {
@@ -166,4 +166,3 @@
 .cl-modalBackdrop .cl-navbar > *:nth-child(1) {
   background: var(--card);
 }
-

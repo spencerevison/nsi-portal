@@ -159,7 +159,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
           <div>
             <h2 className="text-sm font-semibold">Notification Preferences</h2>
             <p className="text-muted-foreground text-xs">
-              Control which community board activity triggers an email. Group
+              Control which message board activity triggers an email. Group
               emails from admin/council are always delivered.
             </p>
           </div>

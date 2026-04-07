@@ -38,7 +38,7 @@ export default async function PortalLayout({
   const baseLinks = [
     { href: "/documents", label: "Documents" },
     { href: "/directory", label: "Directory" },
-    { href: "/community", label: "Community" },
+    { href: "/community", label: "Message Board" },
   ];
   const extraLinks: { href: string; label: string }[] = [];
   if (caps.has("email.send"))

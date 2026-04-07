@@ -43,7 +43,7 @@ export function NewPostForm() {
   const header = (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-xl font-semibold">Community</h1>
+        <h1 className="text-xl font-semibold">Message Board</h1>
         <p className="text-muted-foreground text-sm">
           Announcements and discussions
         </p>
@@ -81,7 +81,7 @@ export function NewPostForm() {
               name="body"
               required
               rows={4}
-              placeholder="Share something with the community..."
+              placeholder="Share something with the group..."
               className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3"
             />
           </div>
