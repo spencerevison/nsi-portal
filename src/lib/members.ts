@@ -56,6 +56,7 @@ export async function listMembers(): Promise<MemberRow[]> {
        invited_at, accepted_at, revoked_at,
        role:role_id ( name )`,
     )
+    .not("email", "ilike", "%+clerk_test%")
     .order("last_name", { ascending: true });
 
   if (error) {
