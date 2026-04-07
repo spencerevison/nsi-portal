@@ -25,7 +25,7 @@ export function MobileNav({
       </button>
 
       {open && (
-        <div className="absolute left-0 right-0 top-full z-50 border-b border-border bg-white px-6 py-3 shadow-sm">
+        <div className="absolute left-0 right-0 top-full z-50 border-b border-border bg-card px-6 py-3 shadow-sm">
           <div className="flex flex-col gap-1">
             {links.map((link) => {
               const active =
@@ -41,7 +41,7 @@ export function MobileNav({
                     "rounded-lg px-3 py-2 text-sm transition-colors",
                     active
                       ? "bg-accent-50 font-medium text-accent-800"
-                      : "text-gray-600 hover:bg-muted",
+                      : "text-muted-foreground hover:bg-muted",
                   )}
                 >
                   {link.label}

@@ -34,7 +34,7 @@ export function PortalNav({
               "text-sm transition-colors",
               active
                 ? "font-medium text-accent-600"
-                : "text-gray-500 hover:text-gray-900",
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             {link.label}
