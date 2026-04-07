@@ -6,7 +6,7 @@
 
 :root {
   color-scheme: light;
-  --background: #FBF0DC;
+  --background: #fbf8f2bc;
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -84,10 +84,10 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 
   /* accent color ramp — dark green + cream */
-  --color-accent-50: #E8F0F2;
-  --color-accent-100: #C2D6DB;
-  --color-accent-200: #8FB3BD;
-  --color-accent-400: #4A7A86;
+  --color-accent-50: #E7EEEA;
+  --color-accent-100: #BBCFC4;
+  --color-accent-200: #7FA898;
+  --color-accent-400: #3D6E5E;
   --color-accent-600: #22444E;
   --color-accent-800: #162D34;
   --color-accent-900: #0C1B1F;
@@ -131,10 +131,10 @@
   --color-accent-50: #0C1B1F;
   --color-accent-100: #162D34;
   --color-accent-200: #22444E;
-  --color-accent-400: #4A7A86;
-  --color-accent-600: #8FB3BD;
-  --color-accent-800: #C2D6DB;
-  --color-accent-900: #E8F0F2;
+  --color-accent-400: #3D6E5E;
+  --color-accent-600: #7FA898;
+  --color-accent-800: #BBCFC4;
+  --color-accent-900: #E7EEEA;
 }
 
 @layer base {
