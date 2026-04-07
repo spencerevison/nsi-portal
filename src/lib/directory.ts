@@ -61,6 +61,7 @@ export async function listDirectoryMembers(): Promise<DirectoryMember[]> {
     )
     .eq("active", true)
     .not("accepted_at", "is", null)
+    .not("email", "ilike", "%+clerk_test%")
     .order("last_name");
 
   if (membersErr) {

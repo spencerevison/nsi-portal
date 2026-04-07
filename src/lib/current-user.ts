@@ -46,7 +46,7 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
     const clerkEmail = clerkUser.emailAddresses
       .find((e) => e.id === clerkUser.primaryEmailAddressId)
       ?.emailAddress?.toLowerCase();
-    const clerkAvatar = clerkUser.imageUrl ?? null;
+    const clerkAvatar = clerkUser.hasImage ? clerkUser.imageUrl : null;
 
     const needsSync =
       clerkFirst !== byClerk.first_name ||
@@ -111,7 +111,7 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
     .update({
       clerk_id: clerkUser.id,
       accepted_at: byEmail.accepted_at ?? new Date().toISOString(),
-      avatar_url: clerkUser.imageUrl ?? null,
+      avatar_url: clerkUser.hasImage ? clerkUser.imageUrl : null,
     })
     .eq("id", byEmail.id);
 

@@ -1,7 +1,11 @@
 import { listDirectoryMembers, listCustomFields } from "@/lib/directory";
+import { getCurrentAppUser } from "@/lib/current-user";
 import { DirectoryView } from "./directory-view";
 
 export default async function DirectoryPage() {
+  // sync current user's Clerk data (avatar, name, etc) before reading directory
+  await getCurrentAppUser();
+
   const [members, fields] = await Promise.all([
     listDirectoryMembers(),
     listCustomFields(),

@@ -26,7 +26,7 @@ export type RoleWithCapabilities = {
 export async function listRolesWithCapabilities(): Promise<RoleWithCapabilities[]> {
   const { data: roles, error } = await supabaseAdmin
     .from("role")
-    .select("id, name, description, is_default, app_user(count)")
+    .select("id, name, description, is_default")
     .order("name");
 
   if (error) {
@@ -34,10 +34,14 @@ export async function listRolesWithCapabilities(): Promise<RoleWithCapabilities[
     return [];
   }
 
-  // get all capabilities
-  const { data: caps } = await supabaseAdmin
-    .from("role_capability")
-    .select("role_id, capability");
+  // get capabilities + member counts (excluding test users)
+  const [{ data: caps }, { data: memberCounts }] = await Promise.all([
+    supabaseAdmin.from("role_capability").select("role_id, capability"),
+    supabaseAdmin
+      .from("app_user")
+      .select("role_id")
+      .not("email", "ilike", "%+clerk_test%"),
+  ]);
 
   const capMap = new Map<string, string[]>();
   for (const c of caps ?? []) {
@@ -45,17 +49,20 @@ export async function listRolesWithCapabilities(): Promise<RoleWithCapabilities[
     capMap.get(c.role_id)!.push(c.capability);
   }
 
-  return (roles ?? []).map((r) => {
-    const countArr = r.app_user as unknown as { count: number }[];
-    return {
-      id: r.id,
-      name: r.name,
-      description: r.description,
-      is_default: r.is_default,
-      capabilities: capMap.get(r.id) ?? [],
-      member_count: countArr?.[0]?.count ?? 0,
-    };
-  });
+  // tally members per role
+  const countMap = new Map<string, number>();
+  for (const m of memberCounts ?? []) {
+    if (m.role_id) countMap.set(m.role_id, (countMap.get(m.role_id) ?? 0) + 1);
+  }
+
+  return (roles ?? []).map((r) => ({
+    id: r.id,
+    name: r.name,
+    description: r.description,
+    is_default: r.is_default,
+    capabilities: capMap.get(r.id) ?? [],
+    member_count: countMap.get(r.id) ?? 0,
+  }));
 }
 
 export async function getRoleWithCapabilities(
@@ -63,24 +70,30 @@ export async function getRoleWithCapabilities(
 ): Promise<RoleWithCapabilities | null> {
   const { data: role, error } = await supabaseAdmin
     .from("role")
-    .select("id, name, description, is_default, app_user(count)")
+    .select("id, name, description, is_default")
     .eq("id", roleId)
     .maybeSingle();
 
   if (error || !role) return null;
 
-  const { data: caps } = await supabaseAdmin
-    .from("role_capability")
-    .select("capability")
-    .eq("role_id", roleId);
+  const [{ data: caps }, { data: members }] = await Promise.all([
+    supabaseAdmin
+      .from("role_capability")
+      .select("capability")
+      .eq("role_id", roleId),
+    supabaseAdmin
+      .from("app_user")
+      .select("id")
+      .eq("role_id", roleId)
+      .not("email", "ilike", "%+clerk_test%"),
+  ]);
 
-  const countArr = role.app_user as unknown as { count: number }[];
   return {
     id: role.id,
     name: role.name,
     description: role.description,
     is_default: role.is_default,
     capabilities: (caps ?? []).map((c) => c.capability),
-    member_count: countArr?.[0]?.count ?? 0,
+    member_count: members?.length ?? 0,
   };
 }
