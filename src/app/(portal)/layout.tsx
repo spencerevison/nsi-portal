@@ -19,14 +19,14 @@ export default async function PortalLayout({
       ? "Your account isn't linked to a member profile."
       : "Your account has been deactivated.";
     return (
-      <main className="flex min-h-screen items-center justify-center bg-muted p-6">
-        <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
+      <main className="bg-muted flex min-h-screen items-center justify-center p-6">
+        <div className="border-border bg-card w-full max-w-md rounded-lg border p-8 shadow-sm">
           <h1 className="mb-2 text-xl font-semibold">Access unavailable</h1>
-          <p className="mb-4 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mb-4 text-sm">
             {reason} If you believe this is wrong, contact the administrator.
           </p>
           <SignOutButton>
-            <button className="rounded border border-border px-4 py-2 text-sm hover:bg-muted">
+            <button className="border-border hover:bg-muted rounded border px-4 py-2 text-sm">
               Sign out
             </button>
           </SignOutButton>
@@ -49,12 +49,12 @@ export default async function PortalLayout({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="relative border-b border-border bg-card">
+      <header className="border-border bg-card relative border-b">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-2">
           <Link href="/" className="flex items-center gap-2 font-semibold">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo-nsi.svg" alt="NSI" className="size-9" />
-            NSI Portal
+            Community Portal
           </Link>
           {/* Desktop nav */}
           <nav className="hidden items-center gap-6 md:flex">

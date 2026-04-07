@@ -20,6 +20,14 @@ export function ClerkThemedProvider({
 
   return (
     <ClerkProvider
+      localization={{
+        signIn: {
+          start: {
+            title: "Welcome back",
+            subtitle: "Sign in to the NSI Community Portal",
+          },
+        },
+      }}
       appearance={{
         baseTheme: isDark ? dark : undefined,
         variables: {
