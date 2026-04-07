@@ -149,9 +149,12 @@
 }
 
 /* Hide Clerk branding links */
-.cl-footer > *:not(:first-child) {
+.cl-footer {
   display: none;
 }
 .cl-navbar > *:nth-child(3) {
   display: none;
+}
+.cl-modalBackdrop .cl-navbar > *:nth-child(1) {
+  background: white;
 }
