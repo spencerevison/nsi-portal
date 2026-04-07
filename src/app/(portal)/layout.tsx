@@ -44,8 +44,10 @@ export default async function PortalLayout({
     { href: "/community", label: "Community" },
   ];
   const extraLinks: { href: string; label: string }[] = [];
-  if (caps.has("email.send")) extraLinks.push({ href: "/email/compose", label: "Email" });
-  if (caps.has("admin.access")) extraLinks.push({ href: "/admin", label: "Admin" });
+  if (caps.has("email.send"))
+    extraLinks.push({ href: "/email/compose", label: "Email" });
+  if (caps.has("admin.access"))
+    extraLinks.push({ href: "/admin", label: "Admin" });
   const allLinks = [...baseLinks, ...extraLinks];
 
   return (
@@ -53,9 +55,8 @@ export default async function PortalLayout({
       <header className="relative border-b border-neutral-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
           <Link href="/" className="flex items-center gap-2 font-semibold">
-            <span className="flex size-7 items-center justify-center rounded-lg bg-accent-600 text-xs font-bold text-accent-50">
-              N
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-nsi.svg" alt="NSI" className="size-7" />
             NSI Portal
           </Link>
           {/* Desktop nav */}
