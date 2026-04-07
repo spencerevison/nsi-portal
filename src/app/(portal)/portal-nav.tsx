@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 const links = [
   { href: "/documents", label: "Documents" },
   { href: "/directory", label: "Directory" },
-  { href: "/community", label: "Community" },
+  { href: "/community", label: "Message Board" },
 ];
 
 export function PortalNav({

@@ -30,7 +30,7 @@ const quickLinks = [
   {
     href: "/community",
     icon: MessageSquare,
-    label: "Community",
+    label: "Message Board",
     desc: "Posts and discussions",
   },
 ];

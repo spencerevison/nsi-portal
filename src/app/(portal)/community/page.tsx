@@ -21,7 +21,7 @@ export default async function CommunityPage() {
       {canWrite && <NewPostForm />}
       {!canWrite && (
         <div>
-          <h1 className="text-xl font-semibold">Community</h1>
+          <h1 className="text-xl font-semibold">Message Board</h1>
           <p className="text-muted-foreground text-sm">
             Announcements and discussions
           </p>

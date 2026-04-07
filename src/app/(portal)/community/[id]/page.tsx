@@ -31,7 +31,7 @@ export default async function PostPage({ params }: { params: Params }) {
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Back to Community
+        Back to Message Board
       </Link>
 
       {/* Post — body before metadata */}
