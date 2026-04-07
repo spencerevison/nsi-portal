@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SignOutButton } from "@clerk/nextjs";
 import { UserMenu } from "./user-menu";
+import { PortalNav } from "./portal-nav";
 import { getCurrentAppUser, getCurrentCapabilities } from "@/lib/current-user";
 
 export default async function PortalLayout({
@@ -35,48 +36,23 @@ export default async function PortalLayout({
     );
   }
 
+  // build conditional nav links based on capabilities
+  const extraLinks: { href: string; label: string }[] = [];
+  if (caps.has("email.send")) extraLinks.push({ href: "/email/compose", label: "Email" });
+  if (caps.has("admin.access")) extraLinks.push({ href: "/admin", label: "Admin" });
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b border-neutral-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-          <Link href="/" className="font-semibold">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-accent-600 text-xs font-bold text-accent-50">
+              N
+            </span>
             NSI Portal
           </Link>
-          <nav className="flex items-center gap-6 text-sm text-neutral-600">
-            <Link
-              href="/documents"
-              className="transition-colors hover:text-neutral-900"
-            >
-              Documents
-            </Link>
-            <Link
-              href="/directory"
-              className="transition-colors hover:text-neutral-900"
-            >
-              Directory
-            </Link>
-            <Link
-              href="/community"
-              className="transition-colors hover:text-neutral-900"
-            >
-              Community
-            </Link>
-            {caps.has("email.send") && (
-              <Link
-                href="/email/compose"
-                className="transition-colors hover:text-neutral-900"
-              >
-                Email
-              </Link>
-            )}
-            {caps.has("admin.access") && (
-              <Link
-                href="/admin"
-                className="transition-colors hover:text-neutral-900"
-              >
-                Admin
-              </Link>
-            )}
+          <nav className="flex items-center gap-6">
+            <PortalNav extraLinks={extraLinks} />
             <UserMenu />
           </nav>
         </div>

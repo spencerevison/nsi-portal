@@ -82,6 +82,15 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* accent color ramp — swappable in one place */
+  --color-accent-50: #E6F1FB;
+  --color-accent-100: #B5D4F4;
+  --color-accent-200: #85B7EB;
+  --color-accent-400: #378ADD;
+  --color-accent-600: #185FA5;
+  --color-accent-800: #0C447C;
+  --color-accent-900: #042C53;
 }
 
 .dark {
