@@ -24,8 +24,9 @@ export default async function CommunityPage() {
             Announcements and discussions
           </p>
         </div>
-        {canWrite && <NewPostForm />}
       </div>
+
+      {canWrite && <NewPostForm />}
 
       {posts.length === 0 && (
         <Card>
