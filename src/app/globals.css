@@ -6,7 +6,7 @@
 
 :root {
   color-scheme: light;
-  --background: oklch(98.426% 0.00749 260.893 / 0.834);
+  --background: #FBF0DC;
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -83,14 +83,14 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* accent color ramp — swappable in one place */
-  --color-accent-50: #e6f1fb;
-  --color-accent-100: #b5d4f4;
-  --color-accent-200: #85b7eb;
-  --color-accent-400: #378add;
-  --color-accent-600: #185fa5;
-  --color-accent-800: #0c447c;
-  --color-accent-900: #042c53;
+  /* accent color ramp — dark green + cream */
+  --color-accent-50: #E8F0F2;
+  --color-accent-100: #C2D6DB;
+  --color-accent-200: #8FB3BD;
+  --color-accent-400: #4A7A86;
+  --color-accent-600: #22444E;
+  --color-accent-800: #162D34;
+  --color-accent-900: #0C1B1F;
 }
 
 .dark {
@@ -128,13 +128,13 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   /* inverted accent ramp for dark backgrounds */
-  --color-accent-50: #042c53;
-  --color-accent-100: #0c447c;
-  --color-accent-200: #185fa5;
-  --color-accent-400: #378add;
-  --color-accent-600: #85b7eb;
-  --color-accent-800: #b5d4f4;
-  --color-accent-900: #e6f1fb;
+  --color-accent-50: #0C1B1F;
+  --color-accent-100: #162D34;
+  --color-accent-200: #22444E;
+  --color-accent-400: #4A7A86;
+  --color-accent-600: #8FB3BD;
+  --color-accent-800: #C2D6DB;
+  --color-accent-900: #E8F0F2;
 }
 
 @layer base {

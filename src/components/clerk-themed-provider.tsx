@@ -5,7 +5,7 @@ import { dark } from "@clerk/themes";
 import { useTheme } from "next-themes";
 
 const baseVariables = {
-  colorPrimary: "#185fa5",
+  colorPrimary: "#22444E",
   fontFamily: "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif",
   borderRadius: "0.5rem",
 };
