@@ -22,17 +22,19 @@ export function CommentForm({ postId }: { postId: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex gap-2">
+    <form onSubmit={onSubmit} className="space-y-2">
       <textarea
         name="body"
         required
-        rows={2}
+        rows={3}
         placeholder="Write a comment..."
-        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 flex-1 rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3"
+        className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
       />
-      <Button type="submit" disabled={pending} className="self-end">
-        {pending ? "..." : "Reply"}
-      </Button>
+      <div className="flex justify-end">
+        <Button type="submit" disabled={pending}>
+          {pending ? "Posting..." : "Reply"}
+        </Button>
+      </div>
     </form>
   );
 }
