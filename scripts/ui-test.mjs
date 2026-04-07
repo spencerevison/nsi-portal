@@ -52,22 +52,19 @@ await pwd.fill(password);
 await page.getByRole("button", { name: /continue/i }).click();
 
 // handle device verification if it triggers
+// handle intermediate Clerk screens (factor-two, client-trust, etc.)
 try {
   await page.waitForURL("http://localhost:3000/", { timeout: 5000 });
 } catch {
-  if (page.url().includes("factor-two")) {
+  const url = page.url();
+  if (url.includes("factor-two") || url.includes("client-trust")) {
     console.log("Device verification — entering test code 424242...");
-    // Clerk renders 6 individual OTP digit inputs
     await page.waitForTimeout(500);
+    // Clerk auto-submits after all 6 digits are entered
     await page.keyboard.type("424242", { delay: 50 });
-    // click continue/verify
-    const continueBtn = page.getByRole("button", { name: /continue|verify/i });
-    if (await continueBtn.isVisible()) {
-      await continueBtn.click();
-    }
-    await page.waitForURL("http://localhost:3000/", { timeout: 10000 });
+    await page.waitForURL("http://localhost:3000/", { timeout: 20000 });
   } else {
-    console.error("Unexpected URL:", page.url());
+    console.error("Unexpected URL:", url);
     await page.screenshot({ path: `${OUT}/error-signin.png` });
     await browser.close();
     process.exit(1);

@@ -47,12 +47,11 @@ await page.getByRole("button", { name: /continue/i }).click();
 try {
   await page.waitForURL("http://localhost:3000/", { timeout: 5000 });
 } catch {
-  if (page.url().includes("factor-two")) {
+  const url = page.url();
+  if (url.includes("factor-two") || url.includes("client-trust")) {
     await page.waitForTimeout(500);
     await page.keyboard.type("424242", { delay: 50 });
-    const btn = page.getByRole("button", { name: /continue|verify/i });
-    if (await btn.isVisible()) await btn.click();
-    await page.waitForURL("http://localhost:3000/", { timeout: 10000 });
+    await page.waitForURL("http://localhost:3000/", { timeout: 20000 });
   }
 }
 log("Sign-in", page.url() === "http://localhost:3000/");
