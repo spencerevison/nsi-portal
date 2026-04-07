@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SignOutButton } from "@clerk/nextjs";
 import { UserMenu } from "./user-menu";
 import { PortalNav } from "./portal-nav";
+import { MobileNav } from "./mobile-nav";
 import { getCurrentAppUser, getCurrentCapabilities } from "@/lib/current-user";
 
 export default async function PortalLayout({
@@ -36,14 +37,20 @@ export default async function PortalLayout({
     );
   }
 
-  // build conditional nav links based on capabilities
+  // build nav links based on capabilities
+  const baseLinks = [
+    { href: "/documents", label: "Documents" },
+    { href: "/directory", label: "Directory" },
+    { href: "/community", label: "Community" },
+  ];
   const extraLinks: { href: string; label: string }[] = [];
   if (caps.has("email.send")) extraLinks.push({ href: "/email/compose", label: "Email" });
   if (caps.has("admin.access")) extraLinks.push({ href: "/admin", label: "Admin" });
+  const allLinks = [...baseLinks, ...extraLinks];
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-neutral-200 bg-white">
+      <header className="relative border-b border-neutral-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
           <Link href="/" className="flex items-center gap-2 font-semibold">
             <span className="flex size-7 items-center justify-center rounded-lg bg-accent-600 text-xs font-bold text-accent-50">
@@ -51,10 +58,16 @@ export default async function PortalLayout({
             </span>
             NSI Portal
           </Link>
-          <nav className="flex items-center gap-6">
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-6 md:flex">
             <PortalNav extraLinks={extraLinks} />
             <UserMenu />
           </nav>
+          {/* Mobile nav */}
+          <div className="flex items-center gap-2 md:hidden">
+            <UserMenu />
+            <MobileNav links={allLinks} />
+          </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">
