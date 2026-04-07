@@ -94,6 +94,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -125,6 +126,15 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* inverted accent ramp for dark backgrounds */
+  --color-accent-50: #042C53;
+  --color-accent-100: #0C447C;
+  --color-accent-200: #185FA5;
+  --color-accent-400: #378ADD;
+  --color-accent-600: #85B7EB;
+  --color-accent-800: #B5D4F4;
+  --color-accent-900: #E6F1FB;
 }
 
 @layer base {
@@ -143,12 +153,10 @@
   }
 }
 
-/* Clerk profile dropdown branding */
+/* Clerk */
 .cl-userButtonPopoverFooter {
   display: none;
 }
-
-/* Hide Clerk branding links */
 .cl-footer {
   display: none;
 }
