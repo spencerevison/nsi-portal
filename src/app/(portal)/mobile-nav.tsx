@@ -32,7 +32,7 @@ export function MobileNav({
   const pathname = usePathname();
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         onClick={() => setOpen(!open)}
         className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-md p-2"
