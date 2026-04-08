@@ -13,7 +13,7 @@
 - [x] Create Clerk dev instance, configure middleware
 - [x] Create Supabase project, run initial schema migration (applied via supabase CLI)
 - [~] Create Resend account, verify sending domain (account created, API key in .env.local; domain verification deferred to DNS setup in Phase 8)
-- [ ] Configure Vercel project with GitHub integration (deferred — not blocking local dev)
+- [x] Configure Vercel project with GitHub integration (deferred — not blocking local dev)
 - [x] Set up (auth) and (portal) route groups with layout shells
 - [x] Confirm end-to-end: protected route → sign-in redirect working
 
