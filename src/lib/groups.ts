@@ -134,7 +134,8 @@ export async function resolveRecipients(
       .from("app_user")
       .select("email, first_name, last_name")
       .eq("active", true)
-      .not("accepted_at", "is", null);
+      .not("accepted_at", "is", null)
+      .not("email", "ilike", "%+clerk_test%");
 
     return (data ?? []).map((u) => ({
       email: u.email,

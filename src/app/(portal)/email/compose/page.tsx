@@ -14,7 +14,8 @@ export default async function ComposePage() {
       .from("app_user")
       .select("id", { count: "exact", head: true })
       .eq("active", true)
-      .not("accepted_at", "is", null),
+      .not("accepted_at", "is", null)
+      .not("email", "ilike", "%+clerk_test%"),
   ]);
 
   return (

@@ -88,13 +88,28 @@ export function ComposeForm({
       {result && (
         <div
           className={cn(
-            "rounded-lg border p-3 text-sm",
+            "flex items-start justify-between gap-2 rounded-lg border p-3 text-sm",
             result.ok
               ? "border-green-200 bg-green-50 text-green-800"
               : "border-destructive/20 bg-destructive/5 text-destructive",
           )}
         >
-          {result.message}
+          <span>{result.message}</span>
+          <button
+            type="button"
+            onClick={() => setResult(null)}
+            className="-mt-1 -mr-1 shrink-0 cursor-pointer p-1 opacity-60 hover:opacity-100"
+            aria-label="Dismiss"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className="size-5"
+            >
+              <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+            </svg>
+          </button>
         </div>
       )}
 
