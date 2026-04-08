@@ -59,6 +59,24 @@ export async function updateCustomFieldValue(input: {
   return { ok: true };
 }
 
+export async function dismissWelcome(): Promise<ActionResult> {
+  const user = await getCurrentAppUser();
+  if (!user) return { ok: false, error: "Not authenticated" };
+
+  const { error } = await supabaseAdmin
+    .from("app_user")
+    .update({ onboarded_at: new Date().toISOString() })
+    .eq("id", user.id);
+
+  if (error) {
+    console.error("dismissWelcome failed", error);
+    return { ok: false, error: "Failed to dismiss" };
+  }
+
+  revalidatePath("/");
+  return { ok: true };
+}
+
 export async function updateNotifications(input: {
   notifyNewPost: boolean;
   notifyReplies: boolean;
