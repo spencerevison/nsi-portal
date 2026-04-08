@@ -28,7 +28,7 @@ export function CommentForm({ postId }: { postId: string }) {
         required
         rows={3}
         placeholder="Write a comment..."
-        className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3"
       />
       <div className="flex justify-end">
         <Button type="submit" disabled={pending}>

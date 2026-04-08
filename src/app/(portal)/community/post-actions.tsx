@@ -34,7 +34,7 @@ export function PostActions({
       <DropdownMenu>
         <DropdownMenuTrigger
           disabled={pending}
-          className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground shrink-0 rounded-md p-1"
           onClick={(e) => e.preventDefault()}
         >
           <MoreVertical className="size-4" />

@@ -63,47 +63,47 @@ export function NewPostForm() {
     <>
       {header}
       <Card className="w-full">
-      <CardContent>
-        <form onSubmit={onSubmit} className="space-y-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="post-title">Title</Label>
-            <Input
-              id="post-title"
-              name="title"
-              required
-              placeholder="What's on your mind?"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="post-body">Message</Label>
-            <textarea
-              id="post-body"
-              name="body"
-              required
-              rows={4}
-              placeholder="Share something with the group..."
-              className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3"
-            />
-          </div>
-          {error && <p className="text-destructive text-sm">{error}</p>}
-          <div className="flex gap-2">
-            <Button type="submit" disabled={pending}>
-              {pending ? "Posting..." : "Post"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setError(null);
-                setOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+        <CardContent>
+          <form onSubmit={onSubmit} className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="post-title">Title</Label>
+              <Input
+                id="post-title"
+                name="title"
+                required
+                placeholder="What's on your mind?"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="post-body">Message</Label>
+              <textarea
+                id="post-body"
+                name="body"
+                required
+                rows={4}
+                placeholder="Share something with the group..."
+                className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3"
+              />
+            </div>
+            {error && <p className="text-destructive text-sm">{error}</p>}
+            <div className="flex gap-2">
+              <Button type="submit" disabled={pending}>
+                {pending ? "Posting..." : "Post"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setError(null);
+                  setOpen(false);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </>
   );
 }

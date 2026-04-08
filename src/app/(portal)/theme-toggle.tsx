@@ -17,7 +17,11 @@ const getServerSnapshot = () => false;
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const mounted = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
 
   if (!mounted) return <div className="size-8" />;
 
@@ -27,7 +31,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(next.value)}
-      className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-md p-1.5 transition-colors"
       title={`Theme: ${current.label}. Click for ${next.label}`}
     >
       <current.icon className="size-4" />

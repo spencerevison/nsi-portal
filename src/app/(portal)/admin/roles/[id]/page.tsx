@@ -7,11 +7,7 @@ import { CapabilityGrid } from "./capability-grid";
 
 type Params = Promise<{ id: string }>;
 
-export default async function RoleDetailPage({
-  params,
-}: {
-  params: Params;
-}) {
+export default async function RoleDetailPage({ params }: { params: Params }) {
   const { id } = await params;
   const role = await getRoleWithCapabilities(id);
   if (!role) notFound();
@@ -20,7 +16,7 @@ export default async function RoleDetailPage({
     <div className="space-y-4">
       <Link
         href="/admin/roles"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
       >
         <ArrowLeft className="size-4" />
         Back to Roles
@@ -32,9 +28,9 @@ export default async function RoleDetailPage({
           {role.is_default && <Badge variant="secondary">Default</Badge>}
         </div>
         {role.description && (
-          <p className="text-sm text-muted-foreground">{role.description}</p>
+          <p className="text-muted-foreground text-sm">{role.description}</p>
         )}
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           {role.member_count} member{role.member_count !== 1 ? "s" : ""} ·{" "}
           {role.capabilities.length} capabilities
         </p>

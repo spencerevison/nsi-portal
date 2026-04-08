@@ -40,13 +40,13 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* accent color ramp — light mode (dark green) */
-  --accent-50: #E7EEEA;
-  --accent-100: #BBCFC4;
-  --accent-200: #7FA898;
-  --accent-400: #3D6E5E;
-  --accent-600: #22444E;
-  --accent-800: #162D34;
-  --accent-900: #0C1B1F;
+  --accent-50: #e7eeea;
+  --accent-100: #bbcfc4;
+  --accent-200: #7fa898;
+  --accent-400: #3d6e5e;
+  --accent-600: #22444e;
+  --accent-800: #162d34;
+  --accent-900: #0c1b1f;
 }
 
 @theme inline {
@@ -150,13 +150,13 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   /* inverted accent ramp for dark backgrounds */
-  --accent-50: #0C1B1F;
-  --accent-100: #162D34;
-  --accent-200: #22444E;
-  --accent-400: #3D6E5E;
-  --accent-600: #7FA898;
-  --accent-800: #BBCFC4;
-  --accent-900: #E7EEEA;
+  --accent-50: #0c1b1f;
+  --accent-100: #162d34;
+  --accent-200: #22444e;
+  --accent-400: #3d6e5e;
+  --accent-600: #7fa898;
+  --accent-800: #bbcfc4;
+  --accent-900: #e7eeea;
 }
 
 @layer base {

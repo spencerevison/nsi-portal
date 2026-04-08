@@ -20,7 +20,7 @@ export default async function RolesPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Roles</h1>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-muted-foreground text-sm">
           {roles.length} roles
         </span>
       </div>

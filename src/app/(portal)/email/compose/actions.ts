@@ -37,7 +37,10 @@ export async function sendGroupEmail(input: {
   if (!user) return { ok: false, error: "Not authenticated" };
 
   if (!checkRateLimit(user.id)) {
-    return { ok: false, error: "Too many emails sent. Please wait before sending again." };
+    return {
+      ok: false,
+      error: "Too many emails sent. Please wait before sending again.",
+    };
   }
 
   if (input.groupSlugs.length === 0) {

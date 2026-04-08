@@ -55,33 +55,31 @@ export function CapabilityGrid({
       <CardContent className="space-y-6">
         <div>
           <h2 className="text-sm font-semibold">Capabilities</h2>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Select what members with this role can do.
           </p>
         </div>
 
         {[...groups.entries()].map(([category, capList]) => (
           <div key={category}>
-            <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <h3 className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
               {category}
             </h3>
             <div className="space-y-2">
               {capList.map((cap) => (
                 <label
                   key={cap.key}
-                  className="flex items-center gap-3 rounded-md px-2 py-1.5 hover:bg-muted"
+                  className="hover:bg-muted flex items-center gap-3 rounded-md px-2 py-1.5"
                 >
                   <input
                     type="checkbox"
                     checked={caps.has(cap.key)}
                     onChange={() => toggle(cap.key)}
-                    className="size-4 rounded border-input"
+                    className="border-input size-4 rounded"
                   />
                   <div>
                     <span className="text-sm">{cap.key}</span>
-                    <p className="text-xs text-muted-foreground">
-                      {cap.label}
-                    </p>
+                    <p className="text-muted-foreground text-xs">{cap.label}</p>
                   </div>
                 </label>
               ))}
@@ -94,7 +92,7 @@ export function CapabilityGrid({
             {pending ? "Saving..." : "Save capabilities"}
           </Button>
           {saved && (
-            <span className="text-sm text-muted-foreground">Saved</span>
+            <span className="text-muted-foreground text-sm">Saved</span>
           )}
         </div>
       </CardContent>

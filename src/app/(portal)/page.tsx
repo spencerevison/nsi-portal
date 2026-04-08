@@ -66,7 +66,14 @@ export default async function HomePage() {
   const allQuickLinks = [
     ...quickLinks,
     ...(caps.has("email.send")
-      ? [{ href: "/email/compose", icon: Mail, label: "Send Email", desc: "Email the community" }]
+      ? [
+          {
+            href: "/email/compose",
+            icon: Mail,
+            label: "Send Email",
+            desc: "Email the community",
+          },
+        ]
       : []),
   ];
 
@@ -85,11 +92,11 @@ export default async function HomePage() {
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {allQuickLinks.map((link) => (
           <Link key={link.href} href={link.href}>
-            <Card className="h-full transition-colors hover:border-accent-200 hover:bg-accent-50/30">
+            <Card className="hover:border-accent-200 hover:bg-accent-50/30 h-full transition-colors">
               <CardContent className="p-4">
-                <link.icon className="mb-2 size-5 text-accent-600" />
+                <link.icon className="text-accent-600 mb-2 size-5" />
                 <h3 className="text-sm font-medium">{link.label}</h3>
-                <p className="mt-0.5 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-0.5 text-xs">
                   {link.desc}
                 </p>
               </CardContent>
@@ -101,7 +108,7 @@ export default async function HomePage() {
       {/* Announcements (pinned posts) */}
       {pinnedPosts && pinnedPosts.length > 0 && (
         <div>
-          <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+          <h2 className="text-muted-foreground mb-3 text-sm font-semibold tracking-wide uppercase">
             Announcements
           </h2>
           <div className="space-y-2">
@@ -122,10 +129,10 @@ export default async function HomePage() {
                           <h3 className="text-sm font-semibold">
                             {post.title}
                           </h3>
-                          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                          <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
                             {post.body}
                           </p>
-                          <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+                          <div className="text-muted-foreground mt-2 flex items-center gap-3 text-xs">
                             <span className="flex items-center gap-1.5">
                               {author && (
                                 <MemberAvatar
@@ -164,11 +171,11 @@ export default async function HomePage() {
       {/* Recent activity */}
       {recentPosts && recentPosts.length > 0 && (
         <div>
-          <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+          <h2 className="text-muted-foreground mb-3 text-sm font-semibold tracking-wide uppercase">
             Recent Activity
           </h2>
           <Card>
-            <CardContent className="divide-y divide-border p-0">
+            <CardContent className="divide-border divide-y p-0">
               {recentPosts.map((post) => {
                 const author = post.author as unknown as {
                   first_name: string;
@@ -179,7 +186,7 @@ export default async function HomePage() {
                   <Link
                     key={post.id}
                     href={`/community/${post.id}`}
-                    className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
+                    className="hover:bg-muted/50 flex items-center gap-3 px-4 py-3 transition-colors"
                   >
                     {author && (
                       <MemberAvatar
@@ -195,13 +202,13 @@ export default async function HomePage() {
                       <h3 className="truncate text-sm font-medium">
                         {post.title}
                       </h3>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {author
                           ? `${author.first_name} ${author.last_name}`
                           : "Unknown"}
                       </p>
                     </div>
-                    <span className="shrink-0 text-xs text-muted-foreground">
+                    <span className="text-muted-foreground shrink-0 text-xs">
                       {timeAgo(post.created_at)}
                     </span>
                   </Link>

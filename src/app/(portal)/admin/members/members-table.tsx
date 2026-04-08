@@ -72,7 +72,12 @@ export function MembersTable({
     const dir = sortDir === "asc" ? 1 : -1;
     switch (sortKey) {
       case "name":
-        return dir * (`${a.last_name} ${a.first_name}`).localeCompare(`${b.last_name} ${b.first_name}`);
+        return (
+          dir *
+          `${a.last_name} ${a.first_name}`.localeCompare(
+            `${b.last_name} ${b.first_name}`,
+          )
+        );
       case "email":
         return dir * a.email.localeCompare(b.email);
       case "lot":
@@ -94,7 +99,7 @@ export function MembersTable({
   return (
     <>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
           placeholder="Search by name, email, lot, or role..."
           value={search}
@@ -109,31 +114,31 @@ export function MembersTable({
             <TableHeader>
               <TableRow>
                 <TableHead
-                  className="cursor-pointer select-none hover:text-foreground"
+                  className="hover:text-foreground cursor-pointer select-none"
                   onClick={() => toggleSort("name")}
                 >
                   Name{sortIndicator("name")}
                 </TableHead>
                 <TableHead
-                  className="cursor-pointer select-none hover:text-foreground"
+                  className="hover:text-foreground cursor-pointer select-none"
                   onClick={() => toggleSort("email")}
                 >
                   Email{sortIndicator("email")}
                 </TableHead>
                 <TableHead
-                  className="cursor-pointer select-none hover:text-foreground"
+                  className="hover:text-foreground cursor-pointer select-none"
                   onClick={() => toggleSort("lot")}
                 >
                   Lot{sortIndicator("lot")}
                 </TableHead>
                 <TableHead
-                  className="cursor-pointer select-none hover:text-foreground"
+                  className="hover:text-foreground cursor-pointer select-none"
                   onClick={() => toggleSort("role")}
                 >
                   Role{sortIndicator("role")}
                 </TableHead>
                 <TableHead
-                  className="cursor-pointer select-none hover:text-foreground"
+                  className="hover:text-foreground cursor-pointer select-none"
                   onClick={() => toggleSort("status")}
                 >
                   Status{sortIndicator("status")}
@@ -146,9 +151,11 @@ export function MembersTable({
                 <TableRow>
                   <TableCell
                     colSpan={6}
-                    className="py-8 text-center text-muted-foreground"
+                    className="text-muted-foreground py-8 text-center"
                   >
-                    {search ? "No members match your search." : "No members yet."}
+                    {search
+                      ? "No members match your search."
+                      : "No members yet."}
                   </TableCell>
                 </TableRow>
               )}
