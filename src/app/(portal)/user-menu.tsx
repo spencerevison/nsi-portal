@@ -25,7 +25,7 @@ export function UserMenu() {
         <UserButton.MenuItems>
           <UserButton.Link
             href="/profile"
-            label="Settings"
+            label="Profile & Settings"
             labelIcon={<SlidersHorizontal className="size-4" />}
           />
           <UserButton.Action label="manageAccount" />
