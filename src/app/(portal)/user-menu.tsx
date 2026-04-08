@@ -20,15 +20,17 @@ export function UserMenu() {
   }, [user?.imageUrl, router]);
 
   return (
-    <UserButton>
-      <UserButton.MenuItems>
-        <UserButton.Link
-          href="/profile"
-          label="Settings"
-          labelIcon={<SlidersHorizontal className="size-4" />}
-        />
-        <UserButton.Action label="manageAccount" />
-      </UserButton.MenuItems>
-    </UserButton>
+    <div className="w-7">
+      <UserButton>
+        <UserButton.MenuItems>
+          <UserButton.Link
+            href="/profile"
+            label="Settings"
+            labelIcon={<SlidersHorizontal className="size-4" />}
+          />
+          <UserButton.Action label="manageAccount" />
+        </UserButton.MenuItems>
+      </UserButton>
+    </div>
   );
 }
