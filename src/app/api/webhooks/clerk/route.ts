@@ -1,5 +1,6 @@
 import { Webhook } from "svix";
 import type { WebhookEvent } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
@@ -117,7 +118,7 @@ async function handleUserCreated(data: WebhookEvent["data"] & { id: string }) {
   // we reject rather than auto-creating, to keep membership gated.
   const { data: existing, error: selErr } = await supabaseAdmin
     .from("app_user")
-    .select("id, clerk_id")
+    .select("id, clerk_id, first_name, last_name")
     .ilike("email", email)
     .maybeSingle();
 
@@ -162,6 +163,19 @@ async function handleUserCreated(data: WebhookEvent["data"] & { id: string }) {
   if (updErr) {
     console.error("app_user link update failed", updErr);
     return new Response("DB error", { status: 500 });
+  }
+
+  // Push pre-seeded name to Clerk so the user's profile shows it
+  if (existing.first_name || existing.last_name) {
+    try {
+      const clerk = await clerkClient();
+      await clerk.users.updateUser(clerkId, {
+        firstName: existing.first_name || "",
+        lastName: existing.last_name || "",
+      });
+    } catch (err) {
+      console.warn("Failed to push name to Clerk", err);
+    }
   }
 
   return new Response(null, { status: 204 });
