@@ -5,7 +5,6 @@ import { dark } from "@clerk/themes";
 import { useTheme } from "next-themes";
 
 const baseVariables = {
-  colorPrimary: "#22444E",
   fontFamily: "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif",
   borderRadius: "0.5rem",
 };
@@ -34,13 +33,16 @@ export function ClerkThemedProvider({
           ...baseVariables,
           ...(isDark
             ? {
+                colorPrimary: "#cebf9e",
                 colorBackground: "oklch(0.205 0 0)",
                 colorInputBackground: "oklch(0.269 0 0)",
                 colorInputText: "oklch(0.985 0 0)",
                 colorText: "oklch(0.985 0 0)",
                 colorTextSecondary: "oklch(0.708 0 0)",
+                colorNeutral: "oklch(0.85 0 0)",
               }
             : {
+                colorPrimary: "#22444E",
                 colorBackground: "#ffffff",
                 colorInputBackground: "#ffffff",
                 colorInputText: "#1a1a1a",
