@@ -15,6 +15,11 @@ import { RoleActions } from "./role-actions";
 
 export default async function RolesPage() {
   const roles = await listRolesWithCapabilities();
+  roles.sort((a, b) => {
+    if (a.name === "Member") return -1;
+    if (b.name === "Member") return 1;
+    return 0;
+  });
 
   return (
     <div className="space-y-4">

@@ -20,7 +20,8 @@ export function AddMemberForm({ roles }: { roles: RoleOption[] }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const [roleId, setRoleId] = useState<string>("");
+  const defaultRole = roles.find((r) => r.is_default);
+  const [roleId, setRoleId] = useState<string>(defaultRole?.id ?? "");
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -42,7 +43,7 @@ export function AddMemberForm({ roles }: { roles: RoleOption[] }) {
         return;
       }
       form.reset();
-      setRoleId("");
+      setRoleId(defaultRole?.id ?? "");
       setOpen(false);
     });
   }

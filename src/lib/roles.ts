@@ -59,6 +59,7 @@ export async function listRolesWithCapabilities(): Promise<
 
   // tally members per role
   const countMap = new Map<string, number>();
+  const totalMembers = (memberCounts ?? []).length;
   for (const m of memberCounts ?? []) {
     if (m.role_id) countMap.set(m.role_id, (countMap.get(m.role_id) ?? 0) + 1);
   }
@@ -69,7 +70,8 @@ export async function listRolesWithCapabilities(): Promise<
     description: r.description,
     is_default: r.is_default,
     capabilities: capMap.get(r.id) ?? [],
-    member_count: countMap.get(r.id) ?? 0,
+    // default role applies to everyone, so count all members
+    member_count: r.is_default ? totalMembers : countMap.get(r.id) ?? 0,
   }));
 }
 
@@ -89,11 +91,17 @@ export async function getRoleWithCapabilities(
       .from("role_capability")
       .select("capability")
       .eq("role_id", roleId),
-    supabaseAdmin
-      .from("app_user")
-      .select("id")
-      .eq("role_id", roleId)
-      .not("email", "ilike", "%+clerk_test%"),
+    // for default role, count all members; otherwise just those with this role
+    role.is_default
+      ? supabaseAdmin
+          .from("app_user")
+          .select("id")
+          .not("email", "ilike", "%+clerk_test%")
+      : supabaseAdmin
+          .from("app_user")
+          .select("id")
+          .eq("role_id", roleId)
+          .not("email", "ilike", "%+clerk_test%"),
   ]);
 
   return {
