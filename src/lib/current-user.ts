@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export type AppUser = {
@@ -71,6 +71,19 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
         last_name: clerkLast,
         email: clerkEmail ?? byClerk.email,
       } as AppUser;
+    }
+
+    // Reverse sync: if Clerk has no name but Supabase does, push it to Clerk
+    if (!clerkUser.firstName && !clerkUser.lastName && (byClerk.first_name || byClerk.last_name)) {
+      try {
+        const clerk = await clerkClient();
+        await clerk.users.updateUser(clerkUser.id, {
+          firstName: byClerk.first_name || "",
+          lastName: byClerk.last_name || "",
+        });
+      } catch (err) {
+        console.warn("Failed to push name to Clerk", err);
+      }
     }
 
     return byClerk as AppUser;
