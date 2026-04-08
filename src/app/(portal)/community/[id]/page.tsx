@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Pin, Clock } from "lucide-react";
 import { getPost, listComments, timeAgo } from "@/lib/community";
-import { getCurrentCapabilities } from "@/lib/current-user";
+import { getCurrentAppUser, getCurrentCapabilities } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { MemberAvatar } from "../../directory/member-avatar";
 import { CommentForm } from "./comment-form";
@@ -14,16 +14,18 @@ type Params = Promise<{ id: string }>;
 export default async function PostPage({ params }: { params: Params }) {
   const { id } = await params;
 
-  const [post, comments, caps] = await Promise.all([
+  const [post, comments, caps, user] = await Promise.all([
     getPost(id),
     listComments(id),
     getCurrentCapabilities(),
+    getCurrentAppUser(),
   ]);
 
   if (!post) notFound();
 
   const canWrite = caps.has("community.write");
   const canModerate = caps.has("community.moderate");
+  const currentUserId = user?.id ?? "";
 
   return (
     <div className="space-y-6">
@@ -95,8 +97,15 @@ export default async function PostPage({ params }: { params: Params }) {
                       {timeAgo(comment.created_at)}
                     </span>
                   </div>
-                  {canModerate && (
-                    <CommentActions commentId={comment.id} postId={post.id} />
+                  {(canModerate ||
+                    comment.author_id === currentUserId) && (
+                    <CommentActions
+                      commentId={comment.id}
+                      postId={post.id}
+                      body={comment.body}
+                      isOwner={comment.author_id === currentUserId}
+                      canModerate={canModerate}
+                    />
                   )}
                 </div>
                 <p className="mt-1.5 pl-8 text-sm whitespace-pre-wrap">

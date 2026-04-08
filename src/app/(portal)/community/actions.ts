@@ -2,7 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { getCurrentAppUser, requireCapability } from "@/lib/current-user";
+import {
+  getCurrentAppUser,
+  getCurrentCapabilities,
+  requireCapability,
+} from "@/lib/current-user";
+import { notifyNewPost, notifyNewComment } from "@/lib/notifications";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -40,6 +45,15 @@ export async function createPost(input: {
   }
 
   revalidatePath("/community");
+
+  // send notification emails (awaited so the runtime doesn't drop the promise)
+  await notifyNewPost({
+    postId: data.id,
+    title: input.title.trim(),
+    authorId: user.id,
+    authorName: `${user.first_name} ${user.last_name}`,
+  }).catch((err) => console.error("notifyNewPost error", err));
+
   return { ok: true, postId: data.id };
 }
 
@@ -70,6 +84,24 @@ export async function createComment(input: {
   }
 
   revalidatePath(`/community/${input.postId}`);
+
+  // notify post author
+  const { data: post } = await supabaseAdmin
+    .from("post")
+    .select("title, author_id")
+    .eq("id", input.postId)
+    .single();
+
+  if (post) {
+    await notifyNewComment({
+      postId: input.postId,
+      postTitle: post.title,
+      postAuthorId: post.author_id,
+      commenterName: `${user.first_name} ${user.last_name}`,
+      commenterId: user.id,
+    }).catch((err) => console.error("notifyNewComment error", err));
+  }
+
   return { ok: true };
 }
 
@@ -107,11 +139,61 @@ export async function deletePost(postId: string): Promise<ActionResult> {
   return { ok: true };
 }
 
+export async function editComment(input: {
+  commentId: string;
+  postId: string;
+  body: string;
+}): Promise<ActionResult> {
+  const user = await getCurrentAppUser();
+  if (!user) return { ok: false, error: "Not authenticated" };
+
+  if (!input.body.trim()) return { ok: false, error: "Comment cannot be empty" };
+  if (input.body.length > 5000)
+    return { ok: false, error: "Comment too long (max 5,000 characters)" };
+
+  // only the comment author can edit
+  const { data: comment } = await supabaseAdmin
+    .from("comment")
+    .select("author_id")
+    .eq("id", input.commentId)
+    .single();
+
+  if (!comment) return { ok: false, error: "Comment not found" };
+  if (comment.author_id !== user.id)
+    return { ok: false, error: "You can only edit your own comments" };
+
+  const { error } = await supabaseAdmin
+    .from("comment")
+    .update({ body: input.body.trim() })
+    .eq("id", input.commentId);
+
+  if (error) return { ok: false, error: "Failed to update comment" };
+
+  revalidatePath(`/community/${input.postId}`);
+  return { ok: true };
+}
+
 export async function deleteComment(
   commentId: string,
   postId: string,
 ): Promise<ActionResult> {
-  await requireCapability("community.moderate");
+  const user = await getCurrentAppUser();
+  if (!user) return { ok: false, error: "Not authenticated" };
+
+  const caps = await getCurrentCapabilities();
+
+  // moderators can delete any comment; authors can delete their own
+  if (!caps.has("community.moderate")) {
+    const { data: comment } = await supabaseAdmin
+      .from("comment")
+      .select("author_id")
+      .eq("id", commentId)
+      .single();
+
+    if (!comment) return { ok: false, error: "Comment not found" };
+    if (comment.author_id !== user.id)
+      return { ok: false, error: "You can only delete your own comments" };
+  }
 
   const { error } = await supabaseAdmin
     .from("comment")
