@@ -11,6 +11,7 @@ import {
 import { getCurrentAppUser, getCurrentCapabilities } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { MemberAvatar } from "./directory/member-avatar";
+import { WelcomeBanner } from "./welcome-banner";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { timeAgo } from "@/lib/utils";
 
@@ -63,6 +64,19 @@ export default async function HomePage() {
     .order("created_at", { ascending: false })
     .limit(5);
 
+  // check if this is a first-time user who hasn't dismissed the welcome
+  const showWelcome = user && !user.onboarded_at;
+
+  let profileIncomplete = false;
+  if (showWelcome && user) {
+    const { data: profile } = await supabaseAdmin
+      .from("app_user")
+      .select("phone, lot_number")
+      .eq("id", user.id)
+      .single();
+    profileIncomplete = !profile?.phone && !profile?.lot_number;
+  }
+
   const allQuickLinks = [
     ...quickLinks,
     ...(caps.has("email.send")
@@ -79,14 +93,21 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold">
-          Welcome{user ? `, ${user.first_name}` : ""}
-        </h1>
-        <p className="text-muted-foreground">
-          North Secretary Island Community Portal
-        </p>
-      </div>
+      {showWelcome ? (
+        <WelcomeBanner
+          firstName={user.first_name}
+          showProfilePrompt={profileIncomplete}
+        />
+      ) : (
+        <div>
+          <h1 className="text-2xl font-semibold">
+            Welcome{user ? `, ${user.first_name}` : ""}
+          </h1>
+          <p className="text-muted-foreground">
+            North Secretary Island Community Portal
+          </p>
+        </div>
+      )}
 
       {/* Quick links */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

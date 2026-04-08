@@ -11,6 +11,7 @@ export type AppUser = {
   role_id: string | null;
   active: boolean;
   accepted_at: string | null;
+  onboarded_at: string | null;
 };
 
 /**
@@ -34,7 +35,7 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
   const { data: byClerk } = await supabaseAdmin
     .from("app_user")
     .select(
-      "id, clerk_id, email, first_name, last_name, role_id, active, accepted_at, avatar_url",
+      "id, clerk_id, email, first_name, last_name, role_id, active, accepted_at, onboarded_at, avatar_url",
     )
     .eq("clerk_id", clerkUser.id)
     .maybeSingle();
@@ -87,7 +88,7 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
   const { data: byEmail } = await supabaseAdmin
     .from("app_user")
     .select(
-      "id, clerk_id, email, first_name, last_name, role_id, active, accepted_at",
+      "id, clerk_id, email, first_name, last_name, role_id, active, accepted_at, onboarded_at",
     )
     .ilike("email", email)
     .maybeSingle();
