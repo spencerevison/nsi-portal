@@ -11,5 +11,7 @@
     "typescriptreact"
   ],
   "eslint.useFlatConfig": true,
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "css.lint.unknownAtRules": "ignore",
+  "css.validate": false
 }
