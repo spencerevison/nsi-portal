@@ -46,7 +46,7 @@ export default async function CommunityPage() {
                   : "hover:border-border/80"
               }
             >
-              <CardContent className="p-4">
+              <CardContent className="p-4 py-0">
                 <div className="flex items-start gap-3">
                   {post.pinned && (
                     <Pin className="mt-0.5 size-4 shrink-0 text-amber-500" />

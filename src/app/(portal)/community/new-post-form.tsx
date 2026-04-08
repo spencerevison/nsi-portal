@@ -41,7 +41,7 @@ export function NewPostForm() {
   }
 
   const header = (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
       <div>
         <h1 className="text-xl font-semibold">Message Board</h1>
         <p className="text-muted-foreground text-sm">
