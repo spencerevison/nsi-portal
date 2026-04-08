@@ -19,7 +19,7 @@ const iconMap: Record<string, LucideIcon> = {
   "/documents": FileText,
   "/directory": Users,
   "/community": MessageSquare,
-  "/email/compose": Mail,
+  "/email": Mail,
   "/admin": Shield,
 };
 
