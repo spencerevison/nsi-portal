@@ -36,7 +36,6 @@ function CommunitySkeleton() {
 export default function CommunityPage() {
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold">Message Board</h1>
       <Suspense fallback={<CommunitySkeleton />}>
         <CommunityLoader />
       </Suspense>

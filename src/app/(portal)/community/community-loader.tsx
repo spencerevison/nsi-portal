@@ -20,9 +20,12 @@ export async function CommunityLoader() {
     <>
       {canWrite && <NewPostForm />}
       {!canWrite && (
-        <p className="text-muted-foreground text-sm">
-          Announcements and discussions
-        </p>
+        <div>
+          <h1 className="text-xl font-semibold">Message Board</h1>
+          <p className="text-muted-foreground text-sm">
+            Announcements and discussions
+          </p>
+        </div>
       )}
 
       {posts.length === 0 && (
