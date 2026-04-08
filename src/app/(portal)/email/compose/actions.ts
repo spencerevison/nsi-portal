@@ -56,7 +56,13 @@ export async function sendGroupEmail(input: {
     return { ok: false, error: "Message too long (max 50,000 characters)" };
   }
 
-  const recipients = await resolveRecipients(input.groupSlugs);
+  // filter out test/invalid email domains that Resend will reject
+  const BLOCKED_DOMAINS = ["example.com", "example.org", "example.net"];
+  const allRecipients = await resolveRecipients(input.groupSlugs);
+  const recipients = allRecipients.filter((r) => {
+    const domain = r.email.split("@")[1]?.toLowerCase();
+    return domain && !BLOCKED_DOMAINS.includes(domain);
+  });
   if (recipients.length === 0) {
     return { ok: false, error: "No recipients in selected group(s)" };
   }
