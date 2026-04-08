@@ -86,7 +86,7 @@
 - [x] Home page dashboard (quick links, announcements, recent activity)
 - [x] Button icons on primary CTAs
 - [x] Members table: search + sort
-- [ ] First-login welcome experience
+- [x] First-login welcome experience
 - [ ] Accessibility pass
 - [ ] Bulk CSV import (deferred from Phase 2)
 - [x] Supabase upgrade to Pro
