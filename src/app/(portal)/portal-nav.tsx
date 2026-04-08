@@ -52,10 +52,9 @@ export function PortalNav({
         <NavLink key={link.href} {...link} pathname={pathname} />
       ))}
       {showAdmin && (
-        <>
-          <div className="bg-border mx-1 h-5 w-px" />
+        <div className="ml-auto">
           <NavLink href="/admin" label="Admin" pathname={pathname} />
-        </>
+        </div>
       )}
     </>
   );
