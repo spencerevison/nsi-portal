@@ -1,11 +1,11 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
-export type RoleOption = { id: string; name: string };
+export type RoleOption = { id: string; name: string; is_default: boolean };
 
 export async function listRoles(): Promise<RoleOption[]> {
   const { data, error } = await supabaseAdmin
     .from("role")
-    .select("id, name")
+    .select("id, name, is_default")
     .order("name");
   if (error) {
     console.error("listRoles failed", error);
