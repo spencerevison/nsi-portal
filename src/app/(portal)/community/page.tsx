@@ -36,9 +36,9 @@ export default async function CommunityPage() {
         </Card>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {posts.map((post) => (
-          <Link key={post.id} href={`/community/${post.id}`}>
+          <Link key={post.id} href={`/community/${post.id}`} className="block">
             <Card
               className={
                 post.pinned
