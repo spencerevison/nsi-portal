@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MemberAvatar } from "../../directory/member-avatar";
 import { CommentForm } from "./comment-form";
 import { CommentActions } from "./comment-actions";
+import clsx from "clsx";
 
 type Params = Promise<{ id: string }>;
 
@@ -35,7 +36,11 @@ export default async function PostPage({ params }: { params: Params }) {
       </Link>
 
       {/* Post — body before metadata */}
-      <Card className={post.pinned ? "border-amber-200 bg-amber-50/30" : ""}>
+      <Card
+        className={clsx("py-0!", {
+          "border-amber-200 bg-amber-50/30": post.pinned,
+        })}
+      >
         <CardContent className="p-5">
           <div className="flex items-start gap-2">
             {post.pinned && <Pin className="mt-1 size-4 text-amber-500" />}
