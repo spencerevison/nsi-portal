@@ -80,11 +80,15 @@ async function handleUserUpdated(data: WebhookEvent["data"] & { id: string }) {
   const hasImage = (data as any).has_image as boolean;
   const avatarUrl = hasImage ? ((data as any).image_url as string) : null;
 
+  // Only sync non-empty names — don't overwrite pre-seeded names with blanks
+  const firstName = (data as any).first_name as string | null;
+  const lastName = (data as any).last_name as string | null;
+
   const { error: updErr } = await supabaseAdmin
     .from("app_user")
     .update({
-      first_name: (data as any).first_name ?? undefined,
-      last_name: (data as any).last_name ?? undefined,
+      ...(firstName ? { first_name: firstName } : {}),
+      ...(lastName ? { last_name: lastName } : {}),
       ...(email ? { email } : {}),
       avatar_url: avatarUrl,
     })
@@ -166,15 +170,24 @@ async function handleUserCreated(data: WebhookEvent["data"] & { id: string }) {
   }
 
   // Push pre-seeded name to Clerk so the user's profile shows it
+  console.log("user.created name sync", {
+    clerkId,
+    supaFirst: existing.first_name,
+    supaLast: existing.last_name,
+  });
   if (existing.first_name || existing.last_name) {
     try {
       const clerk = await clerkClient();
-      await clerk.users.updateUser(clerkId, {
+      const updated = await clerk.users.updateUser(clerkId, {
         firstName: existing.first_name || "",
         lastName: existing.last_name || "",
       });
+      console.log("Clerk user updated", {
+        firstName: updated.firstName,
+        lastName: updated.lastName,
+      });
     } catch (err) {
-      console.warn("Failed to push name to Clerk", err);
+      console.error("Failed to push name to Clerk", err);
     }
   }
 
