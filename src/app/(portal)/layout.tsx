@@ -49,17 +49,17 @@ export default async function PortalLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-border bg-card sticky top-0 border-b">
-        <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-6 md:h-16">
+        <div className="flex h-12 items-center gap-4 px-6 md:h-16 lg:gap-8">
           <Link
             href="/"
-            className="hover:text-accent-400 text-accent-600 dark:text-cream-300 dark:hover:text-cream-100 flex items-center gap-2 text-xs font-semibold sm:text-lg"
+            className="hover:text-accent-400 text-accent-600 dark:text-cream-300 dark:hover:text-cream-100 flex shrink-0 items-center gap-2 text-xs font-semibold sm:text-lg"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo-nsi.svg" alt="NSI" className="size-9" />
             Community Portal
           </Link>
           {/* Desktop nav */}
-          <nav className="hidden h-full items-center gap-6 lg:flex">
+          <nav className="hidden h-full w-full items-center gap-6 lg:flex">
             <PortalNav extraLinks={extraLinks} showAdmin={hasAdmin} />
             <ThemeToggle />
             <UserMenu />
