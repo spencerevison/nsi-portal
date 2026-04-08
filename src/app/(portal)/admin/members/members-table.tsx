@@ -164,7 +164,9 @@ export function MembersTable({
                 return (
                   <TableRow key={m.id}>
                     <TableCell className="font-medium">
-                      {m.first_name} {m.last_name}
+                      {m.first_name || m.last_name
+                        ? `${m.first_name} ${m.last_name}`.trim()
+                        : m.email}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {m.email}
