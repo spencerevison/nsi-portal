@@ -1,22 +1,65 @@
-import { listMembers, listRoles } from "@/lib/members";
-import { AddMemberForm } from "./add-member-form";
-import { MembersTable } from "./members-table";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { MembersLoader } from "./members-loader";
 
-export default async function MembersPage() {
-  const [members, roles] = await Promise.all([listMembers(), listRoles()]);
-
+function MembersSkeleton() {
   return (
-    <div className="space-y-4">
+    <>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Members</h1>
-        <span className="text-muted-foreground text-sm">
-          {members.length} {members.length === 1 ? "member" : "members"}
-        </span>
+        <Skeleton className="h-5 w-20" />
       </div>
 
-      <AddMemberForm roles={roles} />
+      {/* search bar */}
+      <Skeleton className="h-9 w-full rounded-md" />
 
-      <MembersTable members={members} roles={roles} />
+      <Card className="p-0">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Lot</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-12" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-10" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-14 rounded-full" /></TableCell>
+                  <TableCell><Skeleton className="size-5 rounded" /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </>
+  );
+}
+
+export default function MembersPage() {
+  return (
+    <div className="space-y-4">
+      <Suspense fallback={<MembersSkeleton />}>
+        <MembersLoader />
+      </Suspense>
     </div>
   );
 }

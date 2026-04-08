@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { listGroups } from "@/lib/groups";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -9,22 +9,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CreateGroupForm } from "./create-group-form";
-import { GroupActions } from "./group-actions";
+import { GroupsLoader } from "./groups-loader";
 
-export default async function GroupsPage() {
-  const groups = await listGroups();
-
+function GroupsSkeleton() {
   return (
-    <div className="space-y-4">
+    <>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Groups</h1>
-        <span className="text-muted-foreground text-sm">
-          {groups.length} groups
-        </span>
+        <Skeleton className="h-5 w-16" />
       </div>
-
-      <CreateGroupForm />
 
       <Card className="p-0">
         <CardContent className="p-0">
@@ -34,45 +27,32 @@ export default async function GroupsPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Members</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead className="w-12"></TableHead>
+                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {groups.length === 0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="text-muted-foreground py-8 text-center"
-                  >
-                    No groups yet.
-                  </TableCell>
-                </TableRow>
-              )}
-              {groups.map((g) => (
-                <TableRow key={g.id}>
-                  <TableCell className="font-medium">
-                    <Link
-                      href={`/admin/groups/${g.id}`}
-                      className="hover:underline"
-                    >
-                      {g.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {g.member_count}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {g.description ?? "—"}
-                  </TableCell>
-                  <TableCell>
-                    <GroupActions group={g} />
-                  </TableCell>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                  <TableCell><Skeleton className="size-5 rounded" /></TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+    </>
+  );
+}
+
+export default function GroupsPage() {
+  return (
+    <div className="space-y-4">
+      <Suspense fallback={<GroupsSkeleton />}>
+        <GroupsLoader />
+      </Suspense>
     </div>
   );
 }
