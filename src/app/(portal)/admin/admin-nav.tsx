@@ -24,7 +24,7 @@ export function AdminNav() {
             className={cn(
               "-mb-px border-b-2 px-3 pb-2 text-sm transition-colors",
               active
-                ? "border-accent-600 text-accent-600 font-medium"
+                ? "border-accent-600 text-accent-600 dark:text-cream-100 dark:border-cream-100 font-medium"
                 : "text-muted-foreground hover:text-foreground border-transparent",
             )}
           >

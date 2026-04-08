@@ -33,7 +33,7 @@ export function PortalNav({
             className={cn(
               "text-sm transition-colors",
               active
-                ? "font-medium text-accent-600"
+                ? "font-medium text-accent-600 dark:text-cream-100"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
