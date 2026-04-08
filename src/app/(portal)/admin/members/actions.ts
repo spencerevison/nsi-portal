@@ -7,8 +7,8 @@ import { requireCapability } from "@/lib/current-user";
 
 export type InviteMemberInput = {
   email: string;
-  first_name: string;
-  last_name: string;
+  first_name?: string;
+  last_name?: string;
   lot_number?: string;
   role_id: string;
 };
@@ -26,9 +26,6 @@ export async function inviteMember(
   if (!email || !email.includes("@")) {
     return { ok: false, error: "Invalid email" };
   }
-  if (!input.first_name.trim() || !input.last_name.trim()) {
-    return { ok: false, error: "First and last name required" };
-  }
   if (!input.role_id) {
     return { ok: false, error: "Role required" };
   }
@@ -45,12 +42,14 @@ export async function inviteMember(
     return { ok: false, error: "A member with that email already exists" };
   }
 
+  // Name is optional here — Clerk collects it at sign-up, then
+  // getCurrentAppUser syncs it to Supabase on first login.
   const { data: inserted, error: insErr } = await supabaseAdmin
     .from("app_user")
     .insert({
       email,
-      first_name: input.first_name.trim(),
-      last_name: input.last_name.trim(),
+      first_name: input.first_name?.trim() || "",
+      last_name: input.last_name?.trim() || "",
       lot_number: input.lot_number?.trim() || null,
       role_id: input.role_id,
     })
