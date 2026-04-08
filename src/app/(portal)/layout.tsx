@@ -42,7 +42,7 @@ export default async function PortalLayout({
   ];
   const extraLinks: { href: string; label: string }[] = [];
   if (caps.has("email.send"))
-    extraLinks.push({ href: "/email/compose", label: "Email" });
+    extraLinks.push({ href: "/email", label: "Email" });
   const allLinks = [...baseLinks, ...extraLinks];
   const hasAdmin = caps.has("admin.access");
 

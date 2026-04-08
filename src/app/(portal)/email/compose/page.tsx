@@ -1,6 +1,4 @@
 import { Suspense } from "react";
-import { getCurrentCapabilities } from "@/lib/current-user";
-import { notFound } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { ComposeLoader } from "./compose-loader";
@@ -37,10 +35,7 @@ function ComposeSkeleton() {
   );
 }
 
-export default async function ComposePage() {
-  const caps = await getCurrentCapabilities();
-  if (!caps.has("email.send")) notFound();
-
+export default function ComposePage() {
   return (
     <div className="space-y-4">
       <div>

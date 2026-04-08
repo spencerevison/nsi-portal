@@ -1,10 +1,6 @@
 import { Suspense } from "react";
-import Link from "next/link";
-import { getCurrentCapabilities } from "@/lib/current-user";
-import { notFound } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -46,18 +42,10 @@ function HistorySkeleton() {
   );
 }
 
-export default async function EmailHistoryPage() {
-  const caps = await getCurrentCapabilities();
-  if (!caps.has("email.send")) notFound();
-
+export default function EmailHistoryPage() {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Email History</h1>
-        <Link href="/email/compose">
-          <Button variant="outline">Compose</Button>
-        </Link>
-      </div>
+      <h1 className="text-xl font-semibold">Email History</h1>
 
       <Suspense fallback={<HistorySkeleton />}>
         <HistoryLoader />
