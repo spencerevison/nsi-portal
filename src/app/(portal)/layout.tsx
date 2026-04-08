@@ -55,7 +55,7 @@ export default async function PortalLayout({
             className="hover:text-accent-400 text-accent-600 dark:text-cream-300 dark:hover:text-cream-100 flex shrink-0 items-center gap-2 text-xs font-semibold sm:text-lg"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-nsi.svg" alt="NSI" className="size-9" />
+            <img src="/logo-nsi.svg" alt="NSI" className="size-12" />
             <span className="xs:inline hidden">Community Portal</span>
           </Link>
           {/* Desktop nav */}
