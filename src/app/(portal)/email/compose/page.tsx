@@ -1,22 +1,45 @@
-import { listGroups } from "@/lib/groups";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { Suspense } from "react";
 import { getCurrentCapabilities } from "@/lib/current-user";
 import { notFound } from "next/navigation";
-import { ComposeForm } from "./compose-form";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { ComposeLoader } from "./compose-loader";
+
+function ComposeSkeleton() {
+  return (
+    <Card>
+      <CardContent className="space-y-4 p-6">
+        {/* Recipients */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-20" />
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-8 w-24 rounded-md" />
+            ))}
+          </div>
+        </div>
+
+        {/* Subject */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-9 w-full rounded-md" />
+        </div>
+
+        {/* Body */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-40 w-full rounded-md" />
+        </div>
+
+        <Skeleton className="h-9 w-28 rounded-md" />
+      </CardContent>
+    </Card>
+  );
+}
 
 export default async function ComposePage() {
   const caps = await getCurrentCapabilities();
   if (!caps.has("email.send")) notFound();
-
-  const [groups, { count }] = await Promise.all([
-    listGroups(),
-    supabaseAdmin
-      .from("app_user")
-      .select("id", { count: "exact", head: true })
-      .eq("active", true)
-      .not("accepted_at", "is", null)
-      .not("email", "ilike", "%+clerk_test%"),
-  ]);
 
   return (
     <div className="space-y-4">
@@ -27,7 +50,9 @@ export default async function ComposePage() {
         </p>
       </div>
 
-      <ComposeForm groups={groups} totalMembers={count ?? 0} />
+      <Suspense fallback={<ComposeSkeleton />}>
+        <ComposeLoader />
+      </Suspense>
     </div>
   );
 }
