@@ -53,7 +53,7 @@ export default async function PortalLayout({
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-2">
           <Link
             href="/"
-            className="text-accent-600 dark:text-cream-300 flex items-center gap-2 font-semibold"
+            className="text-accent-600 dark:text-cream-300 flex items-center gap-2 text-xs font-semibold sm:text-lg"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo-nsi.svg" alt="NSI" className="size-9" />
