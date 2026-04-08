@@ -38,6 +38,15 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* accent color ramp — light mode (dark green) */
+  --accent-50: #E7EEEA;
+  --accent-100: #BBCFC4;
+  --accent-200: #7FA898;
+  --accent-400: #3D6E5E;
+  --accent-600: #22444E;
+  --accent-800: #162D34;
+  --accent-900: #0C1B1F;
 }
 
 @theme inline {
@@ -83,14 +92,27 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* accent color ramp — dark green + cream */
-  --color-accent-50: #E7EEEA;
-  --color-accent-100: #BBCFC4;
-  --color-accent-200: #7FA898;
-  --color-accent-400: #3D6E5E;
-  --color-accent-600: #22444E;
-  --color-accent-800: #162D34;
-  --color-accent-900: #0C1B1F;
+  /* accent ramp — uses var() so .dark overrides work at runtime */
+  --color-accent-50: var(--accent-50);
+  --color-accent-100: var(--accent-100);
+  --color-accent-200: var(--accent-200);
+  --color-accent-400: var(--accent-400);
+  --color-accent-600: var(--accent-600);
+  --color-accent-800: var(--accent-800);
+  --color-accent-900: var(--accent-900);
+
+  /* cream ramp — warm tan/ivory */
+  --color-cream-50: #fefdfb;
+  --color-cream-100: #fbf8f2;
+  --color-cream-200: #f5efe3;
+  --color-cream-300: #ede4d1;
+  --color-cream-400: #e0d3b8;
+  --color-cream-500: #cebf9e;
+  --color-cream-600: #b5a57e;
+  --color-cream-700: #96865f;
+  --color-cream-800: #6e6245;
+  --color-cream-900: #4a422f;
+  --color-cream-950: #2a2519;
 }
 
 .dark {
@@ -128,13 +150,13 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   /* inverted accent ramp for dark backgrounds */
-  --color-accent-50: #0C1B1F;
-  --color-accent-100: #162D34;
-  --color-accent-200: #22444E;
-  --color-accent-400: #3D6E5E;
-  --color-accent-600: #7FA898;
-  --color-accent-800: #BBCFC4;
-  --color-accent-900: #E7EEEA;
+  --accent-50: #0C1B1F;
+  --accent-100: #162D34;
+  --accent-200: #22444E;
+  --accent-400: #3D6E5E;
+  --accent-600: #7FA898;
+  --accent-800: #BBCFC4;
+  --accent-900: #E7EEEA;
 }
 
 @layer base {
