@@ -76,6 +76,7 @@ export async function sendGroupEmail(input: {
   try {
     const emails = recipients.map((r) => ({
       from: fromAddress,
+      replyTo: user.email,
       to: r.email,
       subject: input.subject.trim(),
       html: `
@@ -92,11 +93,25 @@ export async function sendGroupEmail(input: {
     }));
 
     const result = await resend.batch.send(emails);
+
+    // Resend SDK returns errors in result.error instead of throwing
+    if (result.error) {
+      console.error("resend batch error", result.error);
+      return {
+        ok: false,
+        error:
+          "Something went wrong sending your email. Please try again or contact an adminstrator.",
+      };
+    }
+
     emailIds =
       result.data?.data?.map((d: { id: string }) => d.id).filter(Boolean) ?? [];
   } catch (err) {
     console.error("resend send failed", err);
-    return { ok: false, error: "Failed to send emails" };
+    return {
+      ok: false,
+      error: "Something went wrong sending your email. Please try again.",
+    };
   }
 
   // log it — store all email IDs so webhook can match any of them
