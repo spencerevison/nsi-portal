@@ -56,16 +56,16 @@ export default async function PortalLayout({
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo-nsi.svg" alt="NSI" className="size-9" />
-            Community Portal
+            <span className="xs:inline hidden">Community Portal</span>
           </Link>
           {/* Desktop nav */}
           <nav className="hidden h-full w-full items-center gap-6 lg:flex">
             <PortalNav extraLinks={extraLinks} showAdmin={hasAdmin} />
-            <ThemeToggle />
+            <ThemeToggle className="ml-auto" />
             <UserMenu />
           </nav>
           {/* Mobile nav */}
-          <div className="flex items-center gap-4 lg:hidden">
+          <div className="ml-auto flex items-center gap-4 lg:hidden">
             <ThemeToggle />
             <UserMenu />
             <MobileNav links={allLinks} />

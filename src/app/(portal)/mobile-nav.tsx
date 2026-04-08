@@ -35,7 +35,7 @@ export function MobileNav({
     <div className="lg:hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-md p-2"
+        className="text-muted-foreground hover:bg-muted hover:text-foreground -mr-2 rounded-md p-2"
         aria-label="Toggle menu"
       >
         {open ? <X className="size-5" /> : <Menu className="size-5" />}

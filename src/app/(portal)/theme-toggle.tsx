@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Monitor } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const modes = [
   { value: "light", icon: Sun, label: "Light" },
@@ -15,7 +16,7 @@ const subscribe = () => () => {};
 const getSnapshot = () => true;
 const getServerSnapshot = () => false;
 
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
   const mounted = useSyncExternalStore(
     subscribe,
@@ -31,7 +32,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(next.value)}
-      className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-md p-1.5 transition-colors"
+      className={cn("text-muted-foreground hover:bg-muted hover:text-foreground rounded-md p-1.5 transition-colors", className)}
       title={`Theme: ${current.label}. Click for ${next.label}`}
     >
       <current.icon className="size-4" />

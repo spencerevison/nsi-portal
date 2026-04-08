@@ -101,6 +101,8 @@
   --color-accent-800: var(--accent-800);
   --color-accent-900: var(--accent-900);
 
+  --breakpoint-xs: 380px;
+
   /* cream ramp — warm tan/ivory */
   --color-cream-50: #fefdfb;
   --color-cream-100: #fbf8f2;

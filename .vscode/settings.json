@@ -13,5 +13,15 @@
   "eslint.useFlatConfig": true,
   "typescript.tsdk": "node_modules/typescript/lib",
   "css.lint.unknownAtRules": "ignore",
-  "css.validate": false
+  "css.validate": false,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/.claude": true,
+    "**/CLAUDE.md": true
+  },
+  "explorerExclude.backup": {}
 }
