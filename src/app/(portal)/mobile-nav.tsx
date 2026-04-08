@@ -35,14 +35,14 @@ export function MobileNav({
     <div className="md:hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-md p-2"
         aria-label="Toggle menu"
       >
         {open ? <X className="size-5" /> : <Menu className="size-5" />}
       </button>
 
       {open && (
-        <div className="absolute left-0 right-0 top-full z-50 border-b border-border bg-card px-6 py-3 shadow-sm">
+        <div className="border-border bg-card absolute top-full right-0 left-0 z-50 border-b px-6 py-3 shadow-sm">
           <div className="flex flex-col gap-1">
             {links.map((link) => {
               const active =
@@ -58,7 +58,7 @@ export function MobileNav({
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                     active
-                      ? "bg-accent-50 font-medium text-accent-800"
+                      ? "bg-accent-50 text-accent-800 font-medium"
                       : "text-muted-foreground hover:bg-muted",
                   )}
                 >

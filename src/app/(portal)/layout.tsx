@@ -43,14 +43,13 @@ export default async function PortalLayout({
   const extraLinks: { href: string; label: string }[] = [];
   if (caps.has("email.send"))
     extraLinks.push({ href: "/email/compose", label: "Email" });
-  if (caps.has("admin.access"))
-    extraLinks.push({ href: "/admin", label: "Admin" });
   const allLinks = [...baseLinks, ...extraLinks];
+  const hasAdmin = caps.has("admin.access");
 
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-border bg-card relative border-b">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-2">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6">
           <Link
             href="/"
             className="text-accent-600 dark:text-cream-300 flex items-center gap-2 text-xs font-semibold sm:text-lg"
@@ -60,8 +59,8 @@ export default async function PortalLayout({
             Community Portal
           </Link>
           {/* Desktop nav */}
-          <nav className="hidden items-center gap-6 md:flex">
-            <PortalNav extraLinks={extraLinks} />
+          <nav className="hidden h-16 items-center gap-6 md:flex">
+            <PortalNav extraLinks={extraLinks} showAdmin={hasAdmin} />
             <ThemeToggle />
             <UserMenu />
           </nav>

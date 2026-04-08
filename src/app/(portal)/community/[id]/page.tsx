@@ -28,7 +28,7 @@ export default async function PostPage({ params }: { params: Params }) {
     <div className="space-y-6">
       <Link
         href="/community"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
       >
         <ArrowLeft className="size-4" />
         Back to Message Board
@@ -41,8 +41,8 @@ export default async function PostPage({ params }: { params: Params }) {
             {post.pinned && <Pin className="mt-1 size-4 text-amber-500" />}
             <h1 className="text-lg font-semibold">{post.title}</h1>
           </div>
-          <div className="mt-4 whitespace-pre-wrap text-sm">{post.body}</div>
-          <div className="mt-4 flex items-center gap-3 border-t border-border pt-4 text-xs text-muted-foreground">
+          <div className="mt-4 text-sm whitespace-pre-wrap">{post.body}</div>
+          <div className="border-border text-muted-foreground mt-4 flex items-center gap-3 border-t pt-4 text-xs">
             <span className="flex items-center gap-1.5">
               <MemberAvatar
                 member={{
@@ -64,12 +64,12 @@ export default async function PostPage({ params }: { params: Params }) {
 
       {/* Comments — flat list with dividers, not individual cards */}
       <div>
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground">
+        <h2 className="text-muted-foreground mb-3 text-sm font-medium">
           {comments.length} {comments.length === 1 ? "comment" : "comments"}
         </h2>
 
         {comments.length > 0 && (
-          <div className="divide-y divide-border">
+          <div className="divide-border divide-y">
             {comments.map((comment) => (
               <div key={comment.id} className="py-4 first:pt-0">
                 <div className="flex items-start justify-between">
@@ -77,8 +77,10 @@ export default async function PostPage({ params }: { params: Params }) {
                     <MemberAvatar
                       member={{
                         first_name: comment.author_name.split(" ")[0] ?? "",
-                        last_name:
-                          comment.author_name.split(" ").slice(1).join(" "),
+                        last_name: comment.author_name
+                          .split(" ")
+                          .slice(1)
+                          .join(" "),
                         avatar_url: comment.author_avatar,
                       }}
                       size="sm"
@@ -89,10 +91,7 @@ export default async function PostPage({ params }: { params: Params }) {
                     </span>
                   </div>
                   {canModerate && (
-                    <CommentActions
-                      commentId={comment.id}
-                      postId={post.id}
-                    />
+                    <CommentActions commentId={comment.id} postId={post.id} />
                   )}
                 </div>
                 <p className="mt-1.5 pl-8 text-sm whitespace-pre-wrap">

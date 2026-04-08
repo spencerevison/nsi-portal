@@ -3,14 +3,20 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 // all capabilities in the system
 export const ALL_CAPABILITIES = [
   { key: "documents.read", label: "Browse and download documents" },
-  { key: "documents.write", label: "Upload, rename, delete documents and folders" },
+  {
+    key: "documents.write",
+    label: "Upload, rename, delete documents and folders",
+  },
   { key: "directory.read", label: "View member directory" },
   { key: "email.send", label: "Compose and send group emails" },
   { key: "community.read", label: "View message board" },
   { key: "community.write", label: "Create posts and comments" },
   { key: "community.moderate", label: "Pin/unpin, delete others' posts" },
   { key: "admin.access", label: "Access the admin section" },
-  { key: "groups.manage", label: "Create/edit/delete groups, manage membership" },
+  {
+    key: "groups.manage",
+    label: "Create/edit/delete groups, manage membership",
+  },
   { key: "roles.manage", label: "Create/edit roles, assign capabilities" },
 ] as const;
 
@@ -23,7 +29,9 @@ export type RoleWithCapabilities = {
   member_count: number;
 };
 
-export async function listRolesWithCapabilities(): Promise<RoleWithCapabilities[]> {
+export async function listRolesWithCapabilities(): Promise<
+  RoleWithCapabilities[]
+> {
   const { data: roles, error } = await supabaseAdmin
     .from("role")
     .select("id, name, description, is_default")

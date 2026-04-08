@@ -16,9 +16,9 @@ export default async function SignUpPage({
 
   if (!ticket) {
     return (
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
+      <div className="border-border bg-card w-full max-w-md rounded-lg border p-8 shadow-sm">
         <h1 className="mb-2 text-xl font-semibold">Invitation required</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           The NSI portal is members-only. If you&rsquo;re a community member and
           haven&rsquo;t received an invitation, contact the administrator.
         </p>

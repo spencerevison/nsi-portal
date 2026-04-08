@@ -38,12 +38,14 @@ export function RoleActions({ role }: { role: RoleWithCapabilities }) {
       <DropdownMenu>
         <DropdownMenuTrigger
           disabled={pending}
-          className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex size-8 items-center justify-center rounded-lg"
         >
           <MoreVertical className="size-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => router.push(`/admin/roles/${role.id}`)}>
+          <DropdownMenuItem
+            onClick={() => router.push(`/admin/roles/${role.id}`)}
+          >
             Edit capabilities
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
@@ -83,7 +85,11 @@ export function RoleActions({ role }: { role: RoleWithCapabilities }) {
               <Input value={desc} onChange={(e) => setDesc(e.target.value)} />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditOpen(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={pending}>
@@ -103,9 +109,15 @@ export function RoleActions({ role }: { role: RoleWithCapabilities }) {
               will need to be reassigned first.
             </DialogDescription>
           </DialogHeader>
-          {error && <p className="text-sm text-destructive px-6">{error}</p>}
+          {error && <p className="text-destructive px-6 text-sm">{error}</p>}
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setDeleteOpen(false); setError(null); }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteOpen(false);
+                setError(null);
+              }}
+            >
               Cancel
             </Button>
             <Button

@@ -75,15 +75,9 @@ export async function deleteRole(roleId: string): Promise<ActionResult> {
   }
 
   // delete capabilities first (cascade should handle this, but be explicit)
-  await supabaseAdmin
-    .from("role_capability")
-    .delete()
-    .eq("role_id", roleId);
+  await supabaseAdmin.from("role_capability").delete().eq("role_id", roleId);
 
-  const { error } = await supabaseAdmin
-    .from("role")
-    .delete()
-    .eq("id", roleId);
+  const { error } = await supabaseAdmin.from("role").delete().eq("id", roleId);
 
   if (error) {
     console.error("deleteRole failed", error);

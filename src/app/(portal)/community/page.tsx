@@ -61,7 +61,10 @@ export default async function CommunityPage() {
                         <MemberAvatar
                           member={{
                             first_name: post.author_name.split(" ")[0] ?? "",
-                            last_name: post.author_name.split(" ").slice(1).join(" "),
+                            last_name: post.author_name
+                              .split(" ")
+                              .slice(1)
+                              .join(" "),
                             avatar_url: post.author_avatar,
                           }}
                           size="sm"

@@ -71,7 +71,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
             Name and email are managed in your{" "}
             <button
               type="button"
-              className="text-accent-600 underline underline-offset-2 hover:text-accent-800"
+              className="text-accent-600 hover:text-accent-800 underline underline-offset-2"
               onClick={() => openUserProfile()}
             >
               Account Settings

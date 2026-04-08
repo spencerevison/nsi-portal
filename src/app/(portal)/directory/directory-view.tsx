@@ -75,9 +75,19 @@ export function DirectoryView({
     const dir = sortDir === "asc" ? 1 : -1;
     switch (sortKey) {
       case "name":
-        return dir * (`${a.last_name} ${a.first_name}`).localeCompare(`${b.last_name} ${b.first_name}`);
+        return (
+          dir *
+          `${a.last_name} ${a.first_name}`.localeCompare(
+            `${b.last_name} ${b.first_name}`,
+          )
+        );
       case "lot":
-        return dir * (a.lot_number ?? "").localeCompare(b.lot_number ?? "", undefined, { numeric: true });
+        return (
+          dir *
+          (a.lot_number ?? "").localeCompare(b.lot_number ?? "", undefined, {
+            numeric: true,
+          })
+        );
       case "phone":
         return dir * (a.phone ?? "").localeCompare(b.phone ?? "");
       case "email":
@@ -109,16 +119,28 @@ export function DirectoryView({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className={thClass} onClick={() => toggleSort("name")}>
+                  <TableHead
+                    className={thClass}
+                    onClick={() => toggleSort("name")}
+                  >
                     Name{sortIndicator("name")}
                   </TableHead>
-                  <TableHead className={`w-16 ${thClass}`} onClick={() => toggleSort("lot")}>
+                  <TableHead
+                    className={`w-16 ${thClass}`}
+                    onClick={() => toggleSort("lot")}
+                  >
                     Lot{sortIndicator("lot")}
                   </TableHead>
-                  <TableHead className={thClass} onClick={() => toggleSort("phone")}>
+                  <TableHead
+                    className={thClass}
+                    onClick={() => toggleSort("phone")}
+                  >
                     Phone{sortIndicator("phone")}
                   </TableHead>
-                  <TableHead className={thClass} onClick={() => toggleSort("email")}>
+                  <TableHead
+                    className={thClass}
+                    onClick={() => toggleSort("email")}
+                  >
                     Email{sortIndicator("email")}
                   </TableHead>
                   {customFields.map((f) => (
@@ -141,7 +163,7 @@ export function DirectoryView({
                 )}
                 {sorted.map((m) => (
                   <TableRow key={m.id}>
-                    <TableCell className="whitespace-nowrap font-medium">
+                    <TableCell className="font-medium whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <MemberAvatar member={m} size="sm" />
                         {m.first_name} {m.last_name}
@@ -157,10 +179,7 @@ export function DirectoryView({
                       {m.email}
                     </TableCell>
                     {customFields.map((f) => (
-                      <TableCell
-                        key={f.id}
-                        className="text-muted-foreground"
-                      >
+                      <TableCell key={f.id} className="text-muted-foreground">
                         {formatFieldValue(
                           m.custom_fields[f.id]?.value ?? null,
                           f.name,
