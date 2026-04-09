@@ -71,14 +71,18 @@ export async function renameFolder(
 export async function deleteFolder(folderId: string): Promise<ActionResult> {
   await requireCapability("documents.write");
 
-  // collect all folder IDs in the subtree (this folder + children)
+  // collect all folder IDs in the subtree (recursive)
   const folderIds = [folderId];
-  const { data: children } = await supabaseAdmin
-    .from("folder")
-    .select("id")
-    .eq("parent_id", folderId);
-  if (children) {
-    folderIds.push(...children.map((c) => c.id));
+  let frontier = [folderId];
+  while (frontier.length > 0) {
+    const { data: children } = await supabaseAdmin
+      .from("folder")
+      .select("id")
+      .in("parent_id", frontier);
+    if (!children || children.length === 0) break;
+    const childIds = children.map((c) => c.id);
+    folderIds.push(...childIds);
+    frontier = childIds;
   }
 
   // get ALL document storage paths across the entire subtree
@@ -139,7 +143,7 @@ export async function uploadDocument(
     "image/webp",
     "text/plain",
   ];
-  if (file.type && !ALLOWED_TYPES.includes(file.type)) {
+  if (!file.type || !ALLOWED_TYPES.includes(file.type)) {
     return { ok: false, error: "File type not allowed" };
   }
 
