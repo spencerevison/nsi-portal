@@ -57,7 +57,10 @@ export function MemberActions({
   const canRevoke = member.status === "Invited";
   const canDeactivate = member.status === "Active";
   const canReactivate = member.status === "Inactive";
-  const canDelete = member.status === "Inactive";
+  const canDelete =
+    member.status === "Inactive" ||
+    member.status === "Revoked" ||
+    member.status === "Draft";
 
   return (
     <>

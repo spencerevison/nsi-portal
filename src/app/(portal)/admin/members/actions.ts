@@ -348,12 +348,16 @@ export async function deleteMember(userId: string): Promise<ActionResult> {
 
   const { data: user, error: fetchErr } = await supabaseAdmin
     .from("app_user")
-    .select("id, active, clerk_id")
+    .select("id, active, clerk_id, accepted_at, revoked_at")
     .eq("id", userId)
     .single();
 
   if (fetchErr || !user) return { ok: false, error: "Member not found" };
-  if (user.active)
+  // allow delete for: inactive, revoked (never accepted), and draft (never invited)
+  const neverAccepted = !user.accepted_at;
+  const isRevoked = !!user.revoked_at && neverAccepted;
+  const isDraft = neverAccepted && !user.revoked_at;
+  if (user.active && !isRevoked && !isDraft)
     return { ok: false, error: "Deactivate the member before deleting" };
 
   // remove from Clerk if linked
