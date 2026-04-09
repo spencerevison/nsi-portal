@@ -2,6 +2,7 @@ import { Webhook } from "svix";
 import type { WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { sendWelcomeEmail } from "@/lib/notifications";
 
 // Clerk → app_user link.
 // Svix verifies the signature, then we match by email and write clerk_id.
@@ -121,7 +122,7 @@ async function handleUserCreated(data: WebhookEvent["data"] & { id: string }) {
   // we reject rather than auto-creating, to keep membership gated.
   const { data: existing, error: selErr } = await supabaseAdmin
     .from("app_user")
-    .select("id, clerk_id")
+    .select("id, clerk_id, first_name")
     .ilike("email", email)
     .maybeSingle();
 
@@ -167,6 +168,10 @@ async function handleUserCreated(data: WebhookEvent["data"] & { id: string }) {
     console.error("app_user link update failed", updErr);
     return new Response("DB error", { status: 500 });
   }
+
+  // Send welcome email (non-fatal)
+  const firstName = existing.first_name || "there";
+  await sendWelcomeEmail({ email, firstName });
 
   return new Response(null, { status: 204 });
 }
