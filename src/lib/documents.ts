@@ -67,35 +67,47 @@ export function buildFolderTree(folders: FolderRow[]): FolderRow[] {
   return roots;
 }
 
-export async function getFolderBySlug(
-  slug: string,
-  parentSlug?: string,
-): Promise<FolderRow | null> {
-  let query = supabaseAdmin
-    .from("folder")
-    .select("id, name, slug, parent_id, sort_order");
+// Walk a slug path like ["strata-documents", "bylaws", "2024"] to find the
+// deepest folder, returning it along with the ancestor chain for breadcrumbs.
+export async function getFolderBySlugPath(slugSegments: string[]): Promise<{
+  folder: FolderRow;
+  ancestors: { id: string; name: string; slug: string }[];
+} | null> {
+  if (slugSegments.length === 0) return null;
 
-  if (parentSlug) {
-    // subfolder: look up parent first
-    const { data: parent } = await supabaseAdmin
+  const ancestors: { id: string; name: string; slug: string }[] = [];
+  let parentId: string | null = null;
+
+  for (let i = 0; i < slugSegments.length; i++) {
+    let query = supabaseAdmin
       .from("folder")
-      .select("id")
-      .eq("slug", parentSlug)
-      .is("parent_id", null)
-      .maybeSingle();
+      .select("id, name, slug, parent_id, sort_order")
+      .eq("slug", slugSegments[i]);
 
-    if (!parent) return null;
-    query = query.eq("slug", slug).eq("parent_id", parent.id);
-  } else {
-    query = query.eq("slug", slug).is("parent_id", null);
+    if (parentId) {
+      query = query.eq("parent_id", parentId);
+    } else {
+      query = query.is("parent_id", null);
+    }
+
+    const { data, error } = await query.maybeSingle();
+    if (error) {
+      console.error("getFolderBySlugPath failed", error);
+      return null;
+    }
+    if (!data) return null;
+
+    // last segment is the target folder, everything before is an ancestor
+    if (i < slugSegments.length - 1) {
+      ancestors.push({ id: data.id, name: data.name, slug: data.slug });
+    } else {
+      return { folder: data, ancestors };
+    }
+
+    parentId = data.id;
   }
 
-  const { data, error } = await query.maybeSingle();
-  if (error) {
-    console.error("getFolderBySlug failed", error);
-    return null;
-  }
-  return data;
+  return null;
 }
 
 export async function listDocuments(folderId: string): Promise<DocumentRow[]> {

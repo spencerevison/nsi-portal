@@ -1,6 +1,7 @@
+import { Fragment } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getFolderBySlug, listDocuments } from "@/lib/documents";
+import { getFolderBySlugPath, listDocuments } from "@/lib/documents";
 import { getCurrentCapabilities } from "@/lib/current-user";
 import { FileRow } from "./file-row";
 import { UploadZone, UploadButton } from "./upload-zone";
@@ -9,11 +10,10 @@ type Params = Promise<{ slug: string[] }>;
 
 export default async function FolderPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const parentSlug = slug.length > 1 ? slug[0] : undefined;
-  const folderSlug = slug[slug.length - 1];
 
-  const folder = await getFolderBySlug(folderSlug, parentSlug);
-  if (!folder) notFound();
+  const result = await getFolderBySlugPath(slug);
+  if (!result) notFound();
+  const { folder, ancestors } = result;
 
   const [docs, caps] = await Promise.all([
     listDocuments(folder.id),
@@ -27,16 +27,26 @@ export default async function FolderPage({ params }: { params: Params }) {
       {/* Header */}
       <div className="border-border flex items-center justify-between border-b px-4 py-3">
         <div>
-          <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+          <div className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-xs">
             <Link href="/documents" className="hover:text-foreground">
               Documents
             </Link>
-            {parentSlug && (
-              <>
-                <span>/</span>
-                <span>{parentSlug}</span>
-              </>
-            )}
+            {ancestors.map((a, i) => {
+              const href =
+                "/documents/" +
+                ancestors
+                  .slice(0, i + 1)
+                  .map((x) => x.slug)
+                  .join("/");
+              return (
+                <Fragment key={a.id}>
+                  <span>/</span>
+                  <Link href={href} className="hover:text-foreground">
+                    {a.name}
+                  </Link>
+                </Fragment>
+              );
+            })}
             <span>/</span>
           </div>
           <h2 className="font-semibold">{folder.name}</h2>
