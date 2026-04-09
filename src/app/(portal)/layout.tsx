@@ -43,8 +43,12 @@ export default async function PortalLayout({
   const extraLinks: { href: string; label: string }[] = [];
   if (caps.has("email.send"))
     extraLinks.push({ href: "/email", label: "Email" });
-  const allLinks = [...baseLinks, ...extraLinks];
   const hasAdmin = caps.has("admin.access");
+  const allLinks = [
+    ...baseLinks,
+    ...extraLinks,
+    ...(hasAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+  ];
 
   return (
     <div className="flex min-h-screen flex-col">
