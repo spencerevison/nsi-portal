@@ -42,8 +42,8 @@ export function MobileNav({
       </button>
 
       {open && (
-        <div className="border-border bg-card absolute top-full right-0 left-0 z-50 border-b px-6 py-3 shadow-sm">
-          <div className="flex flex-col gap-1">
+        <nav aria-label="Mobile navigation" className="border-border bg-card absolute top-full right-0 left-0 z-50 border-b px-6 py-3 shadow-sm">
+          <ul className="flex flex-col gap-1">
             {links.map((link) => {
               const active =
                 link.href === "/"
@@ -51,24 +51,25 @@ export function MobileNav({
                   : pathname.startsWith(link.href);
               const Icon = iconMap[link.href];
               return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                    active
-                      ? "bg-accent-50 text-accent-800 font-medium"
-                      : "text-muted-foreground hover:bg-muted",
-                  )}
-                >
-                  {Icon && <Icon className="size-4" />}
-                  {link.label}
-                </Link>
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                      active
+                        ? "bg-accent-50 text-accent-800 font-medium"
+                        : "text-muted-foreground hover:bg-muted",
+                    )}
+                  >
+                    {Icon && <Icon aria-hidden="true" className="size-4" />}
+                    {link.label}
+                  </Link>
+                </li>
               );
             })}
-          </div>
-        </div>
+          </ul>
+        </nav>
       )}
     </div>
   );

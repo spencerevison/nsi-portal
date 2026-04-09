@@ -18,7 +18,12 @@ export async function CommunityLoader() {
 
   return (
     <>
-      {canWrite && <NewPostForm />}
+      {canWrite && (
+        <>
+          <h1 className="sr-only">Message Board</h1>
+          <NewPostForm />
+        </>
+      )}
       {!canWrite && (
         <div>
           <h1 className="text-xl font-semibold">Message Board</h1>
@@ -49,7 +54,7 @@ export async function CommunityLoader() {
               <CardContent className="p-4 py-0">
                 <div className="flex items-start gap-3">
                   {post.pinned && (
-                    <Pin className="mt-0.5 size-4 shrink-0 text-amber-500" />
+                    <Pin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber-500" />
                   )}
                   <div className="min-w-0 flex-1">
                     <h2 className="text-sm font-semibold">{post.title}</h2>
@@ -72,11 +77,11 @@ export async function CommunityLoader() {
                         {post.author_name}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Clock className="size-3" />
+                        <Clock aria-hidden="true" className="size-3" />
                         {timeAgo(post.created_at)}
                       </span>
                       <span className="flex items-center gap-1">
-                        <MessageCircle className="size-3" />
+                        <MessageCircle aria-hidden="true" className="size-3" />
                         {post.comment_count}
                       </span>
                     </div>
