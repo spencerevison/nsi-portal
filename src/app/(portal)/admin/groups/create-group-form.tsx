@@ -37,7 +37,7 @@ export function CreateGroupForm() {
     return (
       <Button onClick={() => setOpen(true)}>
         <Plus className="size-4" />
-        Create group
+        Create email group
       </Button>
     );
   }
