@@ -148,7 +148,8 @@ export async function editComment(input: {
   const user = await getCurrentAppUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
-  if (!input.body.trim()) return { ok: false, error: "Comment cannot be empty" };
+  if (!input.body.trim())
+    return { ok: false, error: "Comment cannot be empty" };
   if (input.body.length > 5000)
     return { ok: false, error: "Comment too long (max 5,000 characters)" };
 

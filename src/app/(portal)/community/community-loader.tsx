@@ -54,7 +54,10 @@ export async function CommunityLoader() {
               <CardContent className="p-4 py-0">
                 <div className="flex items-start gap-3">
                   {post.pinned && (
-                    <Pin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber-500" />
+                    <Pin
+                      aria-hidden="true"
+                      className="mt-0.5 size-4 shrink-0 text-amber-500"
+                    />
                   )}
                   <div className="min-w-0 flex-1">
                     <h2 className="text-sm font-semibold">{post.title}</h2>

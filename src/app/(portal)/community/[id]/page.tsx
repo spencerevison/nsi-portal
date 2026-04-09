@@ -97,8 +97,7 @@ export default async function PostPage({ params }: { params: Params }) {
                       {timeAgo(comment.created_at)}
                     </span>
                   </div>
-                  {(canModerate ||
-                    comment.author_id === currentUserId) && (
+                  {(canModerate || comment.author_id === currentUserId) && (
                     <CommentActions
                       commentId={comment.id}
                       postId={post.id}

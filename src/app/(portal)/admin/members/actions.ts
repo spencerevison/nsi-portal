@@ -185,7 +185,10 @@ export async function getAdminMemberCustomFields(userId: string) {
     .eq("user_id", userId);
 
   const valueMap = new Map(
-    (values ?? []).map((v) => [v.field_id, { value: v.value, visible: v.visible }]),
+    (values ?? []).map((v) => [
+      v.field_id,
+      { value: v.value, visible: v.visible },
+    ]),
   );
 
   return (fields ?? []).map((f) => ({
