@@ -167,6 +167,63 @@ export async function updateMember(
   return { ok: true };
 }
 
+// --- Custom fields (admin) ---
+
+export async function getAdminMemberCustomFields(userId: string) {
+  await requireCapability("admin.access");
+
+  // get all field defs
+  const { data: fields } = await supabaseAdmin
+    .from("custom_field")
+    .select("id, name, field_type, sort_order")
+    .order("sort_order");
+
+  // get this user's values
+  const { data: values } = await supabaseAdmin
+    .from("custom_field_value")
+    .select("field_id, value, visible")
+    .eq("user_id", userId);
+
+  const valueMap = new Map(
+    (values ?? []).map((v) => [v.field_id, { value: v.value, visible: v.visible }]),
+  );
+
+  return (fields ?? []).map((f) => ({
+    field_id: f.id,
+    field_name: f.name,
+    value: valueMap.get(f.id)?.value ?? null,
+    visible: valueMap.get(f.id)?.visible ?? true,
+  }));
+}
+
+export async function adminUpdateCustomFieldValue(input: {
+  userId: string;
+  fieldId: string;
+  value: string | null;
+  visible: boolean;
+}): Promise<ActionResult> {
+  await requireCapability("admin.access");
+
+  const { error } = await supabaseAdmin.from("custom_field_value").upsert(
+    {
+      user_id: input.userId,
+      field_id: input.fieldId,
+      value: input.value,
+      visible: input.visible,
+    },
+    { onConflict: "user_id,field_id" },
+  );
+
+  if (error) {
+    console.error("adminUpdateCustomFieldValue failed", error);
+    return { ok: false, error: "Failed to update" };
+  }
+
+  revalidatePath("/admin/members");
+  revalidatePath("/directory");
+  return { ok: true };
+}
+
 // --- Row actions ---
 
 type ActionResult = { ok: true } | { ok: false; error: string };
