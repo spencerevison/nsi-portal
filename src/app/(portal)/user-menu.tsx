@@ -20,7 +20,7 @@ export function UserMenu() {
   }, [user?.imageUrl, router]);
 
   return (
-    <div className="w-7">
+    <div className="flex w-7 items-center">
       <UserButton>
         <UserButton.MenuItems>
           <UserButton.Link
@@ -28,12 +28,12 @@ export function UserMenu() {
             label="Profile & Settings"
             labelIcon={<SlidersHorizontal className="size-4" />}
           />
+          <UserButton.Action label="manageAccount" />
           <UserButton.Link
             href="/help"
             label="Help & Support"
             labelIcon={<CircleHelp className="size-4" />}
           />
-          <UserButton.Action label="manageAccount" />
         </UserButton.MenuItems>
       </UserButton>
     </div>
