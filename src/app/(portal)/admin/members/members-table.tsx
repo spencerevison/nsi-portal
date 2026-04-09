@@ -108,8 +108,7 @@ export function MembersTable({
         />
       </div>
 
-      <div className="overflow-x-auto">
-      <Card className="p-0">
+      <Card className="overflow-x-auto p-0">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -193,7 +192,6 @@ export function MembersTable({
           </Table>
         </CardContent>
       </Card>
-      </div>
     </>
   );
 }
