@@ -21,6 +21,54 @@ function isDeliverable(email: string): boolean {
 const portalUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://nsiportal.ca";
 
 /**
+ * Welcome email sent after a new member accepts their invitation.
+ * Non-fatal — errors are logged but won't break the webhook.
+ */
+export async function sendWelcomeEmail(opts: {
+  email: string;
+  firstName: string;
+}) {
+  if (!isDeliverable(opts.email)) return;
+
+  const fromAddress =
+    process.env.RESEND_FROM_ADDRESS ?? "NSI Portal <noreply@resend.dev>";
+
+  try {
+    const result = await resend.emails.send({
+      from: fromAddress,
+      to: opts.email,
+      subject: "Welcome to the NSI Community Portal",
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px;">
+          <h1 style="font-size: 20px;">Welcome, ${escapeHtml(opts.firstName)}!</h1>
+          <p>Your account is set up and ready to go. Here's what you can do on the portal:</p>
+          <ul style="line-height: 1.8;">
+            <li><a href="${portalUrl}/documents" style="color: #0d7377;">Documents</a> — browse community files and strata documents</li>
+            <li><a href="${portalUrl}/directory" style="color: #0d7377;">Member Directory</a> — find contact info for your neighbours</li>
+            <li><a href="${portalUrl}/community" style="color: #0d7377;">Message Board</a> — read and post community discussions</li>
+          </ul>
+          <p>
+            <a href="${portalUrl}" style="display:inline-block; background:#0d7377; color:#fff; padding:10px 20px; border-radius:4px; text-decoration:none;">
+              Visit the Portal
+            </a>
+          </p>
+          <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 16px 0;" />
+          <p style="color: #888; font-size: 12px;">
+            You can update your profile and notification preferences in your
+            <a href="${portalUrl}/profile" style="color: #888;">account settings</a>.
+          </p>
+        </div>
+      `,
+    });
+    if (result.error) {
+      console.error("sendWelcomeEmail: resend error", result.error);
+    }
+  } catch (err) {
+    console.error("sendWelcomeEmail failed", err);
+  }
+}
+
+/**
  * Send notification emails for a new community post.
  * Sends to all active members with notify_new_post = true, excluding the author
  * and test users.
