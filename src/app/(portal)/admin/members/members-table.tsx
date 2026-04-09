@@ -108,6 +108,7 @@ export function MembersTable({
         />
       </div>
 
+      <div className="overflow-x-auto">
       <Card className="p-0">
         <CardContent className="p-0">
           <Table>
@@ -120,7 +121,7 @@ export function MembersTable({
                   Name{sortIndicator("name")}
                 </TableHead>
                 <TableHead
-                  className="hover:text-foreground cursor-pointer select-none"
+                  className="hover:text-foreground hidden cursor-pointer select-none md:table-cell"
                   onClick={() => toggleSort("email")}
                 >
                   Email{sortIndicator("email")}
@@ -132,7 +133,7 @@ export function MembersTable({
                   Lot{sortIndicator("lot")}
                 </TableHead>
                 <TableHead
-                  className="hover:text-foreground cursor-pointer select-none"
+                  className="hover:text-foreground hidden cursor-pointer select-none md:table-cell"
                   onClick={() => toggleSort("role")}
                 >
                   Role{sortIndicator("role")}
@@ -168,13 +169,13 @@ export function MembersTable({
                         ? `${m.first_name} ${m.last_name}`.trim()
                         : m.email}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="text-muted-foreground hidden md:table-cell">
                       {m.email}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {m.lot_number ?? "—"}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="text-muted-foreground hidden md:table-cell">
                       {m.role_name ?? "—"}
                     </TableCell>
                     <TableCell>
@@ -192,6 +193,7 @@ export function MembersTable({
           </Table>
         </CardContent>
       </Card>
+      </div>
     </>
   );
 }
