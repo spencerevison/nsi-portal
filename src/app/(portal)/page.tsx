@@ -115,7 +115,7 @@ export default async function HomePage() {
           <Link key={link.href} href={link.href}>
             <Card className="hover:border-accent-200 hover:bg-accent-50/30 h-full transition-colors">
               <CardContent className="p-4">
-                <link.icon className="text-accent-600 mb-2 size-5" />
+                <link.icon aria-hidden="true" className="text-accent-600 mb-2 size-5" />
                 <h3 className="text-sm font-medium">{link.label}</h3>
                 <p className="text-muted-foreground mt-0.5 text-xs">
                   {link.desc}
@@ -145,7 +145,7 @@ export default async function HomePage() {
                   <Card className="border-amber-200 bg-amber-50/30 transition-colors hover:bg-amber-50/50">
                     <CardContent className="p-4">
                       <div className="flex items-start gap-2">
-                        <Pin className="mt-0.5 size-4 shrink-0 text-amber-500" />
+                        <Pin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber-500" />
                         <div className="min-w-0 flex-1">
                           <h3 className="text-sm font-semibold">
                             {post.title}
@@ -170,11 +170,11 @@ export default async function HomePage() {
                                 : "Unknown"}
                             </span>
                             <span className="flex items-center gap-1">
-                              <Clock className="size-3" />
+                              <Clock aria-hidden="true" className="size-3" />
                               {timeAgo(post.created_at)}
                             </span>
                             <span className="flex items-center gap-1">
-                              <MessageCircle className="size-3" />
+                              <MessageCircle aria-hidden="true" className="size-3" />
                               {countArr?.[0]?.count ?? 0}
                             </span>
                           </div>

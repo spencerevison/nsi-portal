@@ -47,15 +47,17 @@ export function PortalNav({
   const allLinks = [...links, ...(extraLinks ?? [])];
 
   return (
-    <>
+    <ul className="contents">
       {allLinks.map((link) => (
-        <NavLink key={link.href} {...link} pathname={pathname} />
+        <li key={link.href} className="h-full">
+          <NavLink href={link.href} label={link.label} pathname={pathname} />
+        </li>
       ))}
       {showAdmin && (
-        <div className="h-full">
+        <li className="h-full">
           <NavLink href="/admin" label="Admin" pathname={pathname} />
-        </div>
+        </li>
       )}
-    </>
+    </ul>
   );
 }
