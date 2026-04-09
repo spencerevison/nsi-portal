@@ -87,6 +87,45 @@ export async function inviteMember(
   return { ok: true, user_id: inserted.id };
 }
 
+// --- Bulk import ---
+
+export type BulkInviteRow = {
+  email: string;
+  first_name: string;
+  last_name: string;
+  lot_number?: string;
+  role_id: string;
+};
+
+export type BulkInviteResult = {
+  results: Array<{ email: string } & InviteMemberResult>;
+};
+
+export async function bulkInviteMembers(
+  rows: BulkInviteRow[],
+): Promise<BulkInviteResult> {
+  await requireCapability("admin.access");
+
+  if (rows.length > 200) {
+    return {
+      results: rows.map((r) => ({
+        email: r.email,
+        ok: false as const,
+        error: "Max 200 rows per import",
+      })),
+    };
+  }
+
+  const results: BulkInviteResult["results"] = [];
+  for (const row of rows) {
+    const res = await inviteMember(row);
+    results.push({ email: row.email, ...res });
+  }
+
+  revalidatePath("/admin/members");
+  return { results };
+}
+
 export type UpdateMemberInput = {
   id: string;
   first_name: string;

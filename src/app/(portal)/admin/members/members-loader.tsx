@@ -1,5 +1,6 @@
 import { listMembers, listRoles } from "@/lib/members";
 import { AddMemberForm } from "./add-member-form";
+import { CsvImportDialog } from "./csv-import-dialog";
 import { MembersTable } from "./members-table";
 
 export async function MembersLoader() {
@@ -13,7 +14,10 @@ export async function MembersLoader() {
           {members.length} {members.length === 1 ? "member" : "members"}
         </span>
       </div>
-      <AddMemberForm roles={roles} />
+      <div className="flex gap-2">
+        <AddMemberForm roles={roles} />
+        <CsvImportDialog roles={roles} />
+      </div>
       <MembersTable members={members} roles={roles} />
     </>
   );
