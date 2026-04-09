@@ -4,6 +4,7 @@ import { SupportTable } from "./support-table";
 
 export type SupportRequestRow = {
   id: string;
+  request_number: number;
   category: string;
   subject: string;
   message: string;
@@ -22,7 +23,7 @@ export default async function AdminSupportPage() {
   const { data, error } = await supabaseAdmin
     .from("support_request")
     .select(
-      `id, category, subject, message, status, created_at,
+      `id, request_number, category, subject, message, status, created_at,
        user:user_id ( first_name, last_name, email )`,
     )
     .order("created_at", { ascending: false });

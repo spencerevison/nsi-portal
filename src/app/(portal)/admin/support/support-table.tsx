@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -12,22 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Check,
-  Eye,
-  RotateCcw,
-  ArrowUpDown,
-  ChevronUp,
-  ChevronDown,
-} from "lucide-react";
+import { ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type { SupportRequestRow } from "./page";
-import { updateRequestStatus } from "./actions";
 import { timeAgo } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -77,13 +63,6 @@ const statusConfig: Record<string, { label: string; badge: React.ReactNode }> =
     },
   };
 
-// next status when cycling forward
-function nextStatus(current: string): string {
-  if (current === "new") return "read";
-  if (current === "read") return "complete";
-  return "new";
-}
-
 type SortKey = "status" | "category" | "date";
 type SortDir = "asc" | "desc";
 
@@ -93,8 +72,7 @@ const allStatuses = ["new", "read", "complete"];
 const allCategories = ["bug", "feature", "question", "other"];
 
 export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
-  const [selected, setSelected] = useState<SupportRequestRow | null>(null);
-  const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   // filters
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -138,21 +116,6 @@ export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
 
     return result;
   }, [requests, statusFilter, categoryFilter, sortKey, sortDir]);
-
-  function handleSetStatus(req: SupportRequestRow, status: string) {
-    startTransition(async () => {
-      await updateRequestStatus({ id: req.id, status });
-    });
-  }
-
-  function handleRowClick(req: SupportRequestRow) {
-    setSelected(req);
-    if (req.status === "new") {
-      startTransition(async () => {
-        await updateRequestStatus({ id: req.id, status: "read" });
-      });
-    }
-  }
 
   function sortIcon(col: SortKey) {
     if (sortKey !== col)
@@ -215,6 +178,7 @@ export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12">#</TableHead>
                 <TableHead
                   className="w-20 cursor-pointer select-none"
                   onClick={() => toggleSort("status")}
@@ -238,7 +202,6 @@ export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
                   Date
                   {sortIcon("date")}
                 </TableHead>
-                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -259,8 +222,13 @@ export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
                       "cursor-pointer",
                       req.status === "complete" && "opacity-60",
                     )}
-                    onClick={() => handleRowClick(req)}
+                    onClick={() =>
+                      router.push(`/admin/support/${req.request_number}`)
+                    }
                   >
+                    <TableCell className="text-muted-foreground text-xs">
+                      #{req.request_number}
+                    </TableCell>
                     <TableCell>
                       {statusConfig[req.status]?.badge ?? (
                         <Badge variant="outline">{req.status}</Badge>
@@ -287,25 +255,6 @@ export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
                     <TableCell className="text-muted-foreground text-sm">
                       {timeAgo(req.created_at)}
                     </TableCell>
-                    <TableCell>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSetStatus(req, nextStatus(req.status));
-                        }}
-                        disabled={pending}
-                        className="text-muted-foreground hover:text-foreground rounded p-1 transition-colors"
-                        title={`Mark as ${statusConfig[nextStatus(req.status)]?.label?.toLowerCase()}`}
-                      >
-                        {req.status === "complete" ? (
-                          <RotateCcw className="size-4" />
-                        ) : req.status === "read" ? (
-                          <Check className="size-4" />
-                        ) : (
-                          <Eye className="size-4" />
-                        )}
-                      </button>
-                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -313,91 +262,6 @@ export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
           </Table>
         </CardContent>
       </Card>
-
-      {/* Detail dialog */}
-      <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent className="max-w-lg">
-          {selected && (
-            <>
-              <DialogHeader>
-                <DialogTitle>{selected.subject}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2 text-sm">
-                  {statusConfig[selected.status]?.badge}
-                  <Badge
-                    variant="secondary"
-                    className={categoryColors[selected.category] ?? ""}
-                  >
-                    {categoryLabels[selected.category] ?? selected.category}
-                  </Badge>
-                  <span className="text-muted-foreground">
-                    {new Date(selected.created_at).toLocaleDateString("en-CA", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-
-                {selected.user && (
-                  <div className="text-sm">
-                    <span className="font-medium">
-                      {selected.user.first_name} {selected.user.last_name}
-                    </span>
-                    <span className="text-muted-foreground ml-2">
-                      {selected.user.email}
-                    </span>
-                  </div>
-                )}
-
-                <div className="border-border bg-muted/30 rounded-lg border p-3 text-sm whitespace-pre-wrap">
-                  {selected.message}
-                </div>
-
-                <div className="flex items-center gap-2 pt-1">
-                  {selected.status !== "complete" ? (
-                    <Button
-                      size="sm"
-                      disabled={pending}
-                      onClick={() => {
-                        handleSetStatus(selected, "complete");
-                        setSelected(null);
-                      }}
-                    >
-                      <Check data-icon="inline-start" className="size-4" />
-                      Mark complete
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={pending}
-                      onClick={() => {
-                        handleSetStatus(selected, "new");
-                        setSelected(null);
-                      }}
-                    >
-                      <RotateCcw data-icon="inline-start" className="size-4" />
-                      Reopen
-                    </Button>
-                  )}
-                  {selected.user && (
-                    <a
-                      href={`mailto:${selected.user.email}?subject=Re: ${encodeURIComponent(selected.subject)}`}
-                      className="text-accent-600 hover:text-accent-800 text-sm underline underline-offset-2"
-                    >
-                      Reply via email
-                    </a>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
