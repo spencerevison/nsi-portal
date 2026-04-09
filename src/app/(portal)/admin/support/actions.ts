@@ -26,6 +26,23 @@ export async function updateRequestStatus(input: {
     return { ok: false, error: "Failed to update status" };
   }
 
-  revalidatePath("/admin/support");
+  revalidatePath("/admin/support", "layout");
+  return { ok: true };
+}
+
+export async function deleteSupportRequest(id: string): Promise<ActionResult> {
+  await requireCapability("support.manage");
+
+  const { error } = await supabaseAdmin
+    .from("support_request")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("deleteSupportRequest failed", error);
+    return { ok: false, error: "Failed to delete request" };
+  }
+
+  revalidatePath("/admin/support", "layout");
   return { ok: true };
 }
