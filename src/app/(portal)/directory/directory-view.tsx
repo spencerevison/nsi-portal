@@ -174,7 +174,10 @@ export function DirectoryView({
                     </TableCell>
                     <TableCell className="text-muted-foreground whitespace-nowrap">
                       {m.phone ? (
-                        <a href={`tel:${m.phone}`} className="hover:underline">
+                        <a
+                          href={`tel:${m.phone}`}
+                          className="text-foreground/80 decoration-muted-foreground/30 hover:decoration-foreground/50 underline underline-offset-2"
+                        >
                           {m.phone}
                         </a>
                       ) : (
@@ -182,7 +185,10 @@ export function DirectoryView({
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      <a href={`mailto:${m.email}`} className="hover:underline">
+                      <a
+                        href={`mailto:${m.email}`}
+                        className="text-foreground/80 decoration-muted-foreground/30 hover:decoration-foreground/50 underline underline-offset-2"
+                      >
                         {m.email}
                       </a>
                     </TableCell>
@@ -206,7 +212,7 @@ export function DirectoryView({
       <div className="space-y-2 md:hidden">
         {sorted.map((m) => (
           <Card key={m.id}>
-            <CardContent className="p-4">
+            <CardContent className="px-4">
               <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MemberAvatar member={m} size="sm" />
@@ -220,16 +226,22 @@ export function DirectoryView({
                   </span>
                 )}
               </div>
-              <div className="text-muted-foreground space-y-1 text-sm">
+              <div className="text-muted-foreground space-y-2 text-sm">
                 {m.phone && (
                   <div>
-                    <a href={`tel:${m.phone}`} className="hover:underline">
+                    <a
+                      href={`tel:${m.phone}`}
+                      className="text-foreground/80 decoration-muted-foreground/30 hover:decoration-foreground/50 underline underline-offset-2"
+                    >
                       {m.phone}
                     </a>
                   </div>
                 )}
                 <div className="truncate">
-                  <a href={`mailto:${m.email}`} className="hover:underline">
+                  <a
+                    href={`mailto:${m.email}`}
+                    className="text-foreground/80 decoration-muted-foreground/30 hover:decoration-foreground/50 underline underline-offset-2"
+                  >
                     {m.email}
                   </a>
                 </div>
