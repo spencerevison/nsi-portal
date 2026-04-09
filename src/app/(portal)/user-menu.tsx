@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, CircleHelp } from "lucide-react";
 
 export function UserMenu() {
   const { user } = useUser();
@@ -27,6 +27,11 @@ export function UserMenu() {
             href="/profile"
             label="Profile & Settings"
             labelIcon={<SlidersHorizontal className="size-4" />}
+          />
+          <UserButton.Link
+            href="/help"
+            label="Help & Support"
+            labelIcon={<CircleHelp className="size-4" />}
           />
           <UserButton.Action label="manageAccount" />
         </UserButton.MenuItems>
