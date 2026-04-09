@@ -52,14 +52,14 @@ export default async function PortalLayout({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-border bg-card sticky top-0 border-b">
-        <div className="flex h-12 items-center gap-4 px-6 md:h-16 lg:gap-8">
+      <header className="border-border bg-card sticky top-0 z-40 border-b">
+        <div className="flex h-12 items-center gap-4 px-4 sm:px-6 md:h-14 lg:gap-8">
           <Link
             href="/"
             className="hover:text-accent-400 text-accent-600 dark:text-cream-300 dark:hover:text-cream-100 flex shrink-0 items-center gap-2 text-xs font-semibold sm:text-lg"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-nsi.svg" alt="NSI" className="size-12" />
+            <img src="/logo-nsi.svg" alt="NSI" className="size-10" />
             <span className="xs:inline hidden">Community Portal</span>
           </Link>
           {/* Desktop nav */}
@@ -79,7 +79,7 @@ export default async function PortalLayout({
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
         {children}
       </main>
       <footer className="border-border border-t py-4 text-center">
