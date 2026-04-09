@@ -1,19 +1,12 @@
 import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { escapeHtml } from "@/lib/utils";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const BLOCKED_DOMAINS = ["example.com", "example.org", "example.net"];
+export const BLOCKED_DOMAINS = ["example.com", "example.org", "example.net"];
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function isDeliverable(email: string): boolean {
+export function isDeliverable(email: string): boolean {
   const domain = email.split("@")[1]?.toLowerCase();
   return !!domain && !BLOCKED_DOMAINS.includes(domain);
 }

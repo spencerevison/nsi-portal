@@ -3,6 +3,8 @@
 import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getCurrentAppUser } from "@/lib/current-user";
+import { escapeHtml } from "@/lib/utils";
+import { isDeliverable } from "@/lib/notifications";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -31,16 +33,6 @@ function checkRateLimit(userId: string): boolean {
   timestamps.push(now);
   return true;
 }
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-const BLOCKED_DOMAINS = ["example.com", "example.org", "example.net"];
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -109,10 +101,7 @@ export async function submitSupportRequest(input: {
 
     const adminEmails = (admins ?? [])
       .map((a) => a.email)
-      .filter((email) => {
-        const domain = email.split("@")[1]?.toLowerCase();
-        return domain && !BLOCKED_DOMAINS.includes(domain);
-      });
+      .filter((email) => isDeliverable(email));
 
     if (adminEmails.length > 0) {
       const fromAddress =

@@ -4,6 +4,8 @@ import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getCurrentAppUser, requireCapability } from "@/lib/current-user";
 import { resolveRecipients } from "@/lib/groups";
+import { escapeHtml } from "@/lib/utils";
+import { isDeliverable } from "@/lib/notifications";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -57,12 +59,8 @@ export async function sendGroupEmail(input: {
   }
 
   // filter out test/invalid email domains that Resend will reject
-  const BLOCKED_DOMAINS = ["example.com", "example.org", "example.net"];
   const allRecipients = await resolveRecipients(input.groupSlugs);
-  const recipients = allRecipients.filter((r) => {
-    const domain = r.email.split("@")[1]?.toLowerCase();
-    return domain && !BLOCKED_DOMAINS.includes(domain);
-  });
+  const recipients = allRecipients.filter((r) => isDeliverable(r.email));
   if (recipients.length === 0) {
     return { ok: false, error: "No recipients in selected group(s)" };
   }
@@ -126,12 +124,4 @@ export async function sendGroupEmail(input: {
   });
 
   return { ok: true, recipientCount: recipients.length };
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }

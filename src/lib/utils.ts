@@ -12,6 +12,14 @@ export function slugify(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export function timeAgo(dateStr: string): string {
   const now = new Date();
   const d = new Date(dateStr);
