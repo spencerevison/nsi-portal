@@ -41,7 +41,7 @@ type Step = "upload" | "preview" | "importing" | "results";
 
 // CSV template content
 const TEMPLATE_CSV =
-  "email,first_name,last_name,lot_number,role\njane@example.com,Jane,Doe,A-1,Member\n";
+  "email,first_name,last_name,lot_number,role\njane@example.com,Jane,Doe,42,Member\n";
 
 function downloadTemplate() {
   const blob = new Blob([TEMPLATE_CSV], { type: "text/csv" });
@@ -57,7 +57,10 @@ function parseCSV(text: string, roles: RoleOption[]): ParsedRow[] {
   const lines = text.split(/\r?\n/).filter((l) => l.trim());
   if (lines.length < 2) return [];
 
-  const header = lines[0].toLowerCase().split(",").map((h) => h.trim());
+  const header = lines[0]
+    .toLowerCase()
+    .split(",")
+    .map((h) => h.trim());
 
   const colIdx = {
     email: header.indexOf("email"),
@@ -81,9 +84,7 @@ function parseCSV(text: string, roles: RoleOption[]): ParsedRow[] {
     ];
   }
 
-  const roleLookup = new Map(
-    roles.map((r) => [r.name.toLowerCase(), r.id]),
-  );
+  const roleLookup = new Map(roles.map((r) => [r.name.toLowerCase(), r.id]));
   const defaultRole = roles.find((r) => r.is_default);
 
   return lines.slice(1).map((line) => {
@@ -287,10 +288,7 @@ export function CsvImportDialog({ roles }: { roles: RoleOption[] }) {
             </div>
 
             <div className="flex gap-2">
-              <Button
-                onClick={handleImport}
-                disabled={validRows.length === 0}
-              >
+              <Button onClick={handleImport} disabled={validRows.length === 0}>
                 Import {validRows.length} member
                 {validRows.length !== 1 ? "s" : ""}
               </Button>
@@ -340,7 +338,10 @@ export function CsvImportDialog({ roles }: { roles: RoleOption[] }) {
                       <TableCell>
                         {r.ok ? (
                           <span className="flex items-center gap-1.5 text-xs text-green-700">
-                            <CheckCircle2 aria-hidden="true" className="size-3.5" />
+                            <CheckCircle2
+                              aria-hidden="true"
+                              className="size-3.5"
+                            />
                             Invited
                           </span>
                         ) : (
@@ -356,7 +357,12 @@ export function CsvImportDialog({ roles }: { roles: RoleOption[] }) {
               </Table>
             </div>
 
-            <Button onClick={() => { reset(); setOpen(false); }}>
+            <Button
+              onClick={() => {
+                reset();
+                setOpen(false);
+              }}
+            >
               Done
             </Button>
           </div>
