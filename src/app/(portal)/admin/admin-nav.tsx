@@ -8,6 +8,7 @@ const tabs = [
   { href: "/admin/members", label: "Members" },
   { href: "/admin/groups", label: "Groups" },
   { href: "/admin/roles", label: "Roles" },
+  { href: "/admin/support", label: "Support" },
 ];
 
 export function AdminNav() {

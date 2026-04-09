@@ -18,6 +18,7 @@ export const ALL_CAPABILITIES = [
     label: "Create/edit/delete groups, manage membership",
   },
   { key: "roles.manage", label: "Create/edit roles, assign capabilities" },
+  { key: "support.manage", label: "View and manage support requests" },
 ] as const;
 
 export type RoleWithCapabilities = {

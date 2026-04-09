@@ -87,6 +87,7 @@
 - [x] Button icons on primary CTAs
 - [x] Members table: search + sort
 - [x] First-login welcome experience
+- [x] Help & Support form (emails admins + logs to DB)
 - [ ] Accessibility pass
 - [ ] Bulk CSV import (deferred from Phase 2)
 - [x] Supabase upgrade to Pro
@@ -104,6 +105,12 @@
 - **Phase 1 password reset:** Not explicitly tested but Clerk's `<SignIn />` includes "Forgot password?" link natively.
 
 ## Session Log
+
+### 2026-04-07
+- Phase 8: first-login welcome banner (dismissible, profile completion prompt, onboarded_at tracking)
+- Help & Support: /help form with category dropdown, subject, message; emails admins via Resend, logs to support_request table
+- Admin support view: /admin/support with table, detail dialog, new/read status toggle, auto-mark-read on open
+- Added support.manage capability (seeded to Admin role), Support tab in admin nav
 
 ### 2026-04-06
 - Phase 5: community board — post feed, single post view, comments, create forms, admin pin/unpin/delete
