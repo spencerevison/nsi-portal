@@ -18,12 +18,7 @@ export async function CommunityLoader() {
 
   return (
     <>
-      {canWrite && (
-        <>
-          <h1 className="sr-only">Message Board</h1>
-          <NewPostForm />
-        </>
-      )}
+      {canWrite && <NewPostForm />}
       {!canWrite && (
         <div>
           <h1 className="text-xl font-semibold">Message Board</h1>

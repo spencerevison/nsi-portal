@@ -14,7 +14,7 @@ export async function MembersLoader() {
           {members.length} {members.length === 1 ? "member" : "members"}
         </span>
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <AddMemberForm roles={roles} />
         <CsvImportDialog roles={roles} />
       </div>

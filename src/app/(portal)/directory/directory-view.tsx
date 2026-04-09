@@ -173,10 +173,18 @@ export function DirectoryView({
                       {m.lot_number ?? "—"}
                     </TableCell>
                     <TableCell className="text-muted-foreground whitespace-nowrap">
-                      {m.phone ?? "—"}
+                      {m.phone ? (
+                        <a href={`tel:${m.phone}`} className="hover:underline">
+                          {m.phone}
+                        </a>
+                      ) : (
+                        "—"
+                      )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {m.email}
+                      <a href={`mailto:${m.email}`} className="hover:underline">
+                        {m.email}
+                      </a>
                     </TableCell>
                     {customFields.map((f) => (
                       <TableCell key={f.id} className="text-muted-foreground">
@@ -213,8 +221,18 @@ export function DirectoryView({
                 )}
               </div>
               <div className="text-muted-foreground space-y-1 text-sm">
-                {m.phone && <div>{m.phone}</div>}
-                <div className="truncate">{m.email}</div>
+                {m.phone && (
+                  <div>
+                    <a href={`tel:${m.phone}`} className="hover:underline">
+                      {m.phone}
+                    </a>
+                  </div>
+                )}
+                <div className="truncate">
+                  <a href={`mailto:${m.email}`} className="hover:underline">
+                    {m.email}
+                  </a>
+                </div>
                 {customFields.map((f) => {
                   const val = formatFieldValue(
                     m.custom_fields[f.id]?.value ?? null,

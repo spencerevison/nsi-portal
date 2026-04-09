@@ -105,7 +105,7 @@ export function AddMemberForm({ roles }: { roles: RoleOption[] }) {
 
           {error && <p className="text-destructive text-sm">{error}</p>}
 
-          <div className="flex gap-2 pt-1">
+          <div className="flex flex-wrap gap-2 pt-1">
             <Button type="submit" disabled={pending || !roleId}>
               {pending ? "Sending..." : "Send invitation"}
             </Button>

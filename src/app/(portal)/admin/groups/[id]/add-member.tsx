@@ -39,8 +39,8 @@ export function AddGroupMember({
   if (availableMembers.length === 0) return null;
 
   return (
-    <div className="flex items-end gap-2">
-      <div className="w-64">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+      <div className="w-full sm:w-64">
         <Select
           items={availableMembers.map((m) => ({
             value: m.id,

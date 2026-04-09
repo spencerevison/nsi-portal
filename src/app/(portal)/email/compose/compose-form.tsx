@@ -197,8 +197,9 @@ export function ComposeForm({
           </div>
 
           <p className="text-muted-foreground text-xs">
-            Emails are sent to all members in the selected group(s). Members
-            cannot opt out of group emails.
+            {canSend
+              ? "Emails are sent to all members in the selected group(s). Members cannot opt out of group emails."
+              : "Select at least one group, add a subject, and write a message to send."}
           </p>
 
           <Button
