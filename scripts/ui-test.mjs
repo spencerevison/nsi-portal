@@ -120,15 +120,26 @@ if (await addBtn.isVisible()) {
 await capture("54-directory", "/directory");
 await capture("55-profile", "/profile");
 await capture("56-documents", "/documents");
-await capture("55-documents-folder", "/documents/strata-documents");
-await capture("56-sign-in", "/sign-in");
-await capture("57-sign-up-no-ticket", "/sign-up");
+await capture("57-documents-folder", "/documents/strata-documents");
+await capture("58-sign-in", "/sign-in");
+await capture("59-sign-up-no-ticket", "/sign-up");
+await capture("60-community", "/community");
+await capture("61-email-compose", "/email/compose");
+await capture("62-email-history", "/email/history");
+await capture("63-help", "/help");
+await capture("64-admin-groups", "/admin/groups");
+await capture("65-admin-roles", "/admin/roles");
+await capture("66-admin-support", "/admin/support");
 
 // --- Mobile screenshots ---
 await page.setViewportSize({ width: 375, height: 812 });
 console.log("\nMobile (375x812):");
-await capture("60-mobile-home", "/");
-await capture("61-mobile-admin", "/admin/members");
+await capture("70-mobile-home", "/");
+await capture("71-mobile-admin", "/admin/members");
+await capture("72-mobile-community", "/community");
+await capture("73-mobile-directory", "/directory");
+await capture("74-mobile-help", "/help");
+await capture("75-mobile-documents", "/documents/strata-documents");
 
 await browser.close();
 console.log(`\nDone. Screenshots in ${OUT}/`);
