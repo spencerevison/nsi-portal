@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,8 +18,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  CustomFieldEditor,
+  parseFieldValue,
+  type FieldItem,
+} from "@/components/custom-field-editor";
 import type { MemberRow, RoleOption } from "@/lib/members";
-import { updateMember } from "./actions";
+import {
+  updateMember,
+  getAdminMemberCustomFields,
+  adminUpdateCustomFieldValue,
+} from "./actions";
+
+type CfState = {
+  field_id: string;
+  field_name: string;
+  value: string | null;
+  visible: boolean;
+  parsed: FieldItem[];
+};
 
 export function EditMemberDialog({
   member,
@@ -35,6 +52,24 @@ export function EditMemberDialog({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [roleId, setRoleId] = useState(member.role_id ?? "");
+
+  // custom fields — loaded on open
+  const [cfState, setCfState] = useState<CfState[]>([]);
+  const [cfLoading, setCfLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setCfLoading(true);
+    getAdminMemberCustomFields(member.id).then((fields) => {
+      setCfState(
+        fields.map((cf) => ({
+          ...cf,
+          parsed: parseFieldValue(cf.value, cf.field_name),
+        })),
+      );
+      setCfLoading(false);
+    });
+  }, [open, member.id]);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -54,6 +89,17 @@ export function EditMemberDialog({
         setError(result.error);
         return;
       }
+
+      // save custom fields
+      for (const cf of cfState) {
+        await adminUpdateCustomFieldValue({
+          userId: member.id,
+          fieldId: cf.field_id,
+          value: JSON.stringify(cf.parsed),
+          visible: cf.visible,
+        });
+      }
+
       onOpenChange(false);
     });
   }
@@ -120,6 +166,41 @@ export function EditMemberDialog({
               </Select>
             </div>
           </div>
+
+          {/* Custom fields */}
+          {cfLoading ? (
+            <p className="text-muted-foreground text-xs">Loading fields...</p>
+          ) : (
+            cfState.length > 0 && (
+              <div className="border-border space-y-3 border-t pt-3">
+                <Label className="text-muted-foreground text-xs">
+                  Directory Fields
+                </Label>
+                {cfState.map((cf, cfIdx) => (
+                  <CustomFieldEditor
+                    key={cf.field_id}
+                    fieldName={cf.field_name}
+                    items={cf.parsed}
+                    visible={cf.visible}
+                    onItemsChange={(items) => {
+                      setCfState((prev) => {
+                        const next = [...prev];
+                        next[cfIdx] = { ...next[cfIdx], parsed: items };
+                        return next;
+                      });
+                    }}
+                    onVisibleChange={(v) => {
+                      setCfState((prev) => {
+                        const next = [...prev];
+                        next[cfIdx] = { ...next[cfIdx], visible: v };
+                        return next;
+                      });
+                    }}
+                  />
+                ))}
+              </div>
+            )
+          )}
 
           {error && <p className="text-destructive text-sm">{error}</p>}
 
