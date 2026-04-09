@@ -1,8 +1,8 @@
 # NSI Portal — Build Status
 
-**Current Phase:** Phase 8 (ready to start)
-**Last Updated:** 2026-04-06
-**Last Session:** All code review items addressed (P1-P4). Phase 7 complete — admin roles/permissions with capability checkbox grid. Removed unused directory.manage capability.
+**Current Phase:** Phase 8 (complete)
+**Last Updated:** 2026-04-08
+**Last Session:** Phase 8 complete. All remaining scope delivered: mobile fixes, accessibility pass, bulk CSV import, welcome email, admin custom fields editing, admin guide, Playwright UI coverage, and final code review with security hardening.
 
 ---
 
@@ -51,7 +51,7 @@
 - [x] Custom fields system: CustomField + CustomFieldValue tables (migration applied)
 - [x] Seed "Kids" and "Dogs" as initial custom fields
 - [x] /profile page: edit own profile, custom fields, visibility toggles, notification prefs
-- [ ] Admin: member edit form with custom fields (deferred — edit dialog works, custom fields can be added later)
+- [x] Admin: member edit form with custom fields (custom field editor in edit dialog, lazy-loaded on open)
 - [x] Dynamic field rendering in directory based on CustomField definitions
 
 ### Phase 5: Community Board
@@ -88,23 +88,31 @@
 - [x] Members table: search + sort
 - [x] First-login welcome experience
 - [x] Help & Support form (emails admins + logs to DB)
-- [ ] Accessibility pass
-- [ ] Bulk CSV import (deferred from Phase 2)
+- [x] Accessibility pass (nav landmarks, headings, aria-hidden, ul/li nav, footer)
+- [x] Bulk CSV import (deferred from Phase 2)
 - [x] Supabase upgrade to Pro
 - [x] Domain setup + DNS (nsiportal.ca)
-- [ ] Seed production data
-- [ ] Welcome email template
-- [ ] Admin guide for Allison
+- [ ] Seed production data (deferred)
+- [x] Welcome email template (triggered from Clerk user.created webhook)
+- [x] Admin guide for Allison (docs/admin-guide.md)
 
 ---
 
 ## Known Issues
 
-- **Mobile nav overflow:** At 375px, header nav links overflow horizontally. Needs hamburger menu below `md:` breakpoint. (Phase 8 responsive audit)
-- **Mobile table truncation:** Members table columns cut off on small screens. Needs `overflow-x-auto` or responsive column hiding.
 - **Phase 1 password reset:** Not explicitly tested but Clerk's `<SignIn />` includes "Forgot password?" link natively.
+- **In-memory rate limiters:** Email send and support request rate limiters use in-memory Maps, which reset on Vercel serverless cold starts. Acceptable for ~70-member community but not bulletproof.
 
 ## Session Log
+
+### 2026-04-08
+- Phase 8 completion: mobile fixes (admin link in hamburger nav, responsive members table), accessibility pass (landmarks, headings, aria-hidden, nav lists, footer)
+- Bulk CSV import: dialog with upload/preview/import steps, validates rows, reuses inviteMember per row
+- Welcome email: sendWelcomeEmail in notifications.ts, triggered from Clerk user.created webhook
+- Admin custom fields: extracted CustomFieldEditor to shared component, admin edit dialog loads fields lazily
+- Admin guide: docs/admin-guide.md covering all admin features
+- Playwright UI tests: expanded to cover all 20 routes (desktop + mobile), documented review findings
+- Code review: fixed file upload type bypass, added requireCapability to editComment/deleteComment, recursive folder deletion for storage cleanup
 
 ### 2026-04-07
 - Phase 8: first-login welcome banner (dismissible, profile completion prompt, onboarded_at tracking)
