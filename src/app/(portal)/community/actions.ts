@@ -144,6 +144,7 @@ export async function editComment(input: {
   postId: string;
   body: string;
 }): Promise<ActionResult> {
+  await requireCapability("community.write");
   const user = await getCurrentAppUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
@@ -177,6 +178,7 @@ export async function deleteComment(
   commentId: string,
   postId: string,
 ): Promise<ActionResult> {
+  await requireCapability("community.write");
   const user = await getCurrentAppUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
