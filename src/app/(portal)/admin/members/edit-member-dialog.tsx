@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useCallback, useTransition } from "react";
 import {
   Dialog,
   DialogContent,
@@ -53,12 +53,11 @@ export function EditMemberDialog({
   const [error, setError] = useState<string | null>(null);
   const [roleId, setRoleId] = useState(member.role_id ?? "");
 
-  // custom fields — loaded on open
+  // custom fields — loaded when dialog opens
   const [cfState, setCfState] = useState<CfState[]>([]);
   const [cfLoading, setCfLoading] = useState(false);
 
-  useEffect(() => {
-    if (!open) return;
+  const loadCustomFields = useCallback(() => {
     setCfLoading(true);
     getAdminMemberCustomFields(member.id).then((fields) => {
       setCfState(
@@ -69,7 +68,7 @@ export function EditMemberDialog({
       );
       setCfLoading(false);
     });
-  }, [open, member.id]);
+  }, [member.id]);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -105,7 +104,13 @@ export function EditMemberDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (v) loadCustomFields();
+        onOpenChange(v);
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit member</DialogTitle>

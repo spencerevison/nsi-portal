@@ -42,7 +42,10 @@ export function MobileNav({
       </button>
 
       {open && (
-        <nav aria-label="Mobile navigation" className="border-border bg-card absolute top-full right-0 left-0 z-50 border-b px-6 py-3 shadow-sm">
+        <nav
+          aria-label="Mobile navigation"
+          className="border-border bg-card absolute top-full right-0 left-0 z-50 border-b px-6 py-3 shadow-sm"
+        >
           <ul className="flex flex-col gap-1">
             {links.map((link) => {
               const active =

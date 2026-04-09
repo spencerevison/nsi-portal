@@ -31,7 +31,7 @@ export function WelcomeBanner({
       <button
         onClick={handleDismiss}
         disabled={pending}
-        className="text-muted-foreground hover:text-foreground absolute right-3 top-3 rounded p-1 transition-colors"
+        className="text-muted-foreground hover:text-foreground absolute top-3 right-3 rounded p-1 transition-colors"
         aria-label="Dismiss welcome message"
       >
         <X className="size-4" />

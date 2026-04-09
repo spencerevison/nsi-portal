@@ -72,7 +72,7 @@ export async function listRolesWithCapabilities(): Promise<
     is_default: r.is_default,
     capabilities: capMap.get(r.id) ?? [],
     // default role applies to everyone, so count all members
-    member_count: r.is_default ? totalMembers : countMap.get(r.id) ?? 0,
+    member_count: r.is_default ? totalMembers : (countMap.get(r.id) ?? 0),
   }));
 }
 

@@ -32,7 +32,10 @@ export function ThemeToggle({ className }: { className?: string }) {
   return (
     <button
       onClick={() => setTheme(next.value)}
-      className={cn("text-muted-foreground hover:bg-muted hover:text-foreground rounded-md p-1.5 transition-colors", className)}
+      className={cn(
+        "text-muted-foreground hover:bg-muted hover:text-foreground rounded-md p-1.5 transition-colors",
+        className,
+      )}
       title={`Theme: ${current.label}. Click for ${next.label}`}
     >
       <current.icon className="size-4" />

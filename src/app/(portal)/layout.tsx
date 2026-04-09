@@ -63,7 +63,10 @@ export default async function PortalLayout({
             <span className="xs:inline hidden">Community Portal</span>
           </Link>
           {/* Desktop nav */}
-          <nav aria-label="Main navigation" className="hidden h-full w-full items-center gap-6 lg:flex">
+          <nav
+            aria-label="Main navigation"
+            className="hidden h-full w-full items-center gap-6 lg:flex"
+          >
             <PortalNav extraLinks={extraLinks} showAdmin={hasAdmin} />
             <ThemeToggle className="ml-auto" />
             <UserMenu />

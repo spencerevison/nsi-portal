@@ -18,7 +18,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Check, Eye, RotateCcw, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
+import {
+  Check,
+  Eye,
+  RotateCcw,
+  ArrowUpDown,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 import type { SupportRequestRow } from "./page";
 import { updateRequestStatus } from "./actions";
 import { timeAgo } from "@/lib/utils";
@@ -47,7 +54,7 @@ const statusConfig: Record<string, { label: string; badge: React.ReactNode }> =
       badge: (
         <Badge
           variant="secondary"
-          className="bg-amber-100 text-amber-900 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800"
+          className="border-amber-200 bg-amber-100 text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
         >
           New
         </Badge>
@@ -62,7 +69,7 @@ const statusConfig: Record<string, { label: string; badge: React.ReactNode }> =
       badge: (
         <Badge
           variant="secondary"
-          className="bg-green-100 text-green-900 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800"
+          className="border-green-200 bg-green-100 text-green-900 dark:border-green-800 dark:bg-green-950/40 dark:text-green-300"
         >
           Complete
         </Badge>
@@ -85,11 +92,7 @@ const statusOrder: Record<string, number> = { new: 0, read: 1, complete: 2 };
 const allStatuses = ["new", "read", "complete"];
 const allCategories = ["bug", "feature", "question", "other"];
 
-export function SupportTable({
-  requests,
-}: {
-  requests: SupportRequestRow[];
-}) {
+export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
   const [selected, setSelected] = useState<SupportRequestRow | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -151,11 +154,14 @@ export function SupportTable({
     }
   }
 
-  function SortIcon({ col }: { col: SortKey }) {
-    if (sortKey !== col) return <ArrowUpDown className="ml-1 inline size-3 opacity-40" />;
-    return sortDir === "asc"
-      ? <ChevronUp className="ml-1 inline size-3" />
-      : <ChevronDown className="ml-1 inline size-3" />;
+  function sortIcon(col: SortKey) {
+    if (sortKey !== col)
+      return <ArrowUpDown className="ml-1 inline size-3 opacity-40" />;
+    return sortDir === "asc" ? (
+      <ChevronUp className="ml-1 inline size-3" />
+    ) : (
+      <ChevronDown className="ml-1 inline size-3" />
+    );
   }
 
   return (
@@ -214,14 +220,14 @@ export function SupportTable({
                   onClick={() => toggleSort("status")}
                 >
                   Status
-                  <SortIcon col="status" />
+                  {sortIcon("status")}
                 </TableHead>
                 <TableHead
                   className="w-28 cursor-pointer select-none"
                   onClick={() => toggleSort("category")}
                 >
                   Category
-                  <SortIcon col="category" />
+                  {sortIcon("category")}
                 </TableHead>
                 <TableHead>Subject</TableHead>
                 <TableHead className="hidden md:table-cell">From</TableHead>
@@ -230,7 +236,7 @@ export function SupportTable({
                   onClick={() => toggleSort("date")}
                 >
                   Date
-                  <SortIcon col="date" />
+                  {sortIcon("date")}
                 </TableHead>
                 <TableHead className="w-12" />
               </TableRow>

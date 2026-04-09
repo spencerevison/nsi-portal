@@ -25,13 +25,12 @@ export function CommentActions({
   postId,
   body: initialBody,
   isOwner,
-  canModerate,
 }: {
   commentId: string;
   postId: string;
   body: string;
   isOwner: boolean;
-  canModerate: boolean;
+  canModerate?: boolean; // passed but used for gating at the parent level
 }) {
   const [pending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);

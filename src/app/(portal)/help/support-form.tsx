@@ -143,10 +143,7 @@ export function SupportForm() {
             />
           </div>
 
-          <Button
-            disabled={!canSubmit || pending}
-            onClick={handleSubmit}
-          >
+          <Button disabled={!canSubmit || pending} onClick={handleSubmit}>
             <Send data-icon="inline-start" className="size-4" />
             {pending ? "Submitting..." : "Submit Request"}
           </Button>
