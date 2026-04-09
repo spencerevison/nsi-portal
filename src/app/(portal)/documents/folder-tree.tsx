@@ -3,7 +3,13 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, ChevronDown, Folder, MoreVertical } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronDown,
+  Folder,
+  FolderPlus,
+  MoreVertical,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,8 +35,41 @@ import { createFolder, renameFolder, deleteFolder } from "./actions";
 type FolderDialog =
   | { type: "rename"; folderId: string; currentName: string }
   | { type: "add-subfolder"; parentId: string }
+  | { type: "add-root" }
   | { type: "delete"; folderId: string; folderName: string }
   | null;
+
+// Figure out which folders to expand based on the current URL
+function initExpanded(
+  tree: FolderRow[],
+  pathname: string,
+): Record<string, boolean> {
+  const expanded: Record<string, boolean> = {};
+
+  function walk(nodes: FolderRow[], prefix: string): boolean {
+    let anyMatch = false;
+    for (const node of nodes) {
+      const href = `${prefix}/${node.slug}`;
+      const childMatch = node.children?.length
+        ? walk(node.children, href)
+        : false;
+      if (pathname.startsWith(href) || childMatch) {
+        expanded[node.id] = true;
+        anyMatch = true;
+      }
+    }
+    return anyMatch;
+  }
+
+  const matched = walk(tree, "/documents");
+
+  // default: expand first top-level folder if nothing matched
+  if (!matched && tree.length > 0) {
+    expanded[tree[0].id] = true;
+  }
+
+  return expanded;
+}
 
 export function FolderTree({
   tree,
@@ -40,21 +79,9 @@ export function FolderTree({
   canWrite: boolean;
 }) {
   const pathname = usePathname();
-  const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
-    const init: Record<string, boolean> = {};
-    for (const folder of tree) {
-      const match =
-        pathname.startsWith(`/documents/${folder.slug}`) ||
-        folder.children?.some((c) =>
-          pathname.includes(`/documents/${folder.slug}/${c.slug}`),
-        );
-      if (match) init[folder.id] = true;
-    }
-    if (Object.keys(init).length === 0 && tree.length > 0) {
-      init[tree[0].id] = true;
-    }
-    return init;
-  });
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
+    initExpanded(tree, pathname),
+  );
   const [pending, startTransition] = useTransition();
   const [dialog, setDialog] = useState<FolderDialog>(null);
 
@@ -66,120 +93,33 @@ export function FolderTree({
     <>
       <div
         className={cn(
-          "border-border bg-card rounded-lg border p-2",
+          "border-border bg-card overflow-x-auto rounded-lg border p-2",
           pending && "opacity-60",
         )}
       >
         {tree.map((folder) => (
-          <div key={folder.id} className="mb-0.5">
-            <div className="group flex items-center">
-              <button
-                onClick={() => toggle(folder.id)}
-                className="text-muted-foreground hover:bg-muted shrink-0 rounded-md p-1"
-              >
-                {expanded[folder.id] ? (
-                  <ChevronDown className="size-4" />
-                ) : (
-                  <ChevronRight className="size-4" />
-                )}
-              </button>
-              <Link
-                href={`/documents/${folder.slug}`}
-                className={cn(
-                  "hover:bg-muted flex flex-1 items-center gap-2 rounded-md px-2 py-2 text-sm font-medium",
-                  pathname === `/documents/${folder.slug}`
-                    ? "bg-muted text-foreground"
-                    : "text-foreground",
-                )}
-              >
-                <Folder className="text-primary size-4" />
-                {folder.name}
-                {(folder.document_count ?? 0) > 0 && (
-                  <span className="text-muted-foreground ml-auto text-xs">
-                    {folder.document_count}
-                  </span>
-                )}
-              </Link>
-              {canWrite && (
-                <FolderMenu
-                  onRename={() =>
-                    setDialog({
-                      type: "rename",
-                      folderId: folder.id,
-                      currentName: folder.name,
-                    })
-                  }
-                  onAddSubfolder={() =>
-                    setDialog({ type: "add-subfolder", parentId: folder.id })
-                  }
-                  onDelete={() =>
-                    setDialog({
-                      type: "delete",
-                      folderId: folder.id,
-                      folderName: folder.name,
-                    })
-                  }
-                  isTopLevel
-                />
-              )}
-            </div>
-
-            {expanded[folder.id] && folder.children && (
-              <div className="ml-8 space-y-0.5">
-                {folder.children.map((child) => {
-                  const href = `/documents/${folder.slug}/${child.slug}`;
-                  const isSelected = pathname === href;
-                  return (
-                    <div key={child.id} className="group flex items-center">
-                      <Link
-                        href={href}
-                        className={cn(
-                          "flex flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
-                          isSelected
-                            ? "bg-muted text-foreground font-medium"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                        )}
-                      >
-                        <Folder
-                          className={cn(
-                            "size-4 shrink-0",
-                            isSelected
-                              ? "text-primary"
-                              : "text-muted-foreground",
-                          )}
-                        />
-                        <span className="truncate">{child.name}</span>
-                        {(child.document_count ?? 0) > 0 && (
-                          <span className="text-muted-foreground ml-auto shrink-0 text-xs">
-                            {child.document_count}
-                          </span>
-                        )}
-                      </Link>
-                      {canWrite && (
-                        <FolderMenu
-                          onRename={() =>
-                            setDialog({
-                              type: "rename",
-                              folderId: child.id,
-                              currentName: child.name,
-                            })
-                          }
-                          onDelete={() =>
-                            setDialog({
-                              type: "delete",
-                              folderId: child.id,
-                              folderName: child.name,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <FolderNode
+            key={folder.id}
+            folder={folder}
+            depth={0}
+            pathPrefix="/documents"
+            pathname={pathname}
+            expanded={expanded}
+            canWrite={canWrite}
+            onToggle={toggle}
+            onAction={setDialog}
+          />
         ))}
+
+        {canWrite && (
+          <button
+            onClick={() => setDialog({ type: "add-root" })}
+            className="text-muted-foreground hover:bg-muted hover:text-foreground mt-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
+          >
+            <FolderPlus className="size-4" />
+            Add folder
+          </button>
+        )}
       </div>
 
       {/* Rename dialog */}
@@ -211,6 +151,23 @@ export function FolderTree({
           onSubmit={(name) => {
             startTransition(async () => {
               await createFolder(name, dialog.parentId);
+              setDialog(null);
+            });
+          }}
+        />
+      )}
+
+      {/* Add root folder dialog */}
+      {dialog?.type === "add-root" && (
+        <FolderInputDialog
+          title="Add folder"
+          label="Folder name"
+          submitLabel="Create"
+          pending={pending}
+          onClose={() => setDialog(null)}
+          onSubmit={(name) => {
+            startTransition(async () => {
+              await createFolder(name, null);
               setDialog(null);
             });
           }}
@@ -252,18 +209,129 @@ export function FolderTree({
   );
 }
 
+// --- Recursive folder node ---
+
+function FolderNode({
+  folder,
+  depth,
+  pathPrefix,
+  pathname,
+  expanded,
+  canWrite,
+  onToggle,
+  onAction,
+}: {
+  folder: FolderRow;
+  depth: number;
+  pathPrefix: string;
+  pathname: string;
+  expanded: Record<string, boolean>;
+  canWrite: boolean;
+  onToggle: (id: string) => void;
+  onAction: (dialog: FolderDialog) => void;
+}) {
+  const href = `${pathPrefix}/${folder.slug}`;
+  const isSelected = pathname === href;
+  const hasChildren = (folder.children?.length ?? 0) > 0;
+  const isExpanded = expanded[folder.id];
+
+  return (
+    <div className={depth > 0 ? "pl-4" : "mb-0.5"}>
+      <div className="group flex items-center">
+        {hasChildren ? (
+          <button
+            onClick={() => onToggle(folder.id)}
+            className="text-muted-foreground hover:bg-muted shrink-0 rounded-md p-1"
+          >
+            {isExpanded ? (
+              <ChevronDown className="size-4" />
+            ) : (
+              <ChevronRight className="size-4" />
+            )}
+          </button>
+        ) : (
+          <span className="w-6 shrink-0" />
+        )}
+
+        <Link
+          href={href}
+          className={cn(
+            "flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-sm transition-colors",
+            depth === 0 ? "py-2 font-medium" : "py-1.5",
+            isSelected
+              ? "bg-muted text-foreground font-medium"
+              : depth === 0
+                ? "text-foreground hover:bg-muted"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+          )}
+        >
+          <Folder
+            className={cn(
+              "size-4 shrink-0",
+              isSelected || depth === 0
+                ? "text-primary"
+                : "text-muted-foreground",
+            )}
+          />
+          <span className="truncate">{folder.name}</span>
+          {(folder.document_count ?? 0) > 0 && (
+            <span className="text-muted-foreground ml-auto shrink-0 text-xs">
+              {folder.document_count}
+            </span>
+          )}
+        </Link>
+
+        {canWrite && (
+          <FolderMenu
+            onRename={() =>
+              onAction({
+                type: "rename",
+                folderId: folder.id,
+                currentName: folder.name,
+              })
+            }
+            onAddSubfolder={() =>
+              onAction({ type: "add-subfolder", parentId: folder.id })
+            }
+            onDelete={() =>
+              onAction({
+                type: "delete",
+                folderId: folder.id,
+                folderName: folder.name,
+              })
+            }
+          />
+        )}
+      </div>
+
+      {isExpanded &&
+        folder.children?.map((child) => (
+          <FolderNode
+            key={child.id}
+            folder={child}
+            depth={depth + 1}
+            pathPrefix={href}
+            pathname={pathname}
+            expanded={expanded}
+            canWrite={canWrite}
+            onToggle={onToggle}
+            onAction={onAction}
+          />
+        ))}
+    </div>
+  );
+}
+
 // --- Sub-components ---
 
 function FolderMenu({
   onRename,
   onAddSubfolder,
   onDelete,
-  isTopLevel = false,
 }: {
   onRename: () => void;
-  onAddSubfolder?: () => void;
+  onAddSubfolder: () => void;
   onDelete: () => void;
-  isTopLevel?: boolean;
 }) {
   return (
     <DropdownMenu>
@@ -272,11 +340,9 @@ function FolderMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={onRename}>Rename</DropdownMenuItem>
-        {isTopLevel && onAddSubfolder && (
-          <DropdownMenuItem onClick={onAddSubfolder}>
-            Add Subfolder
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem onClick={onAddSubfolder}>
+          Add Subfolder
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-destructive" onClick={onDelete}>
           Delete
