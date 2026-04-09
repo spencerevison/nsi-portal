@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { listGroups } from "@/lib/groups";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -10,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CreateGroupForm } from "./create-group-form";
-import { GroupActions } from "./group-actions";
+import { GroupTableRow } from "./group-table-row";
 
 export async function GroupsLoader() {
   const groups = await listGroups();
@@ -18,9 +17,9 @@ export async function GroupsLoader() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Groups</h1>
+        <h1 className="text-xl font-semibold">Email Groups</h1>
         <span className="text-muted-foreground text-sm">
-          {groups.length} groups
+          {groups.length} email groups
         </span>
       </div>
 
@@ -33,7 +32,9 @@ export async function GroupsLoader() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Members</TableHead>
-                <TableHead>Description</TableHead>
+                <TableHead className="hidden sm:table-cell">
+                  Description
+                </TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
@@ -44,30 +45,12 @@ export async function GroupsLoader() {
                     colSpan={4}
                     className="text-muted-foreground py-8 text-center"
                   >
-                    No groups yet.
+                    No email groups yet.
                   </TableCell>
                 </TableRow>
               )}
               {groups.map((g) => (
-                <TableRow key={g.id}>
-                  <TableCell className="font-medium">
-                    <Link
-                      href={`/admin/groups/${g.id}`}
-                      className="hover:underline"
-                    >
-                      {g.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {g.member_count}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {g.description ?? "—"}
-                  </TableCell>
-                  <TableCell>
-                    <GroupActions group={g} />
-                  </TableCell>
-                </TableRow>
+                <GroupTableRow key={g.id} group={g} />
               ))}
             </TableBody>
           </Table>

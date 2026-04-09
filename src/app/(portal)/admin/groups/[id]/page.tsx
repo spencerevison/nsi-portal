@@ -33,7 +33,7 @@ export default async function GroupDetailPage({ params }: { params: Params }) {
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
       >
         <ArrowLeft className="size-4" />
-        Back to Groups
+        Back to Email Groups
       </Link>
 
       <div>
@@ -65,7 +65,7 @@ export default async function GroupDetailPage({ params }: { params: Params }) {
                     colSpan={3}
                     className="text-muted-foreground py-8 text-center"
                   >
-                    No members in this group yet.
+                    No members in this email group yet.
                   </TableCell>
                 </TableRow>
               )}

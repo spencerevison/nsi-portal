@@ -26,7 +26,9 @@ function GroupsSkeleton() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Members</TableHead>
-                <TableHead>Description</TableHead>
+                <TableHead className="hidden sm:table-cell">
+                  Description
+                </TableHead>
                 <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
@@ -39,7 +41,7 @@ function GroupsSkeleton() {
                   <TableCell>
                     <Skeleton className="h-4 w-8" />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Skeleton className="h-4 w-48" />
                   </TableCell>
                   <TableCell>

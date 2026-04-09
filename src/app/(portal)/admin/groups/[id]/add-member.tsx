@@ -62,7 +62,7 @@ export function AddGroupMember({
         </Select>
       </div>
       <Button onClick={handleAdd} disabled={pending || !selectedId}>
-        {pending ? "Adding..." : "Add to group"}
+        {pending ? "Adding..." : "Add to email group"}
       </Button>
     </div>
   );

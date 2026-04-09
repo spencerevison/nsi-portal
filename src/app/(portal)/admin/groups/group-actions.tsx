@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,6 +25,7 @@ import type { GroupRow } from "@/lib/groups";
 import { updateGroup, deleteGroup } from "./actions";
 
 export function GroupActions({ group }: { group: GroupRow }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -40,6 +42,12 @@ export function GroupActions({ group }: { group: GroupRow }) {
           <MoreVertical className="size-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={() => router.push(`/admin/groups/${group.id}`)}
+          >
+            Manage
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
             Edit
           </DropdownMenuItem>
@@ -57,7 +65,7 @@ export function GroupActions({ group }: { group: GroupRow }) {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit group</DialogTitle>
+            <DialogTitle>Edit email group</DialogTitle>
           </DialogHeader>
           <form
             onSubmit={(e) => {
@@ -97,10 +105,10 @@ export function GroupActions({ group }: { group: GroupRow }) {
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete group</DialogTitle>
+            <DialogTitle>Delete email group</DialogTitle>
             <DialogDescription>
               Delete &ldquo;{group.name}&rdquo;? Members will be removed from
-              the group but their accounts are not affected.
+              the email group but their accounts are not affected.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
