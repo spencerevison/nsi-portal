@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { FileText, Download, MoreVertical } from "lucide-react";
+import {
+  FileText,
+  FileSpreadsheet,
+  Image,
+  Download,
+  MoreVertical,
+  type LucideIcon,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +27,36 @@ import { Button } from "@/components/ui/button";
 import type { DocumentRow } from "@/lib/documents";
 import { getDownloadUrl, deleteDocument } from "../actions";
 
+// icon + color per file type
+function fileTypeIcon(mimeType: string | null): {
+  Icon: LucideIcon;
+  color: string;
+} {
+  if (!mimeType) return { Icon: FileText, color: "text-muted-foreground" };
+
+  if (mimeType === "application/pdf")
+    return { Icon: FileText, color: "text-red-500" };
+
+  if (
+    mimeType === "application/msword" ||
+    mimeType ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  )
+    return { Icon: FileText, color: "text-blue-500" };
+
+  if (
+    mimeType === "application/vnd.ms-excel" ||
+    mimeType ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  )
+    return { Icon: FileSpreadsheet, color: "text-green-600" };
+
+  if (mimeType.startsWith("image/"))
+    return { Icon: Image, color: "text-purple-500" };
+
+  return { Icon: FileText, color: "text-muted-foreground" };
+}
+
 function formatFileSize(bytes: number | null): string {
   if (!bytes) return "—";
   if (bytes < 1024) return `${bytes} B`;
@@ -36,6 +73,8 @@ export function FileRow({
 }) {
   const [pending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const { Icon, color } = fileTypeIcon(doc.mime_type);
 
   function handleDownload() {
     startTransition(async () => {
@@ -61,7 +100,7 @@ export function FileRow({
           disabled={pending}
           className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left disabled:opacity-50"
         >
-          <FileText className="text-destructive/60 size-5 shrink-0" />
+          <Icon className={`size-5 shrink-0 ${color}`} />
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium">
               {doc.display_name}
