@@ -1,13 +1,29 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useId, useState, useTransition, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  DndContext,
+  closestCenter,
+  DragOverlay,
+  type DragStartEvent,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { CSS } from "@dnd-kit/utilities";
 import {
   ChevronRight,
   ChevronDown,
   Folder,
   FolderPlus,
+  GripVertical,
   MoreVertical,
 } from "lucide-react";
 import {
@@ -30,7 +46,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import type { FolderRow } from "@/lib/documents";
-import { createFolder, renameFolder, deleteFolder } from "./actions";
+import {
+  createFolder,
+  renameFolder,
+  deleteFolder,
+  reorderFolders,
+} from "./actions";
 
 type FolderDialog =
   | { type: "rename"; folderId: string; currentName: string }
@@ -61,14 +82,61 @@ function initExpanded(
     return anyMatch;
   }
 
-  const matched = walk(tree, "/documents");
-
-  // default: expand first top-level folder if nothing matched
-  if (!matched && tree.length > 0) {
-    expanded[tree[0].id] = true;
-  }
+  walk(tree, "/documents");
 
   return expanded;
+}
+
+// Find a folder's sibling array in the tree
+function findSiblings(tree: FolderRow[], folderId: string): FolderRow[] | null {
+  for (const node of tree) {
+    if (node.id === folderId) return tree;
+    if (node.children) {
+      const found = findSiblings(node.children, folderId);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+// Deep-clone tree with a sibling group reordered
+function reorderInTree(
+  tree: FolderRow[],
+  folderId: string,
+  oldIdx: number,
+  newIdx: number,
+): FolderRow[] {
+  if (tree.some((f) => f.id === folderId)) {
+    return arrayMove(tree, oldIdx, newIdx);
+  }
+
+  return tree.map((node) => {
+    if (node.children?.some((c) => c.id === folderId)) {
+      return {
+        ...node,
+        children: arrayMove(node.children, oldIdx, newIdx),
+      };
+    }
+    if (node.children) {
+      return {
+        ...node,
+        children: reorderInTree(node.children, folderId, oldIdx, newIdx),
+      };
+    }
+    return node;
+  });
+}
+
+// Find a folder by ID anywhere in the tree
+function findFolder(tree: FolderRow[], id: string): FolderRow | null {
+  for (const node of tree) {
+    if (node.id === id) return node;
+    if (node.children) {
+      const found = findFolder(node.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
 }
 
 export function FolderTree({
@@ -79,15 +147,87 @@ export function FolderTree({
   canWrite: boolean;
 }) {
   const pathname = usePathname();
+  const dndId = useId();
+  const [localTree, setLocalTree] = useState(tree);
+  // sync local state when server re-renders with fresh data
+  useEffect(() => {
+    setLocalTree(tree);
+  }, [tree]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
     initExpanded(tree, pathname),
   );
   const [pending, startTransition] = useTransition();
   const [dialog, setDialog] = useState<FolderDialog>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   function toggle(id: string) {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
   }
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setActiveId(null);
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const siblings = findSiblings(localTree, active.id as string);
+      if (!siblings) return;
+
+      const oldIdx = siblings.findIndex((f) => f.id === active.id);
+      const newIdx = siblings.findIndex((f) => f.id === over.id);
+      if (oldIdx === -1 || newIdx === -1) return;
+
+      // optimistic reorder
+      const newTree = reorderInTree(
+        localTree,
+        active.id as string,
+        oldIdx,
+        newIdx,
+      );
+      setLocalTree(newTree);
+
+      // persist: send the new sibling order to the server
+      const newSiblings = findSiblings(newTree, active.id as string);
+      if (newSiblings) {
+        const orderedIds = newSiblings.map((f) => f.id);
+        startTransition(() => {
+          reorderFolders(orderedIds);
+        });
+      }
+    },
+    [localTree, startTransition],
+  );
+
+  const handleDragCancel = useCallback(() => {
+    setActiveId(null);
+  }, []);
+
+  const activeFolder = activeId ? findFolder(localTree, activeId) : null;
+
+  const treeContent = (
+    <SortableContext
+      items={localTree.map((f) => f.id)}
+      strategy={verticalListSortingStrategy}
+    >
+      {localTree.map((folder) => (
+        <SortableFolderNode
+          key={folder.id}
+          folder={folder}
+          depth={0}
+          pathPrefix="/documents"
+          pathname={pathname}
+          expanded={expanded}
+          canWrite={canWrite}
+          onToggle={toggle}
+          onAction={setDialog}
+        />
+      ))}
+    </SortableContext>
+  );
 
   return (
     <>
@@ -97,19 +237,40 @@ export function FolderTree({
           pending && "opacity-60",
         )}
       >
-        {tree.map((folder) => (
-          <FolderNode
-            key={folder.id}
-            folder={folder}
-            depth={0}
-            pathPrefix="/documents"
-            pathname={pathname}
-            expanded={expanded}
-            canWrite={canWrite}
-            onToggle={toggle}
-            onAction={setDialog}
-          />
-        ))}
+        {canWrite ? (
+          <DndContext
+            id={dndId}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis]}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+          >
+            {treeContent}
+            <DragOverlay>
+              {activeFolder ? (
+                <div className="bg-card border-border flex items-center gap-2 rounded-md border px-2 py-1.5 text-sm font-medium shadow-md">
+                  <Folder className="text-primary size-4" />
+                  {activeFolder.name}
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        ) : (
+          localTree.map((folder) => (
+            <FolderNode
+              key={folder.id}
+              folder={folder}
+              depth={0}
+              pathPrefix="/documents"
+              pathname={pathname}
+              expanded={expanded}
+              canWrite={false}
+              onToggle={toggle}
+              onAction={setDialog}
+            />
+          ))
+        )}
 
         {canWrite && (
           <button
@@ -128,7 +289,7 @@ export function FolderTree({
           title="Rename folder"
           label="Folder name"
           defaultValue={dialog.currentName}
-          submitLabel="Save"
+          submitLabel={pending ? "Saving..." : "Save"}
           pending={pending}
           onClose={() => setDialog(null)}
           onSubmit={(name) => {
@@ -145,7 +306,7 @@ export function FolderTree({
         <FolderInputDialog
           title="Add subfolder"
           label="Subfolder name"
-          submitLabel="Create"
+          submitLabel={pending ? "Creating..." : "Create"}
           pending={pending}
           onClose={() => setDialog(null)}
           onSubmit={(name) => {
@@ -162,7 +323,7 @@ export function FolderTree({
         <FolderInputDialog
           title="Add folder"
           label="Folder name"
-          submitLabel="Create"
+          submitLabel={pending ? "Creating..." : "Create"}
           pending={pending}
           onClose={() => setDialog(null)}
           onSubmit={(name) => {
@@ -209,9 +370,140 @@ export function FolderTree({
   );
 }
 
-// --- Recursive folder node ---
+// --- Sortable folder node (with drag handle) ---
+
+function SortableFolderNode(props: {
+  folder: FolderRow;
+  depth: number;
+  pathPrefix: string;
+  pathname: string;
+  expanded: Record<string, boolean>;
+  canWrite: boolean;
+  onToggle: (id: string) => void;
+  onAction: (dialog: FolderDialog) => void;
+}) {
+  const { folder } = props;
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: folder.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const isExpanded = props.expanded[folder.id];
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        props.depth > 0 ? "pl-4" : "mb-0.5",
+        isDragging && "opacity-40",
+      )}
+    >
+      <div className="group flex items-center">
+        <button
+          {...attributes}
+          {...listeners}
+          className="text-muted-foreground hover:text-foreground shrink-0 cursor-grab rounded-md p-0.5 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
+          tabIndex={-1}
+        >
+          <GripVertical className="size-3.5" />
+        </button>
+
+        <FolderNodeContent {...props} />
+      </div>
+
+      {isExpanded && folder.children && folder.children.length > 0 && (
+        <SortableContext
+          items={folder.children.map((c) => c.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {folder.children.map((child) => (
+            <SortableFolderNode
+              key={child.id}
+              folder={child}
+              depth={props.depth + 1}
+              pathPrefix={`${props.pathPrefix}/${folder.slug}`}
+              pathname={props.pathname}
+              expanded={props.expanded}
+              canWrite={props.canWrite}
+              onToggle={props.onToggle}
+              onAction={props.onAction}
+            />
+          ))}
+        </SortableContext>
+      )}
+    </div>
+  );
+}
+
+// --- Static folder node (read-only, no DnD) ---
 
 function FolderNode({
+  folder,
+  depth,
+  pathPrefix,
+  pathname,
+  expanded,
+  canWrite,
+  onToggle,
+  onAction,
+}: {
+  folder: FolderRow;
+  depth: number;
+  pathPrefix: string;
+  pathname: string;
+  expanded: Record<string, boolean>;
+  canWrite: boolean;
+  onToggle: (id: string) => void;
+  onAction: (dialog: FolderDialog) => void;
+}) {
+  const isExpanded = expanded[folder.id];
+
+  return (
+    <div className={depth > 0 ? "pl-4" : "mb-0.5"}>
+      <div className="group flex items-center">
+        <FolderNodeContent
+          folder={folder}
+          depth={depth}
+          pathPrefix={pathPrefix}
+          pathname={pathname}
+          expanded={expanded}
+          canWrite={canWrite}
+          onToggle={onToggle}
+          onAction={onAction}
+        />
+      </div>
+
+      {isExpanded &&
+        folder.children?.map((child) => (
+          <FolderNode
+            key={child.id}
+            folder={child}
+            depth={depth + 1}
+            pathPrefix={`${pathPrefix}/${folder.slug}`}
+            pathname={pathname}
+            expanded={expanded}
+            canWrite={canWrite}
+            onToggle={onToggle}
+            onAction={onAction}
+          />
+        ))}
+    </div>
+  );
+}
+
+// --- Shared folder row content (chevron + link + menu) ---
+
+function FolderNodeContent({
   folder,
   depth,
   pathPrefix,
@@ -233,92 +525,74 @@ function FolderNode({
   const href = `${pathPrefix}/${folder.slug}`;
   const isSelected = pathname === href;
   const hasChildren = (folder.children?.length ?? 0) > 0;
-  const isExpanded = expanded[folder.id];
 
   return (
-    <div className={depth > 0 ? "pl-4" : "mb-0.5"}>
-      <div className="group flex items-center">
-        {hasChildren ? (
-          <button
-            onClick={() => onToggle(folder.id)}
-            className="text-muted-foreground hover:bg-muted shrink-0 rounded-md p-1"
-          >
-            {isExpanded ? (
-              <ChevronDown className="size-4" />
-            ) : (
-              <ChevronRight className="size-4" />
-            )}
-          </button>
-        ) : (
-          <span className="w-6 shrink-0" />
-        )}
-
-        <Link
-          href={href}
-          className={cn(
-            "flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-sm transition-colors",
-            depth === 0 ? "py-2 font-medium" : "py-1.5",
-            isSelected
-              ? "bg-muted text-foreground font-medium"
-              : depth === 0
-                ? "text-foreground hover:bg-muted"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-          )}
+    <>
+      {hasChildren ? (
+        <button
+          onClick={() => onToggle(folder.id)}
+          className="text-muted-foreground hover:bg-muted shrink-0 rounded-md p-1"
         >
-          <Folder
-            className={cn(
-              "size-4 shrink-0",
-              isSelected || depth === 0
-                ? "text-primary"
-                : "text-muted-foreground",
-            )}
-          />
-          <span className="truncate">{folder.name}</span>
-          {(folder.document_count ?? 0) > 0 && (
-            <span className="text-muted-foreground ml-auto shrink-0 text-xs">
-              {folder.document_count}
-            </span>
+          {expanded[folder.id] ? (
+            <ChevronDown className="size-4" />
+          ) : (
+            <ChevronRight className="size-4" />
           )}
-        </Link>
+        </button>
+      ) : (
+        <span className="w-6 shrink-0" />
+      )}
 
-        {canWrite && (
-          <FolderMenu
-            onRename={() =>
-              onAction({
-                type: "rename",
-                folderId: folder.id,
-                currentName: folder.name,
-              })
-            }
-            onAddSubfolder={() =>
-              onAction({ type: "add-subfolder", parentId: folder.id })
-            }
-            onDelete={() =>
-              onAction({
-                type: "delete",
-                folderId: folder.id,
-                folderName: folder.name,
-              })
-            }
-          />
+      <Link
+        href={href}
+        className={cn(
+          "flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-sm transition-colors",
+          depth === 0 ? "py-2 font-medium" : "py-1.5",
+          isSelected
+            ? "bg-muted text-foreground font-medium"
+            : depth === 0
+              ? "text-foreground hover:bg-muted"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
         )}
-      </div>
+      >
+        <Folder
+          className={cn(
+            "size-4 shrink-0",
+            isSelected || depth === 0
+              ? "text-primary"
+              : "text-muted-foreground",
+          )}
+        />
+        <span className="truncate">{folder.name}</span>
+        {(folder.document_count ?? 0) > 0 && (
+          <span className="text-muted-foreground ml-auto shrink-0 text-xs">
+            {folder.document_count}
+          </span>
+        )}
+      </Link>
 
-      {isExpanded &&
-        folder.children?.map((child) => (
-          <FolderNode
-            key={child.id}
-            folder={child}
-            depth={depth + 1}
-            pathPrefix={href}
-            pathname={pathname}
-            expanded={expanded}
-            canWrite={canWrite}
-            onToggle={onToggle}
-            onAction={onAction}
-          />
-        ))}
-    </div>
+      {canWrite && (
+        <FolderMenu
+          onRename={() =>
+            onAction({
+              type: "rename",
+              folderId: folder.id,
+              currentName: folder.name,
+            })
+          }
+          onAddSubfolder={() =>
+            onAction({ type: "add-subfolder", parentId: folder.id })
+          }
+          onDelete={() =>
+            onAction({
+              type: "delete",
+              folderId: folder.id,
+              folderName: folder.name,
+            })
+          }
+        />
+      )}
+    </>
   );
 }
 
@@ -396,7 +670,7 @@ function FolderInputDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={pending || !value.trim()}>
-              {pending ? "..." : submitLabel}
+              {submitLabel}
             </Button>
           </DialogFooter>
         </form>
