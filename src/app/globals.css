@@ -169,6 +169,9 @@
     @apply text-foreground;
     background: linear-gradient(160deg, #ece4d77f 0%, #fdfaf596 100%) fixed;
   }
+  .dark body {
+    background: linear-gradient(160deg, #0a0a0c 0%, #17171b 100%) fixed;
+  }
   html {
     @apply font-sans;
   }
