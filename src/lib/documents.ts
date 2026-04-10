@@ -151,11 +151,10 @@ export async function createSignedDownloadUrl(
   storagePath: string,
   downloadName?: string,
 ): Promise<string | null> {
+  const opts = downloadName ? { download: downloadName } : {};
   const { data, error } = await supabaseAdmin.storage
     .from("documents")
-    .createSignedUrl(storagePath, 60, {
-      download: downloadName || true,
-    });
+    .createSignedUrl(storagePath, 60, opts);
 
   if (error) {
     console.error("createSignedUrl failed", error);

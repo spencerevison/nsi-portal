@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import type { DocumentRow } from "@/lib/documents";
-import { getDownloadUrl, deleteDocument } from "../actions";
+import { getViewUrl, getDownloadUrl, deleteDocument } from "../actions";
 
 // icon + color per file type
 function fileTypeIcon(mimeType: string | null): {
@@ -76,11 +76,24 @@ export function FileRow({
 
   const { Icon, color } = fileTypeIcon(doc.mime_type);
 
+  function handleOpen() {
+    startTransition(async () => {
+      const result = await getViewUrl(doc.id);
+      if (result.ok) {
+        window.open(result.url, "_blank");
+      }
+    });
+  }
+
   function handleDownload() {
     startTransition(async () => {
       const result = await getDownloadUrl(doc.id);
       if (result.ok) {
-        window.open(result.url, "_blank");
+        // force browser download via temporary link
+        const a = document.createElement("a");
+        a.href = result.url;
+        a.download = doc.display_name;
+        a.click();
       }
     });
   }
@@ -96,7 +109,7 @@ export function FileRow({
     <>
       <div className="group hover:bg-muted/50 flex items-center gap-3 px-4 py-3 transition-colors">
         <button
-          onClick={handleDownload}
+          onClick={handleOpen}
           disabled={pending}
           className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left disabled:opacity-50"
         >
