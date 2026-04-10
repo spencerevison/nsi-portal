@@ -111,6 +111,29 @@ export async function deleteFolder(folderId: string): Promise<ActionResult> {
   return { ok: true };
 }
 
+// --- Folder reordering ---
+
+export async function reorderFolders(
+  orderedIds: string[],
+): Promise<ActionResult> {
+  await requireCapability("documents.write");
+
+  // batch update sort_order to match array position
+  const updates = orderedIds.map((id, i) =>
+    supabaseAdmin.from("folder").update({ sort_order: i }).eq("id", id),
+  );
+
+  const results = await Promise.all(updates);
+  const failed = results.find((r) => r.error);
+  if (failed?.error) {
+    console.error("reorderFolders failed", failed.error);
+    return { ok: false, error: "Failed to reorder folders" };
+  }
+
+  revalidatePath("/documents");
+  return { ok: true };
+}
+
 // --- Document operations ---
 
 export async function uploadDocument(
