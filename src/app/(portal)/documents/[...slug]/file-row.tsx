@@ -56,15 +56,23 @@ export function FileRow({
   return (
     <>
       <div className="group hover:bg-muted/50 flex items-center gap-3 px-4 py-3 transition-colors">
-        <FileText className="text-destructive/60 size-5 shrink-0" />
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-medium">{doc.display_name}</div>
-          <div className="text-muted-foreground mt-0.5 text-xs">
-            {formatFileSize(doc.file_size)} ·{" "}
-            {new Date(doc.uploaded_at).toLocaleDateString()}
-            {doc.uploader_name && <span> by {doc.uploader_name}</span>}
+        <button
+          onClick={handleDownload}
+          disabled={pending}
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left disabled:opacity-50"
+        >
+          <FileText className="text-destructive/60 size-5 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-medium">
+              {doc.display_name}
+            </div>
+            <div className="text-muted-foreground mt-0.5 text-xs">
+              {formatFileSize(doc.file_size)} ·{" "}
+              {new Date(doc.uploaded_at).toLocaleDateString()}
+              {doc.uploader_name && <span> by {doc.uploader_name}</span>}
+            </div>
           </div>
-        </div>
+        </button>
         <div className="flex shrink-0 items-center gap-1">
           <button
             onClick={handleDownload}
