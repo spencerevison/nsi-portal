@@ -149,10 +149,13 @@ export async function listDocuments(folderId: string): Promise<DocumentRow[]> {
 
 export async function createSignedDownloadUrl(
   storagePath: string,
+  downloadName?: string,
 ): Promise<string | null> {
   const { data, error } = await supabaseAdmin.storage
     .from("documents")
-    .createSignedUrl(storagePath, 60); // 60 second expiry
+    .createSignedUrl(storagePath, 60, {
+      download: downloadName || true,
+    });
 
   if (error) {
     console.error("createSignedUrl failed", error);

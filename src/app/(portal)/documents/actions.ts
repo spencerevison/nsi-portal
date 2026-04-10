@@ -251,13 +251,13 @@ export async function getDownloadUrl(
   // look up storage path from DB — prevents IDOR via arbitrary paths
   const { data: doc } = await supabaseAdmin
     .from("document")
-    .select("storage_path")
+    .select("storage_path, display_name")
     .eq("id", documentId)
     .single();
 
   if (!doc) return { ok: false, error: "Document not found" };
 
-  const url = await createSignedDownloadUrl(doc.storage_path);
+  const url = await createSignedDownloadUrl(doc.storage_path, doc.display_name);
   if (!url) return { ok: false, error: "Failed to generate download link" };
 
   return { ok: true, url };
