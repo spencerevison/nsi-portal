@@ -166,7 +166,8 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: linear-gradient(160deg, #ece4d77f 0%, #fdfaf596 100%) fixed;
   }
   html {
     @apply font-sans;
