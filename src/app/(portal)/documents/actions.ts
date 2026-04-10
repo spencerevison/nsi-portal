@@ -170,9 +170,9 @@ export async function uploadDocument(
     return { ok: false, error: "File type not allowed" };
   }
 
-  // generate a unique storage path preserving extension
-  const ext = file.name.includes(".") ? "." + file.name.split(".").pop() : "";
-  const storagePath = `${crypto.randomUUID()}${ext}`;
+  // uuid prefix prevents collisions, original name shows in URLs
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const storagePath = `${crypto.randomUUID()}/${safeName}`;
 
   // read file into buffer for server-side upload
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -183,7 +183,7 @@ export async function uploadDocument(
       contentType: file.type,
       upsert: false,
       duplex: "half",
-      metadata: { contentDisposition: "attachment" },
+      metadata: { contentDisposition: "inline" },
     });
 
   if (uploadErr) {
@@ -243,12 +243,32 @@ export async function deleteDocument(
   return { ok: true };
 }
 
+// Open inline (PDFs/images render in browser)
+export async function getViewUrl(
+  documentId: string,
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  await requireCapability("documents.read");
+
+  const { data: doc } = await supabaseAdmin
+    .from("document")
+    .select("storage_path")
+    .eq("id", documentId)
+    .single();
+
+  if (!doc) return { ok: false, error: "Document not found" };
+
+  const url = await createSignedDownloadUrl(doc.storage_path);
+  if (!url) return { ok: false, error: "Failed to generate link" };
+
+  return { ok: true, url };
+}
+
+// Force download with original filename
 export async function getDownloadUrl(
   documentId: string,
 ): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
   await requireCapability("documents.read");
 
-  // look up storage path from DB — prevents IDOR via arbitrary paths
   const { data: doc } = await supabaseAdmin
     .from("document")
     .select("storage_path, display_name")
