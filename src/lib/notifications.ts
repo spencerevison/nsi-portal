@@ -62,27 +62,27 @@ export async function sendInvitationEmail(opts: {
 
   const html = `
     <div style="font-family: ${fontStack}; max-width: 560px; margin: 0 auto; color: #222; line-height: 1.55;">
-      <div style="background: #0d7377; height: 6px; border-radius: 6px 6px 0 0;"></div>
-      <div style="padding: 32px 28px;">
-        <div style="margin-bottom: 24px;">
-          <img src="${logoUrl}" alt="NSI Community Portal" width="64" height="64" style="display:block; border:0; width:64px; height:64px; border-radius:10px;" />
+      <div style="background: #22444e; height: 6px; border-radius: 6px 6px 0 0;"></div>
+      <div style="padding: 28px;">
+        <div style="margin-bottom: 20px;">
+          <img src="${logoUrl}" alt="NSI Community Portal" width="56" height="56" style="display:block; border:0; width:56px; height:56px; border-radius:10px;" />
         </div>
-        <h1 style="font-size: 24px; font-weight: 600; margin: 0 0 20px; color: #0d7377; line-height: 1.3;">
+        <h1 style="font-size: 22px; font-weight: 600; margin: 0 0 16px; color: #22444e; line-height: 1.3;">
           You're invited to the NSI Community Portal
         </h1>
-        <p style="margin: 0 0 16px;">${greeting}</p>
-        <p style="margin: 0 0 16px;">
+        <p style="margin: 0 0 14px;">${greeting}</p>
+        <p style="margin: 0 0 14px;">
           You've been invited to join the <strong>North Secretary Island Community Portal</strong> — a private site for NSI members. Once you're set up, you'll be able to browse community documents, find contact info for your neighbours, and keep up with island news.
         </p>
-        <div style="margin: 32px 0;">
-          <a href="${url}" style="display:inline-block; background:#0d7377; color:#fff; padding:14px 32px; border-radius:6px; text-decoration:none; font-weight:600; font-size:15px;">
+        <div style="margin: 24px 0;">
+          <a href="${url}" style="display:inline-block; background:#22444e; color:#fff; padding:9px 18px; border-radius:8px; text-decoration:none; font-weight:500; font-size:14px; line-height:1.3;">
             Accept Invitation
           </a>
         </div>
         <p style="color: #666; font-size: 13px; margin: 0;">
           This invitation link will expire in 30 days.
         </p>
-        <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 28px 0 16px;" />
+        <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 24px 0 14px;" />
         <p style="color: #888; font-size: 12px; margin: 0;">
           If you weren't expecting this invitation, you can safely ignore this email.
         </p>
@@ -147,12 +147,12 @@ export async function sendWelcomeEmail(opts: {
           <h1 style="font-size: 20px;">Welcome, ${escapeHtml(opts.firstName)}!</h1>
           <p>Your account is set up and ready to go. Here's what you can do on the portal:</p>
           <ul style="line-height: 1.8;">
-            <li><a href="${portalUrl}/documents" style="color: #0d7377;">Documents</a> — browse community files and strata documents</li>
-            <li><a href="${portalUrl}/directory" style="color: #0d7377;">Member Directory</a> — find contact info for your neighbours</li>
-            <li><a href="${portalUrl}/community" style="color: #0d7377;">Message Board</a> — read and post community discussions</li>
+            <li><a href="${portalUrl}/documents" style="color: #22444e;">Documents</a> — browse community files and strata documents</li>
+            <li><a href="${portalUrl}/directory" style="color: #22444e;">Member Directory</a> — find contact info for your neighbours</li>
+            <li><a href="${portalUrl}/community" style="color: #22444e;">Message Board</a> — read and post community discussions</li>
           </ul>
           <p>
-            <a href="${portalUrl}" style="display:inline-block; background:#0d7377; color:#fff; padding:10px 20px; border-radius:4px; text-decoration:none;">
+            <a href="${portalUrl}" style="display:inline-block; background:#22444e; color:#fff; padding:10px 20px; border-radius:4px; text-decoration:none;">
               Visit the Portal
             </a>
           </p>
@@ -217,7 +217,7 @@ export async function notifyNewPost(opts: {
         <div style="font-family: sans-serif; max-width: 600px;">
           <p><strong>${escapeHtml(opts.authorName)}</strong> posted on the community board:</p>
           <p style="font-size: 18px; margin: 16px 0;">${escapeHtml(opts.title)}</p>
-          <p><a href="${postUrl}" style="color: #0d7377;">View post</a></p>
+          <p><a href="${postUrl}" style="color: #22444e;">View post</a></p>
           <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 16px 0;" />
           <p style="color: #888; font-size: 12px;">
             You received this because you have new post notifications enabled.
@@ -282,7 +282,7 @@ export async function notifyNewComment(opts: {
       html: `
         <div style="font-family: sans-serif; max-width: 600px;">
           <p><strong>${escapeHtml(opts.commenterName)}</strong> commented on your post <strong>${escapeHtml(opts.postTitle)}</strong>.</p>
-          <p><a href="${postUrl}" style="color: #0d7377;">View post</a></p>
+          <p><a href="${postUrl}" style="color: #22444e;">View post</a></p>
           <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 16px 0;" />
           <p style="color: #888; font-size: 12px;">
             You received this because you have reply notifications enabled.
