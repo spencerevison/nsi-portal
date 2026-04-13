@@ -71,7 +71,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
         <CardContent className="space-y-4">
           <h2 className="text-sm font-semibold">Profile Information</h2>
           <p className="text-muted-foreground text-xs">
-            Name and email are managed in your{" "}
+            Name, email, and picture are managed in your{" "}
             <button
               type="button"
               className="text-accent-600 hover:text-accent-800 underline underline-offset-2"
