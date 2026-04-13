@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus } from "lucide-react";
 import { inviteMember } from "./actions";
 import type { RoleOption } from "@/lib/members";
 import { Button } from "@/components/ui/button";
@@ -16,10 +15,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function AddMemberForm({ roles }: { roles: RoleOption[] }) {
+type Props = {
+  roles: RoleOption[];
+  onClose: () => void;
+};
+
+export function AddMemberForm({ roles, onClose }: Props) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
   const defaultRole = roles.find((r) => r.is_default);
   const [roleId, setRoleId] = useState<string>(defaultRole?.id ?? "");
 
@@ -44,24 +47,15 @@ export function AddMemberForm({ roles }: { roles: RoleOption[] }) {
       }
       form.reset();
       setRoleId(defaultRole?.id ?? "");
-      setOpen(false);
+      onClose();
     });
-  }
-
-  if (!open) {
-    return (
-      <Button onClick={() => setOpen(true)}>
-        <Plus className="size-4" />
-        Add member
-      </Button>
-    );
   }
 
   return (
     <Card>
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="first_name">First name</Label>
               <Input id="first_name" name="first_name" />
@@ -77,7 +71,7 @@ export function AddMemberForm({ roles }: { roles: RoleOption[] }) {
             <Input id="email" name="email" type="email" required />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="lot_number">Lot number</Label>
               <Input id="lot_number" name="lot_number" />
@@ -114,7 +108,7 @@ export function AddMemberForm({ roles }: { roles: RoleOption[] }) {
               variant="outline"
               onClick={() => {
                 setError(null);
-                setOpen(false);
+                onClose();
               }}
             >
               Cancel
