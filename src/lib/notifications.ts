@@ -14,6 +14,117 @@ export function isDeliverable(email: string): boolean {
 const portalUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://nsiportal.ca";
 
 /**
+ * Invitation email — sent in place of Clerk's built-in invitation email.
+ * We route through Resend because Clerk's shared SendGrid IPs were getting
+ * flagged as spam by Gmail regardless of SPF/DKIM. See ADR-001/003.
+ *
+ * Callers create the Clerk invitation with `notify: false` and then pass
+ * the returned `invitation.url` here.
+ */
+export async function sendInvitationEmail(opts: {
+  email: string;
+  firstName?: string;
+  invitationUrl: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!isDeliverable(opts.email)) {
+    return { ok: false, error: "Email address is not deliverable" };
+  }
+  if (!opts.invitationUrl) {
+    return { ok: false, error: "Missing invitation URL" };
+  }
+
+  // Allow a separate from-address for invites (e.g. invitations@send.nsiportal.ca)
+  // but fall back to the main one so existing setups keep working.
+  const fromAddress =
+    process.env.RESEND_INVITATIONS_FROM_ADDRESS ??
+    process.env.RESEND_FROM_ADDRESS ??
+    "NSI Portal <noreply@resend.dev>";
+
+  const url = escapeHtml(opts.invitationUrl);
+  const greeting = opts.firstName
+    ? `Hi ${escapeHtml(opts.firstName)},`
+    : "Hello,";
+  const greetingText = opts.firstName ? `Hi ${opts.firstName},` : "Hello,";
+
+  const subject =
+    "You're invited to the North Secretary Island Community Portal";
+
+  // system font stack renders natively in most modern mail clients;
+  // keeps the email from looking like a generic transactional template.
+  const fontStack =
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+
+  // Assets referenced from emails need an absolute, publicly-reachable URL —
+  // recipients' mail clients can't hit localhost. Default to prod; override
+  // via EMAIL_ASSETS_URL if you're testing against a preview deployment.
+  const assetsUrl = process.env.EMAIL_ASSETS_URL ?? "https://nsiportal.ca";
+  const logoUrl = `${assetsUrl}/logo-nsi-email.png`;
+
+  const html = `
+    <div style="font-family: ${fontStack}; max-width: 560px; margin: 0 auto; color: #222; line-height: 1.55;">
+      <div style="background: #0d7377; height: 6px; border-radius: 6px 6px 0 0;"></div>
+      <div style="padding: 32px 28px;">
+        <div style="margin-bottom: 24px;">
+          <img src="${logoUrl}" alt="NSI Community Portal" width="64" height="64" style="display:block; border:0; width:64px; height:64px; border-radius:10px;" />
+        </div>
+        <h1 style="font-size: 24px; font-weight: 600; margin: 0 0 20px; color: #0d7377; line-height: 1.3;">
+          You're invited to the NSI Community Portal
+        </h1>
+        <p style="margin: 0 0 16px;">${greeting}</p>
+        <p style="margin: 0 0 16px;">
+          You've been invited to join the <strong>North Secretary Island Community Portal</strong> — a private site for NSI members. Once you're set up, you'll be able to browse community documents, find contact info for your neighbours, and keep up with island news.
+        </p>
+        <div style="margin: 32px 0;">
+          <a href="${url}" style="display:inline-block; background:#0d7377; color:#fff; padding:14px 32px; border-radius:6px; text-decoration:none; font-weight:600; font-size:15px;">
+            Accept Invitation
+          </a>
+        </div>
+        <p style="color: #666; font-size: 13px; margin: 0;">
+          This invitation link will expire in 30 days.
+        </p>
+        <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 28px 0 16px;" />
+        <p style="color: #888; font-size: 12px; margin: 0;">
+          If you weren't expecting this invitation, you can safely ignore this email.
+        </p>
+      </div>
+    </div>
+  `;
+
+  const text = [
+    "You're invited to the North Secretary Island Community Portal",
+    "",
+    greetingText,
+    "",
+    "You've been invited to join the North Secretary Island Community Portal — a private site for NSI members. Once you're set up, you'll be able to browse community documents, find contact info for your neighbours, and keep up with island news.",
+    "",
+    "Accept your invitation:",
+    opts.invitationUrl,
+    "",
+    "This invitation link will expire in 30 days.",
+    "",
+    "If you weren't expecting this invitation, you can safely ignore this email.",
+  ].join("\n");
+
+  try {
+    const result = await resend.emails.send({
+      from: fromAddress,
+      to: opts.email,
+      subject,
+      html,
+      text,
+    });
+    if (result.error) {
+      console.error("sendInvitationEmail: resend error", result.error);
+      return { ok: false, error: "Email provider rejected the message" };
+    }
+    return { ok: true };
+  } catch (err) {
+    console.error("sendInvitationEmail failed", err);
+    return { ok: false, error: "Failed to send invitation email" };
+  }
+}
+
+/**
  * Welcome email sent after a new member accepts their invitation.
  * Non-fatal — errors are logged but won't break the webhook.
  */

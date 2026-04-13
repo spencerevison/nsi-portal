@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { clerkClient } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { requireCapability } from "@/lib/current-user";
+import { sendInvitationEmail } from "@/lib/notifications";
 
 export type InviteMemberInput = {
   email: string;
@@ -61,29 +62,56 @@ export async function inviteMember(
     return { ok: false, error: "Failed to create member record" };
   }
 
-  // Fire the Clerk invitation. If this fails, roll back the app_user row
-  // so the admin can retry cleanly.
+  // Create the Clerk invitation (notify:false — we deliver the email ourselves
+  // via Resend, since Clerk's shared SendGrid IPs were ending up in Gmail spam).
+  // If Clerk itself fails, roll back the app_user row so the admin can retry.
+  let invitationUrl: string | undefined;
   try {
     const clerk = await clerkClient();
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    await clerk.invitations.createInvitation({
+    const inv = await clerk.invitations.createInvitation({
       emailAddress: email,
       redirectUrl: `${appUrl}/sign-up`,
       ignoreExisting: true,
+      notify: false,
     });
+    invitationUrl = inv.url;
   } catch (err) {
     console.error("clerk invitation failed", err);
     await supabaseAdmin.from("app_user").delete().eq("id", inserted.id);
-    return { ok: false, error: "Failed to send invitation email" };
+    return { ok: false, error: "Failed to create invitation" };
   }
 
-  // Mark as invited
+  if (!invitationUrl) {
+    // shouldn't happen in practice — the Clerk SDK populates `url` on the
+    // returned invitation object — but if it ever doesn't we need to know.
+    console.error("clerk invitation returned no url", { email });
+    await supabaseAdmin.from("app_user").delete().eq("id", inserted.id);
+    return { ok: false, error: "Invitation created but no link returned" };
+  }
+
+  // Mark as invited before sending — if the send fails the member still
+  // shows up in the admin list and can be retried via "Resend".
   await supabaseAdmin
     .from("app_user")
     .update({ invited_at: new Date().toISOString() })
     .eq("id", inserted.id);
 
+  const sendRes = await sendInvitationEmail({
+    email,
+    firstName: input.first_name?.trim() || undefined,
+    invitationUrl,
+  });
+
   revalidatePath("/admin/members");
+
+  if (!sendRes.ok) {
+    return {
+      ok: false,
+      error: `Member added, but invitation email failed to send (${sendRes.error}). Use Resend to try again.`,
+    };
+  }
+
   return { ok: true, user_id: inserted.id };
 }
 
@@ -236,26 +264,29 @@ export async function resendInvitation(userId: string): Promise<ActionResult> {
 
   const { data: user, error } = await supabaseAdmin
     .from("app_user")
-    .select("id, email, accepted_at")
+    .select("id, email, first_name, accepted_at")
     .eq("id", userId)
     .single();
 
   if (error || !user) return { ok: false, error: "Member not found" };
   if (user.accepted_at) return { ok: false, error: "Already accepted" };
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  let invitationUrl: string | undefined;
+
   try {
     const clerk = await clerkClient();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    await clerk.invitations.createInvitation({
+    const inv = await clerk.invitations.createInvitation({
       emailAddress: user.email,
       redirectUrl: `${appUrl}/sign-up`,
       ignoreExisting: false,
+      notify: false,
     });
+    invitationUrl = inv.url;
   } catch {
-    // if invitation already exists, try revoking and re-creating
+    // invitation probably already exists — revoke any pending ones and recreate
     try {
       const clerk = await clerkClient();
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
       const invitations = await clerk.invitations.getInvitationList({
         query: user.email,
         status: "pending",
@@ -263,14 +294,21 @@ export async function resendInvitation(userId: string): Promise<ActionResult> {
       for (const inv of invitations.data) {
         await clerk.invitations.revokeInvitation(inv.id);
       }
-      await clerk.invitations.createInvitation({
+      const inv = await clerk.invitations.createInvitation({
         emailAddress: user.email,
         redirectUrl: `${appUrl}/sign-up`,
+        notify: false,
       });
+      invitationUrl = inv.url;
     } catch (err) {
       console.error("resend invitation failed", err);
       return { ok: false, error: "Failed to resend invitation" };
     }
+  }
+
+  if (!invitationUrl) {
+    console.error("clerk invitation returned no url", { email: user.email });
+    return { ok: false, error: "Invitation created but no link returned" };
   }
 
   await supabaseAdmin
@@ -278,7 +316,21 @@ export async function resendInvitation(userId: string): Promise<ActionResult> {
     .update({ invited_at: new Date().toISOString(), revoked_at: null })
     .eq("id", userId);
 
+  const sendRes = await sendInvitationEmail({
+    email: user.email,
+    firstName: user.first_name || undefined,
+    invitationUrl,
+  });
+
   revalidatePath("/admin/members");
+
+  if (!sendRes.ok) {
+    return {
+      ok: false,
+      error: `Invitation refreshed, but email failed to send (${sendRes.error}). Try again.`,
+    };
+  }
+
   return { ok: true };
 }
 
