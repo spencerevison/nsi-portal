@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { updateCapabilities } from "../actions";
 
 export function CapabilityGrid({
@@ -71,11 +72,9 @@ export function CapabilityGrid({
                   key={cap.key}
                   className="hover:bg-muted flex items-center gap-3 rounded-md px-2 py-1.5"
                 >
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={caps.has(cap.key)}
-                    onChange={() => toggle(cap.key)}
-                    className="border-input size-4 rounded"
+                    onCheckedChange={() => toggle(cap.key)}
                   />
                   <div>
                     <span className="text-sm">{cap.key}</span>

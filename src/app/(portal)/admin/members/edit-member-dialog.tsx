@@ -34,7 +34,6 @@ type CfState = {
   field_id: string;
   field_name: string;
   value: string | null;
-  visible: boolean;
   parsed: FieldItem[];
 };
 
@@ -62,7 +61,9 @@ export function EditMemberDialog({
     getAdminMemberCustomFields(member.id).then((fields) => {
       setCfState(
         fields.map((cf) => ({
-          ...cf,
+          field_id: cf.field_id,
+          field_name: cf.field_name,
+          value: cf.value,
           parsed: parseFieldValue(cf.value, cf.field_name),
         })),
       );
@@ -95,7 +96,7 @@ export function EditMemberDialog({
           userId: member.id,
           fieldId: cf.field_id,
           value: JSON.stringify(cf.parsed),
-          visible: cf.visible,
+          visible: true,
         });
       }
 
@@ -186,18 +187,10 @@ export function EditMemberDialog({
                     key={cf.field_id}
                     fieldName={cf.field_name}
                     items={cf.parsed}
-                    visible={cf.visible}
                     onItemsChange={(items) => {
                       setCfState((prev) => {
                         const next = [...prev];
                         next[cfIdx] = { ...next[cfIdx], parsed: items };
-                        return next;
-                      });
-                    }}
-                    onVisibleChange={(v) => {
-                      setCfState((prev) => {
-                        const next = [...prev];
-                        next[cfIdx] = { ...next[cfIdx], visible: v };
                         return next;
                       });
                     }}
