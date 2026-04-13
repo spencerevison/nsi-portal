@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   CustomFieldEditor,
   parseFieldValue,
@@ -30,13 +31,12 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
   const [notifyNewPost, setNotifyNewPost] = useState(profile.notify_new_post);
   const [notifyReplies, setNotifyReplies] = useState(profile.notify_replies);
 
-  // custom fields — track values + visibility locally
+  // custom fields — track values locally
   const [cfState, setCfState] = useState(
     profile.custom_fields.map((cf) => ({
       field_id: cf.field_id,
       field_name: cf.field_name,
       value: cf.value,
-      visible: cf.visible,
       parsed: parseFieldValue(cf.value, cf.field_name),
     })),
   );
@@ -50,7 +50,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
         await updateCustomFieldValue({
           fieldId: cf.field_id,
           value: JSON.stringify(cf.parsed),
-          visible: cf.visible,
+          visible: true,
         });
       }
 
@@ -126,8 +126,8 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
           <div>
             <h2 className="text-sm font-semibold">Directory Information</h2>
             <p className="text-muted-foreground text-xs">
-              These fields are optional and visible in the member directory only
-              if you choose to share them.
+              Optional fields shown alongside your profile in the member
+              directory.
             </p>
           </div>
 
@@ -136,18 +136,10 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
               key={cf.field_id}
               fieldName={cf.field_name}
               items={cf.parsed}
-              visible={cf.visible}
               onItemsChange={(items) => {
                 setCfState((prev) => {
                   const next = [...prev];
                   next[cfIdx] = { ...next[cfIdx], parsed: items };
-                  return next;
-                });
-              }}
-              onVisibleChange={(v) => {
-                setCfState((prev) => {
-                  const next = [...prev];
-                  next[cfIdx] = { ...next[cfIdx], visible: v };
                   return next;
                 });
               }}
@@ -172,11 +164,9 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
                 Get notified when someone creates a new post
               </p>
             </div>
-            <input
-              type="checkbox"
+            <Checkbox
               checked={notifyNewPost}
-              onChange={(e) => setNotifyNewPost(e.target.checked)}
-              className="border-input size-5 rounded"
+              onCheckedChange={(checked) => setNotifyNewPost(checked === true)}
             />
           </label>
           <div className="border-border border-t" />
@@ -187,11 +177,9 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
                 Get notified when someone comments on your post
               </p>
             </div>
-            <input
-              type="checkbox"
+            <Checkbox
               checked={notifyReplies}
-              onChange={(e) => setNotifyReplies(e.target.checked)}
-              className="border-input size-5 rounded"
+              onCheckedChange={(checked) => setNotifyReplies(checked === true)}
             />
           </label>
         </CardContent>
