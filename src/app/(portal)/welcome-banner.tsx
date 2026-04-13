@@ -27,7 +27,7 @@ export function WelcomeBanner({
   if (dismissed) return null;
 
   return (
-    <Card className="border-accent-200 bg-accent-50/40 dark:border-accent-800 dark:bg-accent-950/30 relative">
+    <Card className="border-accent-200 bg-accent-50/75 dark:border-accent-800 dark:bg-accent-950/30 relative">
       <button
         onClick={handleDismiss}
         disabled={pending}
