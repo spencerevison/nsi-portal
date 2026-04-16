@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -54,9 +55,25 @@ export function PortalNav({
         </li>
       ))}
       {showAdmin && (
-        <li className="h-full">
-          <NavLink href="/admin" label="Admin" pathname={pathname} />
-        </li>
+        <>
+          <li className="flex items-center px-1" aria-hidden>
+            <span className="bg-border h-4 w-px" />
+          </li>
+          <li className="h-full">
+            <Link
+              href="/admin"
+              className={cn(
+                "inline-flex h-full items-center gap-1.5 border-b-2 px-1 pt-1 text-sm font-medium transition-colors",
+                pathname.startsWith("/admin")
+                  ? "border-accent-600 text-accent-600 dark:border-cream-100 dark:text-cream-100"
+                  : "text-muted-foreground hover:text-foreground border-transparent",
+              )}
+            >
+              <Shield className="size-3.5" />
+              Admin
+            </Link>
+          </li>
+        </>
       )}
     </ul>
   );
