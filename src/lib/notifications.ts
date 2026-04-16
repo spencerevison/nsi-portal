@@ -72,7 +72,7 @@ export async function sendInvitationEmail(opts: {
         </h1>
         <p style="margin: 0 0 14px;">${greeting}</p>
         <p style="margin: 0 0 14px;">
-          You've been invited to join the <strong>North Secretary Island Community Portal</strong> — a private site for NSI members. Once you're set up, you'll be able to browse community documents, find contact info for your neighbours, and keep up with island news.
+          You've been invited to join the <strong>North Secretary Island Community Portal</strong> — a private site for NSI members. Once you're set up, you'll be able to browse community documents, find contact info for other community members, and keep up with island news.
         </p>
         <div style="margin: 24px 0;">
           <a href="${url}" style="display:inline-block; background:#22444e; color:#fff; padding:9px 18px; border-radius:8px; text-decoration:none; font-weight:500; font-size:14px; line-height:1.3;">
@@ -95,7 +95,7 @@ export async function sendInvitationEmail(opts: {
     "",
     greetingText,
     "",
-    "You've been invited to join the North Secretary Island Community Portal — a private site for NSI members. Once you're set up, you'll be able to browse community documents, find contact info for your neighbours, and keep up with island news.",
+    "You've been invited to join the North Secretary Island Community Portal — a private site for NSI members. Once you're set up, you'll be able to browse community documents, find contact info for other community members, and keep up with island news.",
     "",
     "Accept your invitation:",
     opts.invitationUrl,
@@ -148,7 +148,7 @@ export async function sendWelcomeEmail(opts: {
           <p>Your account is set up and ready to go. Here's what you can do on the portal:</p>
           <ul style="line-height: 1.8;">
             <li><a href="${portalUrl}/documents" style="color: #22444e;">Documents</a> — browse community files and strata documents</li>
-            <li><a href="${portalUrl}/directory" style="color: #22444e;">Member Directory</a> — find contact info for your neighbours</li>
+            <li><a href="${portalUrl}/directory" style="color: #22444e;">Member Directory</a> — find contact info for other community members</li>
             <li><a href="${portalUrl}/community" style="color: #22444e;">Message Board</a> — read and post community discussions</li>
           </ul>
           <p>
