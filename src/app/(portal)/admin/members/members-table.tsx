@@ -12,26 +12,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  SortableTableHead,
 } from "@/components/ui/table";
-import type { MemberRow, MemberStatus, RoleOption } from "@/lib/members";
+import type { MemberRow, RoleOption } from "@/lib/members";
+import { memberStatusBadge } from "@/lib/member-status";
 import { MemberActions } from "./member-actions";
-
-const statusVariant: Record<
-  MemberStatus,
-  { variant: "secondary" | "outline" | "destructive"; className?: string }
-> = {
-  Draft: { variant: "outline" },
-  Invited: {
-    variant: "secondary",
-    className: "bg-amber-100 text-amber-900 border-amber-200",
-  },
-  Active: {
-    variant: "secondary",
-    className: "bg-green-100 text-green-900 border-green-200",
-  },
-  Revoked: { variant: "destructive" },
-  Inactive: { variant: "secondary" },
-};
 
 type SortKey = "name" | "email" | "lot" | "role" | "status";
 type SortDir = "asc" | "desc";
@@ -91,9 +76,10 @@ export function MembersTable({
     }
   });
 
-  const sortIndicator = (key: SortKey) => {
-    if (sortKey !== key) return null;
-    return sortDir === "asc" ? " ↑" : " ↓";
+  const sortProps = {
+    currentSort: sortKey,
+    direction: sortDir,
+    onSort: toggleSort,
   };
 
   return (
@@ -113,36 +99,29 @@ export function MembersTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead
-                  className="hover:text-foreground cursor-pointer select-none"
-                  onClick={() => toggleSort("name")}
+                <SortableTableHead sortKey="name" {...sortProps}>
+                  Name
+                </SortableTableHead>
+                <SortableTableHead
+                  sortKey="email"
+                  className="hidden md:table-cell"
+                  {...sortProps}
                 >
-                  Name{sortIndicator("name")}
-                </TableHead>
-                <TableHead
-                  className="hover:text-foreground hidden cursor-pointer select-none md:table-cell"
-                  onClick={() => toggleSort("email")}
+                  Email
+                </SortableTableHead>
+                <SortableTableHead sortKey="lot" {...sortProps}>
+                  Lot
+                </SortableTableHead>
+                <SortableTableHead
+                  sortKey="role"
+                  className="hidden md:table-cell"
+                  {...sortProps}
                 >
-                  Email{sortIndicator("email")}
-                </TableHead>
-                <TableHead
-                  className="hover:text-foreground cursor-pointer select-none"
-                  onClick={() => toggleSort("lot")}
-                >
-                  Lot{sortIndicator("lot")}
-                </TableHead>
-                <TableHead
-                  className="hover:text-foreground hidden cursor-pointer select-none md:table-cell"
-                  onClick={() => toggleSort("role")}
-                >
-                  Role{sortIndicator("role")}
-                </TableHead>
-                <TableHead
-                  className="hover:text-foreground cursor-pointer select-none"
-                  onClick={() => toggleSort("status")}
-                >
-                  Status{sortIndicator("status")}
-                </TableHead>
+                  Role
+                </SortableTableHead>
+                <SortableTableHead sortKey="status" {...sortProps}>
+                  Status
+                </SortableTableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
@@ -160,7 +139,7 @@ export function MembersTable({
                 </TableRow>
               )}
               {sorted.map((m) => {
-                const s = statusVariant[m.status];
+                const s = memberStatusBadge[m.status];
                 return (
                   <TableRow key={m.id}>
                     <TableCell className="font-medium">
