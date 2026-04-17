@@ -282,7 +282,7 @@ export default async function HomePage() {
               const countArr = post.comment as unknown as { count: number }[];
               return (
                 <Link key={post.id} href={`/community/${post.id}`}>
-                  <Card className="hover:border-border/80 border-l-3 border-l-amber-500 transition-colors">
+                  <Card className="border-l-[3px] border-l-amber-500 transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-start gap-2">
                         <Pin

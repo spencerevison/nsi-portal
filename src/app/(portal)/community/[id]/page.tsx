@@ -40,7 +40,7 @@ export default async function PostPage({ params }: { params: Params }) {
       {/* Post — body before metadata */}
       <Card
         className={clsx("py-0!", {
-          "border-l-3 border-l-amber-500": post.pinned,
+          "border-l-[3px] border-l-amber-500": post.pinned,
         })}
       >
         <CardContent className="p-5">

@@ -42,7 +42,7 @@ export async function CommunityLoader() {
             <Card
               className={
                 post.pinned
-                  ? "border-l-3 border-l-amber-500"
+                  ? "border-l-[3px] border-l-amber-500"
                   : "hover:border-border/80"
               }
             >

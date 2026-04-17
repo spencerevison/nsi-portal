@@ -4,6 +4,7 @@ import { UserMenu } from "./user-menu";
 import { PortalNav } from "./portal-nav";
 import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";
+import { Button } from "@/components/ui/button";
 import { getCurrentAppUser, getCurrentCapabilities } from "@/lib/current-user";
 
 export default async function PortalLayout({
@@ -20,15 +21,13 @@ export default async function PortalLayout({
       : "Your account has been deactivated.";
     return (
       <main className="bg-muted flex min-h-screen items-center justify-center p-6">
-        <div className="border-border bg-card w-full max-w-md rounded-lg border p-8 shadow-sm">
+        <div className="bg-card ring-foreground/10 w-full max-w-md rounded-xl p-8 ring-1">
           <h1 className="mb-2 text-xl font-semibold">Access unavailable</h1>
           <p className="text-muted-foreground mb-4 text-sm">
             {reason} If you believe this is wrong, contact the administrator.
           </p>
           <SignOutButton>
-            <button className="border-border hover:bg-muted rounded border px-4 py-2 text-sm">
-              Sign out
-            </button>
+            <Button variant="outline">Sign out</Button>
           </SignOutButton>
         </div>
       </main>

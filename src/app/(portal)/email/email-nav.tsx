@@ -23,7 +23,7 @@ export function EmailNav() {
             className={cn(
               "border-b-2 px-1 pb-2 text-sm font-medium transition-colors",
               active
-                ? "border-accent-600 text-accent-600 dark:border-cream-100 dark:text-cream-100"
+                ? "border-accent-600 text-accent-600 dark:border-cream-300 dark:text-cream-300"
                 : "text-muted-foreground hover:text-foreground border-transparent",
             )}
           >
