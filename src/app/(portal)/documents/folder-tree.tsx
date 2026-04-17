@@ -250,7 +250,7 @@ export function FolderTree({
             <DragOverlay>
               {activeFolder ? (
                 <div className="bg-card border-border flex items-center gap-2 rounded-md border px-2 py-1.5 text-sm font-medium shadow-md">
-                  <Folder className="text-primary size-4" />
+                  <Folder className="text-accent-600 dark:text-cream-300 size-4" />
                   {activeFolder.name}
                 </div>
               ) : null}
@@ -559,7 +559,7 @@ function FolderNodeContent({
           className={cn(
             "size-4 shrink-0",
             isSelected || depth === 0
-              ? "text-primary"
+              ? "text-accent-600 dark:text-cream-300"
               : "text-muted-foreground",
           )}
         />

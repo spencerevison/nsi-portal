@@ -27,7 +27,7 @@ export function NavLink({
       className={cn(
         "inline-flex h-full items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors",
         active
-          ? "border-accent-600 text-accent-600 dark:border-cream-100 dark:text-cream-100"
+          ? "border-accent-600 text-accent-600 dark:border-cream-300 dark:text-cream-300"
           : "text-muted-foreground hover:text-foreground border-transparent",
       )}
     >
@@ -65,7 +65,7 @@ export function PortalNav({
               className={cn(
                 "inline-flex h-full items-center gap-1.5 border-b-2 px-1 pt-1 text-sm font-medium transition-colors",
                 pathname.startsWith("/admin")
-                  ? "border-accent-600 text-accent-600 dark:border-cream-100 dark:text-cream-100"
+                  ? "border-accent-600 text-accent-600 dark:border-cream-300 dark:text-cream-300"
                   : "text-muted-foreground hover:text-foreground border-transparent",
               )}
             >
