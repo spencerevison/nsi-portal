@@ -104,6 +104,39 @@ function TableCaption({
   );
 }
 
+// Generic sortable <th> — encapsulates the cursor/hover styling, indicator
+// arrow, and click handler so tables don't re-declare them per column.
+function SortableTableHead<K extends string>({
+  sortKey,
+  currentSort,
+  direction,
+  onSort,
+  children,
+  className,
+  ...props
+}: Omit<React.ComponentProps<"th">, "onClick"> & {
+  sortKey: K;
+  currentSort: K;
+  direction: "asc" | "desc";
+  onSort: (key: K) => void;
+}) {
+  const indicator =
+    currentSort === sortKey ? (direction === "asc" ? " ↑" : " ↓") : null;
+  return (
+    <TableHead
+      className={cn(
+        "hover:text-foreground cursor-pointer select-none",
+        className,
+      )}
+      onClick={() => onSort(sortKey)}
+      {...props}
+    >
+      {children}
+      {indicator}
+    </TableHead>
+  );
+}
+
 export {
   Table,
   TableHeader,
@@ -113,4 +146,5 @@ export {
   TableRow,
   TableCell,
   TableCaption,
+  SortableTableHead,
 };

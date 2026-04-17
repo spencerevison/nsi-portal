@@ -11,6 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  SortableTableHead,
 } from "@/components/ui/table";
 import type { DirectoryMember, CustomField } from "@/lib/directory";
 import { MemberAvatar } from "./member-avatar";
@@ -55,11 +56,6 @@ export function DirectoryView({
     }
   }
 
-  const sortIndicator = (key: SortKey) => {
-    if (sortKey !== key) return null;
-    return sortDir === "asc" ? " ↑" : " ↓";
-  };
-
   const filtered = members.filter((m) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -97,7 +93,11 @@ export function DirectoryView({
     }
   });
 
-  const thClass = "cursor-pointer select-none hover:text-foreground";
+  const sortProps = {
+    currentSort: sortKey,
+    direction: sortDir,
+    onSort: toggleSort,
+  };
 
   return (
     <>
@@ -119,30 +119,22 @@ export function DirectoryView({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead
-                    className={thClass}
-                    onClick={() => toggleSort("name")}
+                  <SortableTableHead sortKey="name" {...sortProps}>
+                    Name
+                  </SortableTableHead>
+                  <SortableTableHead
+                    sortKey="lot"
+                    className="w-16"
+                    {...sortProps}
                   >
-                    Name{sortIndicator("name")}
-                  </TableHead>
-                  <TableHead
-                    className={`w-16 ${thClass}`}
-                    onClick={() => toggleSort("lot")}
-                  >
-                    Lot{sortIndicator("lot")}
-                  </TableHead>
-                  <TableHead
-                    className={thClass}
-                    onClick={() => toggleSort("phone")}
-                  >
-                    Phone{sortIndicator("phone")}
-                  </TableHead>
-                  <TableHead
-                    className={thClass}
-                    onClick={() => toggleSort("email")}
-                  >
-                    Email{sortIndicator("email")}
-                  </TableHead>
+                    Lot
+                  </SortableTableHead>
+                  <SortableTableHead sortKey="phone" {...sortProps}>
+                    Phone
+                  </SortableTableHead>
+                  <SortableTableHead sortKey="email" {...sortProps}>
+                    Email
+                  </SortableTableHead>
                   {customFields.map((f) => (
                     <TableHead key={f.id}>{f.name}</TableHead>
                   ))}
