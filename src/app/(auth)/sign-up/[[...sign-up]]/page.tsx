@@ -16,23 +16,29 @@ export default async function SignUpPage({
 
   if (!ticket) {
     return (
-      <div className="border-border bg-card w-full max-w-md rounded-lg border p-8 shadow-sm">
-        <h1 className="mb-2 text-xl font-semibold">Invitation required</h1>
-        <p className="text-muted-foreground text-sm">
-          The NSI portal is members-only. If you&rsquo;re a community member and
-          haven&rsquo;t received an invitation, contact the administrator.
-        </p>
-        <p className="mt-4 text-sm">
-          <Link
-            href="/sign-in"
-            className="text-accent-600 hover:text-accent-800 hover:underline"
-          >
-            Already have an account? Sign in
-          </Link>
-        </p>
-      </div>
+      <main className="flex min-h-screen flex-col items-center justify-center p-6">
+        <div className="border-border bg-card w-full max-w-md rounded-lg border p-8 shadow-sm">
+          <h1 className="mb-2 text-xl font-semibold">Invitation required</h1>
+          <p className="text-muted-foreground text-sm">
+            The NSI portal is members-only. If you&rsquo;re a community member
+            and haven&rsquo;t received an invitation, contact the administrator.
+          </p>
+          <p className="mt-4 text-sm">
+            <Link
+              href="/sign-in"
+              className="text-accent-600 hover:text-accent-800 hover:underline"
+            >
+              Already have an account? Sign in
+            </Link>
+          </p>
+        </div>
+      </main>
     );
   }
 
-  return <SignUp />;
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-6">
+      <SignUp />
+    </main>
+  );
 }
