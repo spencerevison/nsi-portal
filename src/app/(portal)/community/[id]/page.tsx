@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MemberAvatar } from "../../directory/member-avatar";
 import { CommentForm } from "./comment-form";
 import { CommentActions } from "./comment-actions";
+import { PostAttachments, CommentAttachments } from "./attachments";
 import clsx from "clsx";
 
 type Params = Promise<{ id: string }>;
@@ -49,6 +50,9 @@ export default async function PostPage({ params }: { params: Params }) {
             <h1 className="text-lg font-semibold">{post.title}</h1>
           </div>
           <div className="mt-4 text-sm whitespace-pre-wrap">{post.body}</div>
+          {post.attachments.length > 0 && (
+            <PostAttachments attachments={post.attachments} />
+          )}
           <div className="border-border text-muted-foreground mt-4 flex items-center gap-3 border-t pt-4 text-xs">
             <span className="flex items-center gap-1.5">
               <MemberAvatar
@@ -110,6 +114,11 @@ export default async function PostPage({ params }: { params: Params }) {
                 <p className="mt-1.5 pl-8 text-sm whitespace-pre-wrap">
                   {comment.body}
                 </p>
+                {comment.attachments.length > 0 && (
+                  <div className="pl-8">
+                    <CommentAttachments attachments={comment.attachments} />
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -14,6 +14,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { GroupRow } from "@/lib/groups";
+import {
+  AttachmentPicker,
+  hasBlockingAttachmentIssues,
+  type PendingAttachment,
+} from "@/components/attachment-picker";
+import { formatBytes } from "@/lib/attachments";
 import { sendGroupEmail } from "./actions";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +34,8 @@ export function ComposeForm({
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
+  const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [result, setResult] = useState<{
     ok: boolean;
@@ -54,12 +62,14 @@ export function ComposeForm({
 
   function handleSend() {
     setResult(null);
+    const fd = new FormData();
+    for (const slug of selectedSlugs) fd.append("groupSlugs", slug);
+    fd.set("subject", subject);
+    fd.set("body", body);
+    for (const a of attachments) fd.append("attachments", a.file, a.file.name);
+
     startTransition(async () => {
-      const res = await sendGroupEmail({
-        groupSlugs: selectedSlugs,
-        subject,
-        body,
-      });
+      const res = await sendGroupEmail(fd);
 
       setConfirmOpen(false);
 
@@ -71,17 +81,22 @@ export function ComposeForm({
         setSelectedSlugs([]);
         setSubject("");
         setBody("");
+        setAttachments([]);
       } else {
         setResult({ ok: false, message: res.error });
       }
     });
   }
 
+  const attachmentTotal = attachments.reduce((n, a) => n + a.file.size, 0);
+  const attachmentsBlocked = hasBlockingAttachmentIssues(attachments);
+
   const canSend =
     selectedSlugs.length > 0 &&
     recipientCount > 0 &&
-    subject.trim() &&
-    body.trim();
+    !!subject.trim() &&
+    !!body.trim() &&
+    !attachmentsBlocked;
 
   return (
     <div className="space-y-4">
@@ -196,6 +211,19 @@ export function ComposeForm({
             />
           </div>
 
+          <div className="space-y-1.5">
+            <Label className="text-muted-foreground text-xs">Attachments</Label>
+            <AttachmentPicker
+              value={attachments}
+              onChange={setAttachments}
+              onError={setAttachmentError}
+              disabled={pending}
+            />
+            {attachmentError && (
+              <p className="text-destructive text-xs">{attachmentError}</p>
+            )}
+          </div>
+
           <p className="text-muted-foreground text-xs">
             {canSend
               ? "Emails are sent to all members in the selected group(s). Members cannot opt out of group emails."
@@ -219,7 +247,13 @@ export function ComposeForm({
             <DialogDescription>
               Send &ldquo;{subject}&rdquo; to{" "}
               {allSelected ? "all members" : selectedSlugs.join(", ")} (
-              {recipientCount} recipient{recipientCount !== 1 ? "s" : ""})?
+              {recipientCount} recipient{recipientCount !== 1 ? "s" : ""})
+              {attachments.length > 0
+                ? `, with ${attachments.length} attachment${
+                    attachments.length === 1 ? "" : "s"
+                  } (${formatBytes(attachmentTotal)})`
+                : ""}
+              ?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

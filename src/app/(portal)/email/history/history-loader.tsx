@@ -1,3 +1,4 @@
+import { Paperclip } from "lucide-react";
 import { listEmailLogs } from "@/lib/groups";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -47,7 +48,22 @@ export async function HistoryLoader() {
             )}
             {logs.map((log) => (
               <TableRow key={log.id}>
-                <TableCell className="font-medium">{log.subject}</TableCell>
+                <TableCell className="font-medium">
+                  <span className="inline-flex items-center gap-1.5">
+                    {log.subject}
+                    {log.attachment_count > 0 && (
+                      <span
+                        className="text-muted-foreground inline-flex items-center gap-0.5 text-xs"
+                        title={`${log.attachment_count} attachment${
+                          log.attachment_count === 1 ? "" : "s"
+                        }`}
+                      >
+                        <Paperclip className="size-3" />
+                        {log.attachment_count}
+                      </span>
+                    )}
+                  </span>
+                </TableCell>
                 <TableCell className="text-muted-foreground">
                   {log.target_groups.join(", ")}
                 </TableCell>

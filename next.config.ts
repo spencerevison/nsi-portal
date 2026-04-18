@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // attachments (posts, comments, emails) cap at 15 MB aggregate —
+    // plus form fields + multipart overhead, so 18 MB gives headroom.
+    serverActions: { bodySizeLimit: "18mb" },
+  },
   async headers() {
     return [
       {

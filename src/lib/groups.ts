@@ -18,6 +18,7 @@ export type EmailLogRow = {
   recipient_count: number;
   delivery_status: Record<string, number>;
   sent_at: string;
+  attachment_count: number;
 };
 
 export async function getGroup(groupId: string): Promise<GroupRow | null> {
@@ -187,7 +188,8 @@ export async function listEmailLogs(): Promise<EmailLogRow[]> {
     .from("email_log")
     .select(
       `id, subject, body, sent_by, target_groups, recipient_count, delivery_status, sent_at,
-       sender:sent_by ( first_name, last_name )`,
+       sender:sent_by ( first_name, last_name ),
+       email_attachment(count)`,
     )
     .order("sent_at", { ascending: false })
     .limit(50);
@@ -202,6 +204,7 @@ export async function listEmailLogs(): Promise<EmailLogRow[]> {
       first_name: string;
       last_name: string;
     } | null;
+    const attCount = e.email_attachment as unknown as { count: number }[];
     return {
       id: e.id,
       subject: e.subject,
@@ -214,6 +217,7 @@ export async function listEmailLogs(): Promise<EmailLogRow[]> {
       recipient_count: e.recipient_count,
       delivery_status: (e.delivery_status as Record<string, number>) ?? {},
       sent_at: e.sent_at,
+      attachment_count: attCount?.[0]?.count ?? 0,
     };
   });
 }
