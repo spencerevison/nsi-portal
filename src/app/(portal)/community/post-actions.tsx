@@ -29,13 +29,21 @@ export function PostActions({
   const [pending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  // Wrapper div stops clicks from bubbling up to the parent <Link> on
+  // the message-board list (clicking the kebab/confirm-delete shouldn't
+  // trigger navigation to the post detail page).
+  const stop = (e: React.MouseEvent) => e.stopPropagation();
+
   return (
-    <>
+    <div onClick={stop}>
       <DropdownMenu>
         <DropdownMenuTrigger
           disabled={pending}
           className="text-muted-foreground hover:bg-muted hover:text-foreground shrink-0 rounded-md p-1"
-          onClick={(e) => e.preventDefault()}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
           <MoreVertical className="size-4" />
         </DropdownMenuTrigger>
@@ -79,8 +87,9 @@ export function PostActions({
               disabled={pending}
               onClick={() => {
                 startTransition(async () => {
+                  // redirect() handles navigation on success; only failure
+                  // returns here
                   await deletePost(postId);
-                  setConfirmDelete(false);
                 });
               }}
             >
@@ -89,6 +98,6 @@ export function PostActions({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

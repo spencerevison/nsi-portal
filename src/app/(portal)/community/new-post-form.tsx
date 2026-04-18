@@ -1,42 +1,47 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  AttachmentPicker,
+  hasBlockingAttachmentIssues,
+  type PendingAttachment,
+} from "@/components/attachment-picker";
 import { createPost } from "./actions";
 
 export function NewPostForm() {
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  function reset() {
+    setAttachments([]);
+    setError(null);
+  }
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    const fd = new FormData(e.currentTarget);
+    if (hasBlockingAttachmentIssues(attachments)) {
+      setError("Fix the attachment issues before posting");
+      return;
+    }
+
     const form = e.currentTarget;
+    const fd = new FormData();
+    fd.set("title", String(new FormData(form).get("title") ?? ""));
+    fd.set("body", String(new FormData(form).get("body") ?? ""));
+    for (const a of attachments) fd.append("attachments", a.file, a.file.name);
 
     startTransition(async () => {
-      const result = await createPost({
-        title: String(fd.get("title") ?? ""),
-        body: String(fd.get("body") ?? ""),
-      });
-
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-
-      form.reset();
-      setOpen(false);
-      if (result.postId) {
-        router.push(`/community/${result.postId}`);
-      }
+      // Success path redirects server-side; only errors land here.
+      const result = await createPost(fd);
+      if (!result.ok) setError(result.error);
     });
   }
 
@@ -58,6 +63,8 @@ export function NewPostForm() {
   );
 
   if (!open) return header;
+
+  const blocked = hasBlockingAttachmentIssues(attachments);
 
   return (
     <>
@@ -85,16 +92,25 @@ export function NewPostForm() {
                 className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3"
               />
             </div>
+
+            <AttachmentPicker
+              value={attachments}
+              onChange={setAttachments}
+              onError={setError}
+              disabled={pending}
+            />
+
             {error && <p className="text-destructive text-sm">{error}</p>}
+
             <div className="flex gap-2">
-              <Button type="submit" disabled={pending}>
+              <Button type="submit" disabled={pending || blocked}>
                 {pending ? "Posting..." : "Post"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  setError(null);
+                  reset();
                   setOpen(false);
                 }}
               >
