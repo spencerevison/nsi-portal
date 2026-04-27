@@ -1,8 +1,8 @@
 # NSI Portal — Build Status
 
 **Current Phase:** Phase 8 (complete)
-**Last Updated:** 2026-04-08
-**Last Session:** Phase 8 complete. All remaining scope delivered: mobile fixes, accessibility pass, bulk CSV import, welcome email, admin custom fields editing, admin guide, Playwright UI coverage, and final code review with security hardening.
+**Last Updated:** 2026-04-27
+**Last Session:** Added Vercel Cron keep-alive (`/api/cron/keep-alive`, every 3 days) to prevent Supabase free-tier auto-pause. Deferral, not a reversal of ADR-002 — Pro upgrade still planned for launch.
 
 ---
 
@@ -90,7 +90,7 @@
 - [x] Help & Support form (emails admins + logs to DB)
 - [x] Accessibility pass (nav landmarks, headings, aria-hidden, ul/li nav, footer)
 - [x] Bulk CSV import (deferred from Phase 2)
-- [x] Supabase upgrade to Pro
+- [ ] Supabase upgrade to Pro (deferred — Vercel Cron keep-alive in place as stop-gap; per ADR-002 Pro upgrade still planned at launch)
 - [x] Domain setup + DNS (nsiportal.ca)
 - [ ] Seed production data (deferred)
 - [x] Welcome email template (triggered from Clerk user.created webhook)
@@ -104,6 +104,11 @@
 - **In-memory rate limiters:** Email send and support request rate limiters use in-memory Maps, which reset on Vercel serverless cold starts. Acceptable for ~70-member community but not bulletproof.
 
 ## Session Log
+
+### 2026-04-27
+- Added `/api/cron/keep-alive` route + `vercel.json` cron entry (every 3 days at 12:00 UTC). Service-role HEAD count against `app_user` keeps Supabase free-tier project from auto-pausing.
+- Auth via shared `CRON_SECRET` env var (Vercel sends it as `Authorization: Bearer …`); added to `.env.example`, documented in README.
+- Stop-gap until the Supabase Pro upgrade per ADR-002 lands at launch.
 
 ### 2026-04-08
 - Phase 8 completion: mobile fixes (admin link in hamburger nav, responsive members table), accessibility pass (landmarks, headings, aria-hidden, nav lists, footer)
