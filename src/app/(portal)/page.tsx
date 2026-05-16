@@ -1,22 +1,13 @@
 import Link from "next/link";
-import {
-  FileText,
-  Users,
-  MessageSquare,
-  Mail,
-  Pin,
-  Clock,
-  MessageCircle,
-  Upload,
-} from "lucide-react";
-import { getCurrentAppUser, getCurrentCapabilities } from "@/lib/current-user";
+import { Upload } from "lucide-react";
+import { getCurrentAppUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
+import { PinnedCard } from "@/components/pinned-card";
 import { MemberAvatar } from "./directory/member-avatar";
 import { WelcomeBanner } from "./welcome-banner";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { listFolders } from "@/lib/documents";
 import { timeAgo } from "@/lib/utils";
-import { stripHtml } from "@/lib/rich-text";
 
 type ActivityItem =
   | {
@@ -43,35 +34,11 @@ type ActivityItem =
 
 const BATCH_WINDOW_MS = 60_000;
 
-const quickLinks = [
-  {
-    href: "/documents",
-    icon: FileText,
-    label: "Documents",
-    desc: "Browse community files",
-  },
-  {
-    href: "/directory",
-    icon: Users,
-    label: "Directory",
-    desc: "Find member contacts",
-  },
-  {
-    href: "/community",
-    icon: MessageSquare,
-    label: "Message Board",
-    desc: "Posts and discussions",
-  },
-];
-
 export default async function HomePage() {
-  const [user, caps] = await Promise.all([
-    getCurrentAppUser(),
-    getCurrentCapabilities(),
-  ]);
+  const user = await getCurrentAppUser();
 
-  // fetch pinned posts + recent activity
-  const { data: pinnedPosts } = await supabaseAdmin
+  // newest pinned post — drives the "From the board" preview card
+  const { data: pinnedRows } = await supabaseAdmin
     .from("post")
     .select(
       `id, title, body, created_at,
@@ -80,7 +47,9 @@ export default async function HomePage() {
     )
     .eq("pinned", true)
     .order("created_at", { ascending: false })
-    .limit(3);
+    .limit(1);
+
+  const pinnedPost = pinnedRows?.[0] ?? null;
 
   const { data: recentPosts } = await supabaseAdmin
     .from("post")
@@ -106,7 +75,6 @@ export default async function HomePage() {
     listFolders(),
   ]);
 
-  // build folder slug map for resolving subfolder URLs
   const folderMap = new Map(allFolders.map((f) => [f.id, f]));
 
   function folderHref(folder: { slug: string; parent_id: string | null }) {
@@ -165,7 +133,6 @@ export default async function HomePage() {
     }
   }
 
-  // merge posts + doc uploads into a unified feed
   const postItems: ActivityItem[] = (recentPosts ?? []).map((post) => {
     const author = post.author as unknown as {
       first_name: string;
@@ -202,7 +169,6 @@ export default async function HomePage() {
     )
     .slice(0, 7);
 
-  // check if this is a first-time user who hasn't dismissed the welcome
   const showWelcome = user && !user.onboarded_at;
 
   let profileIncomplete = false;
@@ -215,19 +181,19 @@ export default async function HomePage() {
     profileIncomplete = !profile?.phone && !profile?.lot_number;
   }
 
-  const allQuickLinks = [
-    ...quickLinks,
-    ...(caps.has("email.send")
-      ? [
-          {
-            href: "/email/compose",
-            icon: Mail,
-            label: "Send Email",
-            desc: "Email the community",
-          },
-        ]
-      : []),
-  ];
+  // shape pinned post for <PinnedCard>
+  const pinnedAuthor = pinnedPost?.author as unknown as {
+    first_name: string;
+    last_name: string;
+    avatar_url: string | null;
+  } | null;
+  const pinnedCommentArr = pinnedPost?.comment as unknown as
+    | { count: number }[]
+    | undefined;
+  const pinnedReplyCount = pinnedCommentArr?.[0]?.count ?? 0;
+
+  const hasPinned = !!pinnedPost;
+  const hasActivity = activityFeed.length > 0;
 
   return (
     <div className="space-y-8">
@@ -247,172 +213,113 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* Quick links */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {allQuickLinks.map((link) => (
-          <Link key={link.href} href={link.href}>
-            <Card className="hover:border-accent-200 hover:bg-accent-50/30 h-full transition-colors">
-              <CardContent className="p-4">
-                <link.icon
-                  aria-hidden="true"
-                  className="text-accent-600 mb-2 size-5"
-                />
-                <h3 className="text-sm font-medium">{link.label}</h3>
-                <p className="text-muted-foreground mt-0.5 text-xs">
-                  {link.desc}
-                </p>
+      <div
+        className={
+          hasPinned ? "grid gap-5 md:grid-cols-[1.4fr_1fr]" : "grid gap-5"
+        }
+      >
+        {hasPinned && pinnedPost && (
+          <section>
+            <div className="mb-3 flex items-baseline justify-between">
+              <h2 className="text-accent-900 text-lg font-semibold tracking-[-0.005em]">
+                From the board
+              </h2>
+              <Link
+                href="/community"
+                className="text-accent-600 text-xs font-medium hover:underline"
+              >
+                All posts →
+              </Link>
+            </div>
+            <PinnedCard
+              variant="preview"
+              title={pinnedPost.title}
+              body={pinnedPost.body}
+              author={{
+                name: pinnedAuthor
+                  ? `${pinnedAuthor.first_name} ${pinnedAuthor.last_name}`
+                  : "Unknown",
+                avatarUrl: pinnedAuthor?.avatar_url ?? null,
+              }}
+              postedAt={pinnedPost.created_at}
+              replyCount={pinnedReplyCount}
+              href={`/community/${pinnedPost.id}`}
+            />
+          </section>
+        )}
+
+        {hasActivity && (
+          <section>
+            <div className="mb-3 flex items-baseline justify-between">
+              <h2 className="text-accent-900 text-lg font-semibold tracking-[-0.005em]">
+                Recent activity
+              </h2>
+            </div>
+            <Card>
+              <CardContent className="divide-border divide-y p-0">
+                {activityFeed.map((item) =>
+                  item.kind === "post" ? (
+                    <Link
+                      key={`post-${item.id}`}
+                      href={`/community/${item.id}`}
+                      className="hover:bg-muted/50 flex items-center gap-3 px-4 py-3 transition-colors"
+                    >
+                      {item.author && (
+                        <MemberAvatar
+                          member={{
+                            first_name: item.author.first_name,
+                            last_name: item.author.last_name,
+                            avatar_url: item.author.avatar_url,
+                          }}
+                          size="sm"
+                        />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-sm font-medium">
+                          {item.title}
+                        </h3>
+                        <p className="text-muted-foreground text-xs">
+                          {item.author
+                            ? `${item.author.first_name} ${item.author.last_name}`
+                            : "Unknown"}
+                        </p>
+                      </div>
+                      <span className="text-muted-foreground shrink-0 text-xs">
+                        {timeAgo(item.timestamp)}
+                      </span>
+                    </Link>
+                  ) : (
+                    <Link
+                      key={`doc-${item.id}`}
+                      href={item.folderHref}
+                      className="hover:bg-muted/50 flex items-center gap-3 px-4 py-3 transition-colors"
+                    >
+                      <div className="bg-cream-200 text-accent-600 flex size-7 items-center justify-center rounded-md">
+                        <Upload aria-hidden="true" className="size-3.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-sm font-medium">
+                          {item.documentName}
+                          <span className="text-muted-foreground font-normal">
+                            {" "}
+                            to {item.folderName}
+                          </span>
+                        </h3>
+                        <p className="text-muted-foreground text-xs">
+                          {item.uploaderName}
+                        </p>
+                      </div>
+                      <span className="text-muted-foreground shrink-0 text-xs">
+                        {timeAgo(item.timestamp)}
+                      </span>
+                    </Link>
+                  ),
+                )}
               </CardContent>
             </Card>
-          </Link>
-        ))}
+          </section>
+        )}
       </div>
-
-      {/* Announcements (pinned posts) */}
-      {pinnedPosts && pinnedPosts.length > 0 && (
-        <div>
-          <h2 className="text-muted-foreground mb-3 text-sm font-semibold tracking-wide uppercase">
-            Announcements
-          </h2>
-          <div className="space-y-2">
-            {pinnedPosts.map((post) => {
-              const author = post.author as unknown as {
-                first_name: string;
-                last_name: string;
-                avatar_url: string | null;
-              } | null;
-              const countArr = post.comment as unknown as { count: number }[];
-              return (
-                <Link
-                  key={post.id}
-                  href={`/community/${post.id}`}
-                  className="block"
-                >
-                  <Card className="border-l-[3px] border-l-amber-500 transition-colors">
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-2">
-                        <Pin
-                          aria-hidden="true"
-                          className="mt-0.5 size-4 shrink-0 text-amber-500"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <h3 className="text-sm font-semibold">
-                            {post.title}
-                          </h3>
-                          <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-                            {stripHtml(post.body)}
-                          </p>
-                          <div className="text-muted-foreground mt-2 flex items-center gap-3 text-xs">
-                            <span className="flex items-center gap-1.5">
-                              {author && (
-                                <MemberAvatar
-                                  member={{
-                                    first_name: author.first_name,
-                                    last_name: author.last_name,
-                                    avatar_url: author.avatar_url,
-                                  }}
-                                  size="sm"
-                                />
-                              )}
-                              {author
-                                ? `${author.first_name} ${author.last_name}`
-                                : "Unknown"}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock aria-hidden="true" className="size-3" />
-                              {timeAgo(post.created_at)}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <MessageCircle
-                                aria-hidden="true"
-                                className="size-3"
-                              />
-                              {countArr?.[0]?.count ?? 0}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Recent activity */}
-      {activityFeed.length > 0 && (
-        <div>
-          <h2 className="text-muted-foreground mb-3 text-sm font-semibold tracking-wide uppercase">
-            Recent Activity
-          </h2>
-          <Card>
-            <CardContent className="divide-border divide-y p-0">
-              {activityFeed.map((item) =>
-                item.kind === "post" ? (
-                  <Link
-                    key={`post-${item.id}`}
-                    href={`/community/${item.id}`}
-                    className="hover:bg-muted/50 flex items-center gap-3 px-4 py-3 transition-colors"
-                  >
-                    {item.author && (
-                      <MemberAvatar
-                        member={{
-                          first_name: item.author.first_name,
-                          last_name: item.author.last_name,
-                          avatar_url: item.author.avatar_url,
-                        }}
-                        size="sm"
-                      />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-sm font-medium">
-                        {item.title}
-                      </h3>
-                      <p className="text-muted-foreground text-xs">
-                        {item.author
-                          ? `${item.author.first_name} ${item.author.last_name}`
-                          : "Unknown"}
-                      </p>
-                    </div>
-                    <span className="text-muted-foreground shrink-0 text-xs">
-                      {timeAgo(item.timestamp)}
-                    </span>
-                  </Link>
-                ) : (
-                  <Link
-                    key={`doc-${item.id}`}
-                    href={item.folderHref}
-                    className="hover:bg-muted/50 flex items-center gap-3 px-4 py-3 transition-colors"
-                  >
-                    <div className="bg-muted flex size-7 items-center justify-center rounded-full">
-                      <Upload
-                        aria-hidden="true"
-                        className="text-muted-foreground size-3.5"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-sm font-medium">
-                        {item.documentName}
-                        <span className="text-muted-foreground font-normal">
-                          {" "}
-                          to {item.folderName}
-                        </span>
-                      </h3>
-                      <p className="text-muted-foreground text-xs">
-                        {item.uploaderName}
-                      </p>
-                    </div>
-                    <span className="text-muted-foreground shrink-0 text-xs">
-                      {timeAgo(item.timestamp)}
-                    </span>
-                  </Link>
-                ),
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }

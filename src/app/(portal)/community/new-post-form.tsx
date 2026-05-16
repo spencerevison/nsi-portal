@@ -94,7 +94,7 @@ export function NewPostForm() {
               <RichTextEditor
                 value={body}
                 onChange={setBody}
-                placeholder="Share something with the group..."
+                placeholder="Share something with the community..."
                 disabled={pending}
                 ariaLabel="Message body"
               />
