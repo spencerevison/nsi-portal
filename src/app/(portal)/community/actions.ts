@@ -15,10 +15,13 @@ import {
   removeAttachmentBlobs,
   uploadAttachmentBlob,
 } from "@/lib/attachments-server";
+import { sanitizeRichText, stripHtml, isEmptyRichText } from "@/lib/rich-text";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
 const MAX_POST_TITLE = 200;
+// limits apply to the visible/plaintext length — HTML tags don't count
+// against the user's character budget.
 const MAX_POST_BODY = 10000;
 const MAX_COMMENT_BODY = 5000;
 
@@ -29,13 +32,17 @@ export async function createPost(formData: FormData): Promise<ActionResult> {
   if (!user) return { ok: false, error: "Not authenticated" };
 
   const title = String(formData.get("title") ?? "").trim();
-  const body = String(formData.get("body") ?? "").trim();
+  const rawBody = String(formData.get("body") ?? "");
   const files = formData.getAll("attachments").filter(isFile);
 
-  if (!title || !body) return { ok: false, error: "Title and body required" };
+  const body = sanitizeRichText(rawBody);
+  const visibleLen = stripHtml(body).length;
+
+  if (!title || isEmptyRichText(body))
+    return { ok: false, error: "Title and body required" };
   if (title.length > MAX_POST_TITLE)
     return { ok: false, error: "Title too long (max 200 characters)" };
-  if (body.length > MAX_POST_BODY)
+  if (visibleLen > MAX_POST_BODY)
     return { ok: false, error: "Post too long (max 10,000 characters)" };
 
   const attCheck = validateAttachmentSet(
@@ -113,13 +120,16 @@ export async function createComment(formData: FormData): Promise<ActionResult> {
   if (!user) return { ok: false, error: "Not authenticated" };
 
   const postId = String(formData.get("postId") ?? "");
-  const body = String(formData.get("body") ?? "").trim();
+  const rawBody = String(formData.get("body") ?? "");
   const files = formData.getAll("attachments").filter(isFile);
 
+  const body = sanitizeRichText(rawBody);
+  const bodyEmpty = isEmptyRichText(body);
+
   if (!postId) return { ok: false, error: "Missing post" };
-  if (!body && files.length === 0)
+  if (bodyEmpty && files.length === 0)
     return { ok: false, error: "Comment cannot be empty" };
-  if (body.length > MAX_COMMENT_BODY)
+  if (stripHtml(body).length > MAX_COMMENT_BODY)
     return { ok: false, error: "Comment too long (max 5,000 characters)" };
 
   const attCheck = validateAttachmentSet(
@@ -258,9 +268,10 @@ export async function editComment(input: {
   const user = await getCurrentAppUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
-  if (!input.body.trim())
+  const sanitized = sanitizeRichText(input.body);
+  if (isEmptyRichText(sanitized))
     return { ok: false, error: "Comment cannot be empty" };
-  if (input.body.length > MAX_COMMENT_BODY)
+  if (stripHtml(sanitized).length > MAX_COMMENT_BODY)
     return { ok: false, error: "Comment too long (max 5,000 characters)" };
 
   const { data: comment } = await supabaseAdmin
@@ -275,7 +286,7 @@ export async function editComment(input: {
 
   const { error } = await supabaseAdmin
     .from("comment")
-    .update({ body: input.body.trim() })
+    .update({ body: sanitized })
     .eq("id", input.commentId);
 
   if (error) return { ok: false, error: "Failed to update comment" };

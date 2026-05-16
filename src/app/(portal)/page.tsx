@@ -16,6 +16,7 @@ import { WelcomeBanner } from "./welcome-banner";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { listFolders } from "@/lib/documents";
 import { timeAgo } from "@/lib/utils";
+import { stripHtml } from "@/lib/rich-text";
 
 type ActivityItem =
   | {
@@ -281,7 +282,11 @@ export default async function HomePage() {
               } | null;
               const countArr = post.comment as unknown as { count: number }[];
               return (
-                <Link key={post.id} href={`/community/${post.id}`}>
+                <Link
+                  key={post.id}
+                  href={`/community/${post.id}`}
+                  className="block"
+                >
                   <Card className="border-l-[3px] border-l-amber-500 transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-start gap-2">
@@ -294,7 +299,7 @@ export default async function HomePage() {
                             {post.title}
                           </h3>
                           <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-                            {post.body}
+                            {stripHtml(post.body)}
                           </p>
                           <div className="text-muted-foreground mt-2 flex items-center gap-3 text-xs">
                             <span className="flex items-center gap-1.5">

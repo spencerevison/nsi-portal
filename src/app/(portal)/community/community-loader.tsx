@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Pin, MessageCircle, Clock } from "lucide-react";
 import { listPosts, timeAgo } from "@/lib/community";
+import { stripHtml } from "@/lib/rich-text";
 import { getCurrentCapabilities } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { MemberAvatar } from "../directory/member-avatar";
@@ -57,7 +58,7 @@ export async function CommunityLoader() {
                   <div className="min-w-0 flex-1">
                     <h2 className="text-sm font-semibold">{post.title}</h2>
                     <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-                      {post.body}
+                      {stripHtml(post.body)}
                     </p>
                     <div className="text-muted-foreground mt-2 flex items-center gap-3 text-xs">
                       <span className="flex items-center gap-1.5">

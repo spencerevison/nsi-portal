@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import {
   AttachmentPicker,
   hasBlockingAttachmentIssues,
@@ -16,10 +17,12 @@ import { createPost } from "./actions";
 export function NewPostForm() {
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  const [body, setBody] = useState("");
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   function reset() {
+    setBody("");
     setAttachments([]);
     setError(null);
   }
@@ -27,6 +30,11 @@ export function NewPostForm() {
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
+    if (!body.trim()) {
+      setError("Message can't be empty");
+      return;
+    }
     if (hasBlockingAttachmentIssues(attachments)) {
       setError("Fix the attachment issues before posting");
       return;
@@ -35,7 +43,7 @@ export function NewPostForm() {
     const form = e.currentTarget;
     const fd = new FormData();
     fd.set("title", String(new FormData(form).get("title") ?? ""));
-    fd.set("body", String(new FormData(form).get("body") ?? ""));
+    fd.set("body", body);
     for (const a of attachments) fd.append("attachments", a.file, a.file.name);
 
     startTransition(async () => {
@@ -82,14 +90,13 @@ export function NewPostForm() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="post-body">Message</Label>
-              <textarea
-                id="post-body"
-                name="body"
-                required
-                rows={4}
+              <Label>Message</Label>
+              <RichTextEditor
+                value={body}
+                onChange={setBody}
                 placeholder="Share something with the group..."
-                className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3"
+                disabled={pending}
+                ariaLabel="Message body"
               />
             </div>
 

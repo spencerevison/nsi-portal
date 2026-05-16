@@ -8,6 +8,7 @@ import { MemberAvatar } from "../../directory/member-avatar";
 import { CommentForm } from "./comment-form";
 import { CommentActions } from "./comment-actions";
 import { PostAttachments, CommentAttachments } from "./attachments";
+import { RichTextContent } from "@/components/rich-text-content";
 import clsx from "clsx";
 
 type Params = Promise<{ id: string }>;
@@ -49,7 +50,7 @@ export default async function PostPage({ params }: { params: Params }) {
             {post.pinned && <Pin className="mt-1 size-4 text-amber-500" />}
             <h1 className="text-lg font-semibold">{post.title}</h1>
           </div>
-          <div className="mt-4 text-sm whitespace-pre-wrap">{post.body}</div>
+          <RichTextContent html={post.body} className="mt-4" />
           {post.attachments.length > 0 && (
             <PostAttachments attachments={post.attachments} />
           )}
@@ -111,9 +112,7 @@ export default async function PostPage({ params }: { params: Params }) {
                     />
                   )}
                 </div>
-                <p className="mt-1.5 pl-8 text-sm whitespace-pre-wrap">
-                  {comment.body}
-                </p>
+                <RichTextContent html={comment.body} className="mt-1.5 pl-8" />
                 {comment.attachments.length > 0 && (
                   <div className="pl-8">
                     <CommentAttachments attachments={comment.attachments} />

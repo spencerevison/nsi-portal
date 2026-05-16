@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import { deleteComment, editComment } from "../actions";
 
 export function CommentActions({
@@ -115,13 +115,19 @@ function EditDialog({
   const [pending, startTransition] = useTransition();
   const [body, setBody] = useState(initialBody);
   const [error, setError] = useState<string | null>(null);
+  const [resetSignal, setResetSignal] = useState(0);
 
   return (
     <Dialog
       open={open}
       onOpenChange={(v) => {
-        if (v) setBody(initialBody);
-        else setError(null);
+        if (v) {
+          setBody(initialBody);
+          // bump so the editor re-seeds with the latest body when reopened
+          setResetSignal((n) => n + 1);
+        } else {
+          setError(null);
+        }
         onOpenChange(v);
       }}
     >
@@ -129,12 +135,13 @@ function EditDialog({
         <DialogHeader>
           <DialogTitle>Edit comment</DialogTitle>
         </DialogHeader>
-        <Textarea
+        <RichTextEditor
           value={body}
-          onChange={(e) => setBody(e.target.value)}
-          rows={4}
-          maxLength={5000}
+          onChange={setBody}
           placeholder="Edit your comment..."
+          disabled={pending}
+          resetSignal={resetSignal}
+          ariaLabel="Edit comment"
         />
         {error && <p className="text-destructive text-sm">{error}</p>}
         <DialogFooter>
