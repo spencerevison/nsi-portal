@@ -248,16 +248,20 @@ export default async function HomePage() {
           </section>
         )}
 
-        {hasActivity && (
-          <section>
-            <div className="mb-3 flex items-baseline justify-between">
-              <h2 className="text-accent-900 text-lg font-semibold tracking-[-0.005em]">
-                Recent activity
-              </h2>
-            </div>
-            <Card>
-              <CardContent className="divide-border divide-y p-0">
-                {activityFeed.map((item) =>
+        <section>
+          <div className="mb-3 flex items-baseline justify-between">
+            <h2 className="text-accent-900 text-lg font-semibold tracking-[-0.005em]">
+              Recent activity
+            </h2>
+          </div>
+          <Card>
+            <CardContent className="divide-border divide-y p-0">
+              {!hasActivity ? (
+                <p className="text-muted-foreground px-4 py-6 text-center text-sm">
+                  No recent activity yet.
+                </p>
+              ) : (
+                activityFeed.map((item) =>
                   item.kind === "post" ? (
                     <Link
                       key={`post-${item.id}`}
@@ -314,11 +318,11 @@ export default async function HomePage() {
                       </span>
                     </Link>
                   ),
-                )}
-              </CardContent>
-            </Card>
-          </section>
-        )}
+                )
+              )}
+            </CardContent>
+          </Card>
+        </section>
       </div>
     </div>
   );
