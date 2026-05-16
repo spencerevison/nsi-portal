@@ -259,6 +259,48 @@ export async function deletePost(postId: string): Promise<ActionResult> {
   redirect("/community");
 }
 
+export async function editPost(input: {
+  postId: string;
+  title: string;
+  body: string;
+}): Promise<ActionResult> {
+  await requireCapability("community.write");
+  const user = await getCurrentAppUser();
+  if (!user) return { ok: false, error: "Not authenticated" };
+
+  const title = input.title.trim();
+  const sanitized = sanitizeRichText(input.body);
+
+  if (!title || isEmptyRichText(sanitized))
+    return { ok: false, error: "Title and body required" };
+  if (title.length > MAX_POST_TITLE)
+    return { ok: false, error: "Title too long (max 200 characters)" };
+  if (stripHtml(sanitized).length > MAX_POST_BODY)
+    return { ok: false, error: "Post too long (max 10,000 characters)" };
+
+  const { data: post } = await supabaseAdmin
+    .from("post")
+    .select("author_id")
+    .eq("id", input.postId)
+    .single();
+
+  if (!post) return { ok: false, error: "Post not found" };
+  // mods can delete/pin but not edit content — keeps the edit trail clean.
+  if (post.author_id !== user.id)
+    return { ok: false, error: "You can only edit your own posts" };
+
+  const { error } = await supabaseAdmin
+    .from("post")
+    .update({ title, body: sanitized })
+    .eq("id", input.postId);
+
+  if (error) return { ok: false, error: "Failed to update post" };
+
+  revalidatePath("/community");
+  revalidatePath(`/community/${input.postId}`);
+  return { ok: true };
+}
+
 export async function editComment(input: {
   commentId: string;
   postId: string;

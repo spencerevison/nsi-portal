@@ -14,7 +14,7 @@ import {
   Heading2,
   Unlink,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -81,11 +81,15 @@ export function RichTextEditor({
     editor?.setEditable(!disabled);
   }, [editor, disabled]);
 
-  // Reset to `value` when parent bumps resetSignal — used after submit to
-  // clear the comment form. We don't track value otherwise because TipTap
-  // owns its own document state.
+  // Reset to `value` only when the parent bumps resetSignal. TipTap owns
+  // its own document state — we must not call setContent on every keystroke
+  // (which is what would happen if we treated `value` as reactive here),
+  // because setContent moves the cursor to the end of the doc.
+  const lastSignal = useRef(resetSignal);
   useEffect(() => {
-    if (resetSignal === undefined || !editor) return;
+    if (!editor || resetSignal === undefined) return;
+    if (lastSignal.current === resetSignal) return;
+    lastSignal.current = resetSignal;
     editor.commands.setContent(value || "");
   }, [resetSignal, editor, value]);
 

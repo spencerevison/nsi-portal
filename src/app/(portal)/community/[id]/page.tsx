@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MemberAvatar } from "../../directory/member-avatar";
 import { CommentForm } from "./comment-form";
 import { CommentActions } from "./comment-actions";
+import { PostActions } from "../post-actions";
 import { PostAttachments, CommentAttachments } from "./attachments";
 import { RichTextContent } from "@/components/rich-text-content";
 import clsx from "clsx";
@@ -46,9 +47,19 @@ export default async function PostPage({ params }: { params: Params }) {
         })}
       >
         <CardContent className="p-5">
-          <div className="flex items-start gap-2">
-            {post.pinned && <Pin className="mt-1 size-4 text-amber-500" />}
-            <h1 className="text-lg font-semibold">{post.title}</h1>
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start gap-2">
+              {post.pinned && <Pin className="mt-1 size-4 text-amber-500" />}
+              <h1 className="text-lg font-semibold">{post.title}</h1>
+            </div>
+            <PostActions
+              postId={post.id}
+              title={post.title}
+              body={post.body}
+              pinned={post.pinned}
+              isOwner={post.author_id === currentUserId}
+              canModerate={canModerate}
+            />
           </div>
           <RichTextContent html={post.body} className="mt-4" />
           {post.attachments.length > 0 && (

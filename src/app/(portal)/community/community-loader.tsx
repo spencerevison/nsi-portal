@@ -1,21 +1,27 @@
 import Link from "next/link";
-import { Pin, MessageCircle, Clock } from "lucide-react";
+import { MessageCircle, Clock } from "lucide-react";
 import { listPosts, timeAgo } from "@/lib/community";
 import { stripHtml } from "@/lib/rich-text";
-import { getCurrentCapabilities } from "@/lib/current-user";
+import { getCurrentAppUser, getCurrentCapabilities } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
+import { PinnedCard } from "@/components/pinned-card";
 import { MemberAvatar } from "../directory/member-avatar";
 import { NewPostForm } from "./new-post-form";
 import { PostActions } from "./post-actions";
 
 export async function CommunityLoader() {
-  const [posts, caps] = await Promise.all([
+  const [posts, caps, user] = await Promise.all([
     listPosts(),
     getCurrentCapabilities(),
+    getCurrentAppUser(),
   ]);
 
   const canWrite = caps.has("community.write");
   const canModerate = caps.has("community.moderate");
+  const currentUserId = user?.id ?? "";
+
+  const pinnedPosts = posts.filter((p) => p.pinned);
+  const otherPosts = posts.filter((p) => !p.pinned);
 
   return (
     <>
@@ -37,63 +43,95 @@ export async function CommunityLoader() {
         </Card>
       )}
 
-      <div className="space-y-4">
-        {posts.map((post) => (
-          <Link key={post.id} href={`/community/${post.id}`} className="block">
-            <Card
-              className={
-                post.pinned
-                  ? "border-l-[3px] border-l-amber-500"
-                  : "hover:border-border/80"
+      {pinnedPosts.length > 0 && (
+        <div className="space-y-4">
+          {pinnedPosts.map((post) => (
+            <PinnedCard
+              key={post.id}
+              variant="listing"
+              title={post.title}
+              body={post.body}
+              author={{
+                name: post.author_name,
+                avatarUrl: post.author_avatar,
+              }}
+              postedAt={post.created_at}
+              replyCount={post.comment_count}
+              href={`/community/${post.id}`}
+              actions={
+                <PostActions
+                  postId={post.id}
+                  title={post.title}
+                  body={post.body}
+                  pinned={post.pinned}
+                  isOwner={post.author_id === currentUserId}
+                  canModerate={canModerate}
+                />
               }
+            />
+          ))}
+        </div>
+      )}
+
+      {otherPosts.length > 0 && (
+        <div className="space-y-4">
+          {otherPosts.map((post) => (
+            <Link
+              key={post.id}
+              href={`/community/${post.id}`}
+              className="block"
             >
-              <CardContent className="p-4 py-0">
-                <div className="flex items-start gap-3">
-                  {post.pinned && (
-                    <Pin
-                      aria-hidden="true"
-                      className="mt-0.5 size-4 shrink-0 text-amber-500"
-                    />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-sm font-semibold">{post.title}</h2>
-                    <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-                      {stripHtml(post.body)}
-                    </p>
-                    <div className="text-muted-foreground mt-2 flex items-center gap-3 text-xs">
-                      <span className="flex items-center gap-1.5">
-                        <MemberAvatar
-                          member={{
-                            first_name: post.author_name.split(" ")[0] ?? "",
-                            last_name: post.author_name
-                              .split(" ")
-                              .slice(1)
-                              .join(" "),
-                            avatar_url: post.author_avatar,
-                          }}
-                          size="sm"
-                        />
-                        {post.author_name}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock aria-hidden="true" className="size-3" />
-                        {timeAgo(post.created_at)}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MessageCircle aria-hidden="true" className="size-3" />
-                        {post.comment_count}
-                      </span>
+              <Card className="hover:border-border/80">
+                <CardContent className="p-4 py-0">
+                  <div className="flex items-start gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-sm font-semibold">{post.title}</h2>
+                      <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
+                        {stripHtml(post.body)}
+                      </p>
+                      <div className="text-muted-foreground mt-2 flex items-center gap-3 text-xs">
+                        <span className="flex items-center gap-1.5">
+                          <MemberAvatar
+                            member={{
+                              first_name: post.author_name.split(" ")[0] ?? "",
+                              last_name: post.author_name
+                                .split(" ")
+                                .slice(1)
+                                .join(" "),
+                              avatar_url: post.author_avatar,
+                            }}
+                            size="sm"
+                          />
+                          {post.author_name}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock aria-hidden="true" className="size-3" />
+                          {timeAgo(post.created_at)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MessageCircle
+                            aria-hidden="true"
+                            className="size-3"
+                          />
+                          {post.comment_count}
+                        </span>
+                      </div>
                     </div>
+                    <PostActions
+                      postId={post.id}
+                      title={post.title}
+                      body={post.body}
+                      pinned={post.pinned}
+                      isOwner={post.author_id === currentUserId}
+                      canModerate={canModerate}
+                    />
                   </div>
-                  {canModerate && (
-                    <PostActions postId={post.id} pinned={post.pinned} />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
     </>
   );
 }

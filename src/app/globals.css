@@ -47,6 +47,17 @@
   --accent-600: #22444e;
   --accent-800: #162d34;
   --accent-900: #0c1b1f;
+
+  /* paper card — warm brown hairline ring + ambient drop shadow.
+     used by <PinnedCard> for the bulletin-board treatment. */
+  --paper-ring: rgba(120, 100, 70, 0.12);
+  --paper-ring-hover: rgba(120, 100, 70, 0.16);
+  --paper-shadow:
+    0 0 0 1px var(--paper-ring), 0 1px 2px rgba(60, 40, 20, 0.04),
+    0 8px 20px -12px rgba(60, 40, 20, 0.18);
+  --paper-shadow-hover:
+    0 0 0 1px var(--paper-ring-hover), 0 1px 2px rgba(60, 40, 20, 0.06),
+    0 12px 28px -12px rgba(60, 40, 20, 0.22);
 }
 
 @theme inline {
