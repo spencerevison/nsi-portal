@@ -1,9 +1,9 @@
 import { listDirectoryMembers, listCustomFields } from "@/lib/directory";
-import { getCurrentAppUser } from "@/lib/current-user";
+import { requireCapability } from "@/lib/current-user";
 import { DirectoryView } from "./directory-view";
 
 export async function DirectoryLoader() {
-  await getCurrentAppUser();
+  await requireCapability("directory.read");
 
   const [members, fields] = await Promise.all([
     listDirectoryMembers(),
