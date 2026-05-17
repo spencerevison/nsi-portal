@@ -135,9 +135,9 @@ Roles are admin-configurable — the primary admin can create new roles and assi
 **Enforcement layers:**
 
 1. **Middleware:** `clerkMiddleware()` verifies the user is authenticated. For admin routes, the middleware also checks for `admin.access` capability by querying the user's role.
-2. **Server actions / API routes:** Every mutation checks the user's capabilities before executing. This is the security boundary.
+2. **Server actions / API routes:** Every mutation checks the user's capabilities before executing. **This is the sole authorization boundary.** Every action begins with `await requireCapability("...")`.
 3. **Client-side rendering:** React components conditionally render admin controls based on capabilities. This is a UX convenience, not a security measure.
-4. **Row Level Security:** Supabase RLS policies provide defense-in-depth at the database level.
+4. **Row Level Security:** RLS is enabled on every table with **no policies defined**. The app reaches the database exclusively through `supabaseAdmin` (service role), which bypasses RLS entirely. This setup blocks the anon/publishable key from reading anything, but it does **not** provide defense-in-depth — an authz bug in any server action becomes a data exposure. If we ever issue Clerk JWTs to the browser and let the publishable-key client read directly, we will need real RLS policies at that time.
 
 ---
 
@@ -509,7 +509,9 @@ async function sendGroupEmail(subject: string, body: string, groups: string[]) {
 
 ### Row Level Security
 
-RLS policies on key tables:
+RLS is enabled on every table but **no policies are defined**. All DB access goes through `supabaseAdmin` (service-role key) which bypasses RLS, so the enabled-no-policy state only matters as a fence around the anon/publishable key. **Authorization is enforced exclusively in server actions** via `requireCapability()`. If we ever expose a direct browser→Supabase read path with the publishable key, we will need to define real policies (likely keyed off a Clerk JWT template carrying `app_user_id` + role).
+
+The policy sketch below is what we'd implement at that point — it is **not currently in effect**:
 
 - **User:** Authenticated users can read all profiles (directory). Users can update only their own profile.
 - **Document / Folder:** Authenticated users can read. Only users with `documents.write` capability can insert/update/delete.

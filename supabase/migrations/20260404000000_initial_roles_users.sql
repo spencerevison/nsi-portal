@@ -1,6 +1,9 @@
 -- Initial schema: User, Role, RoleCapability
 -- Capability model: Users have one Role; Roles have many Capabilities (strings).
--- Enforcement is primarily in server actions; RLS is defense-in-depth.
+-- Authorization is enforced exclusively in server actions via requireCapability().
+-- RLS is enabled below but no policies are defined — the app reaches the DB only
+-- through the service-role key, which bypasses RLS. The enable-without-policy
+-- state just fences off the anon/publishable key. See docs/nsi-portal-system-design.md.
 
 create extension if not exists "pgcrypto";
 
@@ -63,9 +66,10 @@ create trigger app_user_set_updated_at
   before update on public.app_user
   for each row execute function public.set_updated_at();
 
--- RLS — enabled on all tables. Policies will be added as the app wires up
--- proper JWT-based capability checks. For now, no policies = no access via
--- the anon/publishable key, which is what we want while building.
+-- RLS — enabled on all tables but no policies defined. The service-role key
+-- bypasses RLS, so this only fences off the anon/publishable key. Policies
+-- would be required if we ever issue Clerk JWTs and let the browser read
+-- directly via the publishable key (we don't today).
 alter table public.role            enable row level security;
 alter table public.role_capability enable row level security;
 alter table public.app_user        enable row level security;
