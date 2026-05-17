@@ -11,24 +11,16 @@ import {
   removeAttachmentBlobs,
   uploadAttachmentBlob,
 } from "@/lib/attachments-server";
+import { checkAndRecord, rateLimitMessage } from "@/lib/rate-limit";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// simple rate limiter: max 5 sends per user per hour
-const sendLog = new Map<string, number[]>();
-const RATE_LIMIT = 5;
-const RATE_WINDOW = 60 * 60 * 1000; // 1 hour
-
-function checkRateLimit(userId: string): boolean {
-  const now = Date.now();
-  const timestamps = (sendLog.get(userId) ?? []).filter(
-    (t) => now - t < RATE_WINDOW,
-  );
-  sendLog.set(userId, timestamps);
-  if (timestamps.length >= RATE_LIMIT) return false;
-  timestamps.push(now);
-  return true;
-}
+// Rate limit caps: per-sender hour/day, plus a portal-wide daily ceiling so
+// no one can torch Resend quota or domain reputation with a single account.
+const RATE_BUCKET = "email.broadcast";
+const RATE_USER_HOUR = 5;
+const RATE_USER_DAY = 20;
+const RATE_SYSTEM_DAY = 50;
 
 type SendResult =
   | { ok: true; recipientCount: number }
@@ -39,12 +31,14 @@ export async function sendGroupEmail(formData: FormData): Promise<SendResult> {
   const user = await getCurrentAppUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
-  if (!checkRateLimit(user.id)) {
-    return {
-      ok: false,
-      error: "Too many emails sent. Please wait before sending again.",
-    };
-  }
+  const rl = await checkAndRecord({
+    bucket: RATE_BUCKET,
+    userId: user.id,
+    hourLimit: RATE_USER_HOUR,
+    dayLimit: RATE_USER_DAY,
+    systemDayLimit: RATE_SYSTEM_DAY,
+  });
+  if (!rl.ok) return { ok: false, error: rateLimitMessage(rl.reason) };
 
   const groupSlugs = formData.getAll("groupSlugs").map(String).filter(Boolean);
   const subject = String(formData.get("subject") ?? "").trim();

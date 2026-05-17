@@ -5,6 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { escapeHtml } from "@/lib/utils";
 import { isDeliverable } from "@/lib/notifications";
+import { checkAndRecord, rateLimitMessage } from "@/lib/rate-limit";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -18,21 +19,9 @@ const CATEGORY_LABELS: Record<Category, string> = {
   other: "Other",
 };
 
-// rate limit: 3 support requests per hour per user
-const submitLog = new Map<string, number[]>();
-const RATE_LIMIT = 3;
-const RATE_WINDOW = 60 * 60 * 1000;
-
-function checkRateLimit(userId: string): boolean {
-  const now = Date.now();
-  const timestamps = (submitLog.get(userId) ?? []).filter(
-    (t) => now - t < RATE_WINDOW,
-  );
-  submitLog.set(userId, timestamps);
-  if (timestamps.length >= RATE_LIMIT) return false;
-  timestamps.push(now);
-  return true;
-}
+const RATE_BUCKET = "support.submit";
+const RATE_USER_HOUR = 3;
+const RATE_USER_DAY = 10;
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -44,12 +33,13 @@ export async function submitSupportRequest(input: {
   const user = await getCurrentAppUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
-  if (!checkRateLimit(user.id)) {
-    return {
-      ok: false,
-      error: "Too many requests. Please wait before submitting again.",
-    };
-  }
+  const rl = await checkAndRecord({
+    bucket: RATE_BUCKET,
+    userId: user.id,
+    hourLimit: RATE_USER_HOUR,
+    dayLimit: RATE_USER_DAY,
+  });
+  if (!rl.ok) return { ok: false, error: rateLimitMessage(rl.reason) };
 
   // validate category
   if (!VALID_CATEGORIES.includes(input.category as Category)) {
