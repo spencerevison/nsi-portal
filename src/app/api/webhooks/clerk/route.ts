@@ -117,6 +117,20 @@ async function handleUserCreated(data: WebhookEvent["data"] & { id: string }) {
     return new Response("No primary email", { status: 400 });
   }
 
+  // Require the email to be verified before we attach it to a pre-seeded
+  // profile — otherwise unverified signups could hijack a profile they
+  // happened to know the email of.
+  const verificationStatus = emailObj?.verification?.status as
+    | string
+    | undefined;
+  if (verificationStatus !== "verified") {
+    console.warn("user.created rejected: primary email not verified", {
+      clerkId,
+      status: verificationStatus,
+    });
+    return new Response("Email not verified", { status: 400 });
+  }
+
   // Link the clerk user to a pre-seeded app_user by email.
   // If no row exists, the member was not invited through the admin flow —
   // we reject rather than auto-creating, to keep membership gated.

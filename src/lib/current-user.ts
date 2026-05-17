@@ -79,11 +79,22 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
 
   // fallback: look up by primary email and link
   const primaryEmailId = clerkUser.primaryEmailAddressId;
-  const email = clerkUser.emailAddresses
-    .find((e) => e.id === primaryEmailId)
-    ?.emailAddress?.toLowerCase();
+  const primaryEmail = clerkUser.emailAddresses.find(
+    (e) => e.id === primaryEmailId,
+  );
+  const email = primaryEmail?.emailAddress?.toLowerCase();
 
   if (!email) return null;
+
+  // Only link on a verified email — otherwise an attacker who knows a
+  // pre-seeded victim's address could claim their profile by registering
+  // a Clerk account they never confirmed.
+  if (primaryEmail?.verification?.status !== "verified") {
+    console.warn("self-heal skipped: primary email not verified", {
+      clerkId: clerkUser.id,
+    });
+    return null;
+  }
 
   const { data: byEmail } = await supabaseAdmin
     .from("app_user")
