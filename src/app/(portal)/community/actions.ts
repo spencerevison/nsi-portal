@@ -378,15 +378,15 @@ export async function deleteComment(
   return { ok: true };
 }
 
-// Toggle a single emoji reaction on a post or comment for the current user.
-// Idempotent — adding twice is a no-op, removing what isn't there is a no-op.
-// Returns the new presence state so the client can confirm its optimistic flip.
+// One emoji per user per target. Picking the same emoji again removes it,
+// picking a different one replaces the previous reaction. Returns the
+// resulting emoji (or null) so the client can confirm its optimistic flip.
 export async function toggleReaction(input: {
   target: "post" | "comment";
   targetId: string;
   postId: string;
   emoji: string;
-}): Promise<ActionResult & { reacted?: boolean }> {
+}): Promise<ActionResult & { emoji?: string | null }> {
   await requireCapability("community.write");
   const user = await getCurrentAppUser();
   if (!user) return { ok: false, error: "Not authenticated" };
@@ -399,31 +399,49 @@ export async function toggleReaction(input: {
   const table = input.target === "post" ? "post_reaction" : "comment_reaction";
   const idCol = input.target === "post" ? "post_id" : "comment_id";
 
-  // Does it already exist?
   const { data: existing } = await supabaseAdmin
     .from(table)
     .select("emoji")
     .eq(idCol, input.targetId)
     .eq("user_id", user.id)
-    .eq("emoji", emoji)
     .maybeSingle();
 
-  if (existing) {
+  const revalidate = () => {
+    revalidatePath(`/community/${input.postId}`);
+    if (input.target === "post") revalidatePath("/community");
+  };
+
+  // same emoji → remove
+  if (existing && existing.emoji === emoji) {
     const { error } = await supabaseAdmin
       .from(table)
       .delete()
       .eq(idCol, input.targetId)
-      .eq("user_id", user.id)
-      .eq("emoji", emoji);
+      .eq("user_id", user.id);
     if (error) {
       console.error("toggleReaction delete failed", error);
       return { ok: false, error: "Failed to remove reaction" };
     }
-    revalidatePath(`/community/${input.postId}`);
-    if (input.target === "post") revalidatePath("/community");
-    return { ok: true, reacted: false };
+    revalidate();
+    return { ok: true, emoji: null };
   }
 
+  // different emoji → update in place
+  if (existing) {
+    const { error } = await supabaseAdmin
+      .from(table)
+      .update({ emoji })
+      .eq(idCol, input.targetId)
+      .eq("user_id", user.id);
+    if (error) {
+      console.error("toggleReaction update failed", error);
+      return { ok: false, error: "Failed to change reaction" };
+    }
+    revalidate();
+    return { ok: true, emoji };
+  }
+
+  // nothing yet → insert
   const { error } = await supabaseAdmin
     .from(table)
     .insert({ [idCol]: input.targetId, user_id: user.id, emoji });
@@ -431,10 +449,8 @@ export async function toggleReaction(input: {
     console.error("toggleReaction insert failed", error);
     return { ok: false, error: "Failed to add reaction" };
   }
-
-  revalidatePath(`/community/${input.postId}`);
-  if (input.target === "post") revalidatePath("/community");
-  return { ok: true, reacted: true };
+  revalidate();
+  return { ok: true, emoji };
 }
 
 // Signed-URL fetcher used by AttachmentList on click. Any authenticated

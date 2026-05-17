@@ -32,23 +32,31 @@ function applyOptimistic(
   action: OptimisticAction,
   me: Reactor,
 ): ReactionGroup[] {
-  const idx = state.findIndex((g) => g.emoji === action.emoji);
+  // Strip the user out of any group they're currently in — one reaction
+  // per user, so a new pick replaces the old.
+  const stripped = state
+    .map((g) => ({
+      emoji: g.emoji,
+      reactors: g.reactors.filter((r) => r.id !== me.id),
+    }))
+    .filter((g) => g.reactors.length > 0);
+
+  // Tapping the same emoji you already had = remove only.
+  const wasOnTarget = state.some(
+    (g) => g.emoji === action.emoji && g.reactors.some((r) => r.id === me.id),
+  );
+  if (wasOnTarget) return stripped;
+
+  // Add me to the target emoji's group (or create it).
+  const idx = stripped.findIndex((g) => g.emoji === action.emoji);
   if (idx === -1) {
-    return [...state, { emoji: action.emoji, reactors: [me] }];
+    return [...stripped, { emoji: action.emoji, reactors: [me] }];
   }
-
-  const group = state[idx];
-  const hasMe = group.reactors.some((r) => r.id === me.id);
-  const nextReactors = hasMe
-    ? group.reactors.filter((r) => r.id !== me.id)
-    : [...group.reactors, me];
-
-  if (nextReactors.length === 0) {
-    return state.filter((_, i) => i !== idx);
-  }
-
-  const next = state.slice();
-  next[idx] = { emoji: group.emoji, reactors: nextReactors };
+  const next = stripped.slice();
+  next[idx] = {
+    emoji: action.emoji,
+    reactors: [...stripped[idx].reactors, me],
+  };
   return next;
 }
 

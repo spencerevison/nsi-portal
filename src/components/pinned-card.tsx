@@ -15,6 +15,9 @@ type PinnedCardProps = {
   replyCount: number;
   href: string;
   actions?: React.ReactNode;
+  // Rendered below the meta row on the "listing" variant (e.g. reactions).
+  // Sits outside any Link so internal click targets don't navigate.
+  footer?: React.ReactNode;
 };
 
 // Pull the first paragraph out of a sanitized-HTML body so the preview
@@ -55,6 +58,7 @@ export function PinnedCard({
   replyCount,
   href,
   actions,
+  footer,
 }: PinnedCardProps) {
   const isListing = variant === "listing";
 
@@ -146,6 +150,8 @@ export function PinnedCard({
               {replyCount} {replyCount === 1 ? "reply" : "replies"}
             </span>
           </div>
+
+          {footer && <div className="relative mt-3">{footer}</div>}
         </div>
       ) : (
         // preview: blockquote excerpt has no nested anchors, so wrap the whole card.
