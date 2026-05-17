@@ -378,6 +378,65 @@ export async function deleteComment(
   return { ok: true };
 }
 
+// Toggle a single emoji reaction on a post or comment for the current user.
+// Idempotent — adding twice is a no-op, removing what isn't there is a no-op.
+// Returns the new presence state so the client can confirm its optimistic flip.
+export async function toggleReaction(input: {
+  target: "post" | "comment";
+  targetId: string;
+  postId: string;
+  emoji: string;
+}): Promise<ActionResult & { reacted?: boolean }> {
+  await requireCapability("community.write");
+  const user = await getCurrentAppUser();
+  if (!user) return { ok: false, error: "Not authenticated" };
+
+  const emoji = input.emoji.trim();
+  // Cap on emoji string length — a real emoji is at most a few code points;
+  // anything larger is either junk or someone trying to dump text in here.
+  if (!emoji || emoji.length > 32) return { ok: false, error: "Invalid emoji" };
+
+  const table = input.target === "post" ? "post_reaction" : "comment_reaction";
+  const idCol = input.target === "post" ? "post_id" : "comment_id";
+
+  // Does it already exist?
+  const { data: existing } = await supabaseAdmin
+    .from(table)
+    .select("emoji")
+    .eq(idCol, input.targetId)
+    .eq("user_id", user.id)
+    .eq("emoji", emoji)
+    .maybeSingle();
+
+  if (existing) {
+    const { error } = await supabaseAdmin
+      .from(table)
+      .delete()
+      .eq(idCol, input.targetId)
+      .eq("user_id", user.id)
+      .eq("emoji", emoji);
+    if (error) {
+      console.error("toggleReaction delete failed", error);
+      return { ok: false, error: "Failed to remove reaction" };
+    }
+    revalidatePath(`/community/${input.postId}`);
+    if (input.target === "post") revalidatePath("/community");
+    return { ok: true, reacted: false };
+  }
+
+  const { error } = await supabaseAdmin
+    .from(table)
+    .insert({ [idCol]: input.targetId, user_id: user.id, emoji });
+  if (error) {
+    console.error("toggleReaction insert failed", error);
+    return { ok: false, error: "Failed to add reaction" };
+  }
+
+  revalidatePath(`/community/${input.postId}`);
+  if (input.target === "post") revalidatePath("/community");
+  return { ok: true, reacted: true };
+}
+
 // Signed-URL fetcher used by AttachmentList on click. Any authenticated
 // community member can view; we're not gating per-post here because posts
 // are already visible to every logged-in member.

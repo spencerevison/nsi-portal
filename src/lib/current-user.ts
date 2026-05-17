@@ -12,6 +12,7 @@ export type AppUser = {
   active: boolean;
   accepted_at: string | null;
   onboarded_at: string | null;
+  avatar_url: string | null;
 };
 
 /**

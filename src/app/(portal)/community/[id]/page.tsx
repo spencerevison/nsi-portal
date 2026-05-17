@@ -9,6 +9,7 @@ import { CommentForm } from "./comment-form";
 import { CommentActions } from "./comment-actions";
 import { PostActions } from "../post-actions";
 import { PostAttachments, CommentAttachments } from "./attachments";
+import { Reactions } from "../reactions";
 import { RichTextContent } from "@/components/rich-text-content";
 import clsx from "clsx";
 
@@ -29,6 +30,8 @@ export default async function PostPage({ params }: { params: Params }) {
   const canWrite = caps.has("community.write");
   const canModerate = caps.has("community.moderate");
   const currentUserId = user?.id ?? "";
+  const currentUserName = user ? `${user.first_name} ${user.last_name}` : "";
+  const currentUserAvatar = user?.avatar_url ?? null;
 
   return (
     <div className="space-y-6">
@@ -64,6 +67,19 @@ export default async function PostPage({ params }: { params: Params }) {
           <RichTextContent html={post.body} className="mt-4" />
           {post.attachments.length > 0 && (
             <PostAttachments attachments={post.attachments} />
+          )}
+          {canWrite && (
+            <div className="mt-4">
+              <Reactions
+                target="post"
+                targetId={post.id}
+                postId={post.id}
+                currentUserId={currentUserId}
+                currentUserName={currentUserName}
+                currentUserAvatar={currentUserAvatar}
+                reactions={post.reactions}
+              />
+            </div>
           )}
           <div className="border-border text-muted-foreground mt-4 flex items-center gap-3 border-t pt-4 text-xs">
             <span className="flex items-center gap-1.5">
@@ -127,6 +143,19 @@ export default async function PostPage({ params }: { params: Params }) {
                 {comment.attachments.length > 0 && (
                   <div className="pl-8">
                     <CommentAttachments attachments={comment.attachments} />
+                  </div>
+                )}
+                {canWrite && (
+                  <div className="mt-2 pl-8">
+                    <Reactions
+                      target="comment"
+                      targetId={comment.id}
+                      postId={post.id}
+                      currentUserId={currentUserId}
+                      currentUserName={currentUserName}
+                      currentUserAvatar={currentUserAvatar}
+                      reactions={comment.reactions}
+                    />
                   </div>
                 )}
               </div>
