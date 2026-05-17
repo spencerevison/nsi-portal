@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useSignIn } from "@clerk/nextjs";
 import { Loader2 } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn, safeRedirectPath } from "@/lib/utils";
 
 import { NsiMark } from "./nsi-mark";
 
@@ -14,7 +14,7 @@ export function SignInCard() {
   const { signIn } = useSignIn();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get("redirect_url") ?? "/";
+  const redirectUrl = safeRedirectPath(searchParams.get("redirect_url"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

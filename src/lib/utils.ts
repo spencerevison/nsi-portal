@@ -20,6 +20,22 @@ export function escapeHtml(str: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/**
+ * Returns the given URL if it's a same-origin relative path, otherwise the
+ * fallback. Prevents `?redirect_url=https://evil.example` open-redirect via
+ * the sign-in flow.
+ */
+export function safeRedirectPath(
+  url: string | null | undefined,
+  fallback = "/",
+): string {
+  if (!url) return fallback;
+  // must start with "/" but not "//" (protocol-relative) or "/\" (backslash trick)
+  if (!url.startsWith("/")) return fallback;
+  if (url.startsWith("//") || url.startsWith("/\\")) return fallback;
+  return url;
+}
+
 export function timeAgo(dateStr: string): string {
   const now = new Date();
   const d = new Date(dateStr);

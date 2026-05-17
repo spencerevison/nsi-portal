@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { escapeHtml, timeAgo, slugify } from "@/lib/utils";
+import { escapeHtml, timeAgo, slugify, safeRedirectPath } from "@/lib/utils";
 
 describe("escapeHtml", () => {
   it("escapes ampersands", () => {
@@ -69,5 +69,40 @@ describe("slugify", () => {
 
   it("trims leading/trailing hyphens", () => {
     expect(slugify("--test--")).toBe("test");
+  });
+});
+
+describe("safeRedirectPath", () => {
+  it("allows relative paths", () => {
+    expect(safeRedirectPath("/documents")).toBe("/documents");
+    expect(safeRedirectPath("/")).toBe("/");
+  });
+
+  it("rejects absolute URLs", () => {
+    expect(safeRedirectPath("https://evil.example/foo")).toBe("/");
+    expect(safeRedirectPath("http://evil.example")).toBe("/");
+  });
+
+  it("rejects protocol-relative URLs", () => {
+    expect(safeRedirectPath("//evil.example/foo")).toBe("/");
+  });
+
+  it("rejects backslash variants", () => {
+    expect(safeRedirectPath("/\\evil.example")).toBe("/");
+  });
+
+  it("returns fallback for null/empty", () => {
+    expect(safeRedirectPath(null)).toBe("/");
+    expect(safeRedirectPath(undefined)).toBe("/");
+    expect(safeRedirectPath("")).toBe("/");
+  });
+
+  it("rejects javascript: scheme", () => {
+    // doesn't start with "/" so caught by the path check
+    expect(safeRedirectPath("javascript:alert(1)")).toBe("/");
+  });
+
+  it("honors custom fallback", () => {
+    expect(safeRedirectPath(null, "/home")).toBe("/home");
   });
 });
