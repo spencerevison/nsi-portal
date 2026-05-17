@@ -2,7 +2,11 @@
 
 import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { getCurrentAppUser, requireCapability } from "@/lib/current-user";
+import {
+  getCurrentAppUser,
+  getCurrentCapabilities,
+  requireCapability,
+} from "@/lib/current-user";
 import { resolveRecipients } from "@/lib/groups";
 import { escapeHtml } from "@/lib/utils";
 import { isDeliverable } from "@/lib/notifications";
@@ -47,6 +51,21 @@ export async function sendGroupEmail(formData: FormData): Promise<SendResult> {
 
   if (groupSlugs.length === 0)
     return { ok: false, error: "Select at least one group" };
+
+  // "all" reaches every active member — gate behind admin.access so a
+  // Council member with email.send can't unilaterally broadcast to the
+  // whole community.
+  if (groupSlugs.includes("all")) {
+    const caps = await getCurrentCapabilities();
+    if (!caps.has("admin.access")) {
+      return {
+        ok: false,
+        error:
+          'Only admins can send to the "All Members" group. Pick a specific group instead.',
+      };
+    }
+  }
+
   if (!subject || !body)
     return { ok: false, error: "Subject and message required" };
   if (subject.length > 200)
@@ -118,6 +137,10 @@ export async function sendGroupEmail(formData: FormData): Promise<SendResult> {
   // send via Resend batch API (max 100 per call)
   const fromAddress =
     process.env.RESEND_FROM_ADDRESS ?? "NSI Portal <noreply@resend.dev>";
+  // Pin replyTo to a portal-owned address — using user.email lets a sender
+  // route replies anywhere they control on Clerk, which is an internal
+  // phishing vector. Falls back to fromAddress so replies still land somewhere.
+  const replyToAddress = process.env.RESEND_REPLYTO_ADDRESS ?? fromAddress;
   let emailIds: string[] = [];
   const senderName = `${escapeHtml(user.first_name)} ${escapeHtml(user.last_name)}`;
 
@@ -147,7 +170,7 @@ export async function sendGroupEmail(formData: FormData): Promise<SendResult> {
         recipients.map((r) =>
           resend.emails.send({
             from: fromAddress,
-            replyTo: user.email,
+            replyTo: replyToAddress,
             to: r.email,
             subject,
             html,
