@@ -70,7 +70,7 @@ export function ProfileVerificationCard({
     >
       <Card className="ring-cream-400/60 dark:ring-cream-800/60 from-cream-100 to-cream-200 dark:from-cream-950/40 dark:to-cream-900/30 bg-linear-to-b ring-inset">
         <CardContent className="p-6">
-          <p className="text-muted-foreground/80 text-xs font-medium tracking-[0.14em] uppercase">
+          <p className="text-muted-foreground/80 text-xs font-medium tracking-widest uppercase">
             A quick check
           </p>
           <h3 className="mt-1 text-lg font-semibold">Does this look right?</h3>

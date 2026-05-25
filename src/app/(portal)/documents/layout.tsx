@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { FolderTreeLoader } from "./folder-tree-loader";
 
 function FolderTreeSkeleton() {
@@ -9,8 +10,10 @@ function FolderTreeSkeleton() {
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="flex items-center gap-2 rounded px-2 py-1.5"
-            style={{ paddingLeft: i > 2 ? "2rem" : undefined }}
+            className={cn(
+              "flex items-center gap-2 rounded px-2 py-1.5",
+              i > 2 && "pl-8",
+            )}
           >
             <Skeleton className="size-4 rounded" />
             <Skeleton className="h-3.5 w-[70%]" />

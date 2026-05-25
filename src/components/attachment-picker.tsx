@@ -147,7 +147,7 @@ export function AttachmentPicker({
           )}
         </div>
         {!compact && (
-          <p className="text-muted-foreground/70 mt-1 text-[11px]">
+          <p className="text-muted-foreground/70 text-2xs mt-1">
             Images, PDF, Word, Excel · up to {AGGREGATE_MB} MB total
           </p>
         )}

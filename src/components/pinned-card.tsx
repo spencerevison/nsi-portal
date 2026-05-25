@@ -74,7 +74,7 @@ export function PinnedCard({
   return (
     <article
       className={cn(
-        "relative isolate rounded-xl px-6 pt-5.5 pr-6 shadow-(--paper-shadow) transition-shadow duration-200 hover:shadow-(--paper-shadow-hover)",
+        "relative isolate rounded-xl px-6 pt-5.5 shadow-(--paper-shadow) transition-shadow duration-200 hover:shadow-(--paper-shadow-hover)",
         isListing ? "pb-5 pl-7" : "pb-4.5",
       )}
       style={{
@@ -95,11 +95,7 @@ export function PinnedCard({
       {/* Pin icon — top-right, rotated like it was actually tacked */}
       <span
         aria-hidden="true"
-        className="absolute top-3.5 right-4.5 z-10 flex h-5.5 w-5.5 items-center justify-center text-amber-500"
-        style={{
-          transform: "rotate(28deg)",
-          filter: "drop-shadow(0 2px 3px rgba(60, 40, 20, 0.22))",
-        }}
+        className="absolute top-3.5 right-4.5 z-10 flex size-5.5 rotate-[28deg] items-center justify-center text-amber-500 drop-shadow-[0_2px_3px_rgba(60,40,20,0.22)]"
       >
         <Pin className="size-4.5" fill="currentColor" strokeWidth={0.5} />
       </span>
@@ -112,14 +108,11 @@ export function PinnedCard({
         // <a> tags, and anchor-in-anchor is invalid HTML (hydration breaks).
         // Wrap only the title in the Link.
         <div className="relative">
-          <div className="mb-2.5 font-mono text-[11px] font-medium tracking-[0.12em] text-amber-500 uppercase">
+          <div className="text-2xs mb-2.5 font-mono font-medium tracking-widest text-amber-500 uppercase">
             {eyebrow}
           </div>
 
-          <h3
-            className="text-accent-900 mb-1.5 text-lg font-semibold"
-            style={{ letterSpacing: "-0.005em" }}
-          >
+          <h3 className="text-accent-900 mb-1.5 text-lg font-semibold">
             <Link
               href={href}
               className="rounded-sm outline-none hover:underline focus-visible:ring-2 focus-visible:ring-amber-500/40"
@@ -128,7 +121,7 @@ export function PinnedCard({
             </Link>
           </h3>
 
-          <div className="text-[14px] leading-[1.55] text-[oklch(0.25_0_0)]">
+          <div className="text-sm leading-[1.55] text-[oklch(0.25_0_0)]">
             <RichTextContent html={body} />
           </div>
 
@@ -137,12 +130,12 @@ export function PinnedCard({
             <span>{author.name}</span>
             <span
               aria-hidden="true"
-              className="h-0.75 w-0.75 rounded-full bg-[oklch(0.7_0_0)]"
+              className="size-0.75 rounded-full bg-[oklch(0.7_0_0)]"
             />
             <span>Posted {postedShort(postedAt)}</span>
             <span
               aria-hidden="true"
-              className="h-0.75 w-0.75 rounded-full bg-[oklch(0.7_0_0)]"
+              className="size-0.75 rounded-full bg-[oklch(0.7_0_0)]"
             />
             <span>
               {replyCount} {replyCount === 1 ? "reply" : "replies"}
@@ -157,14 +150,11 @@ export function PinnedCard({
           href={href}
           className="relative block rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40"
         >
-          <div className="mb-2.5 font-mono text-[11px] font-medium tracking-[0.12em] text-amber-500 uppercase">
+          <div className="text-2xs mb-2.5 font-mono font-medium tracking-widest text-amber-500 uppercase">
             {eyebrow}
           </div>
 
-          <h3
-            className="text-accent-900 mb-2.5 text-lg font-semibold"
-            style={{ letterSpacing: "-0.005em" }}
-          >
+          <h3 className="text-accent-900 mb-2.5 text-lg font-semibold">
             {title}
           </h3>
 
@@ -172,20 +162,17 @@ export function PinnedCard({
             {firstParagraph(body)}...
           </blockquote>
 
-          <div
-            className="mt-3.5 flex flex-wrap items-center gap-2.5 pt-3 text-[12.5px] text-[oklch(0.4_0_0)]"
-            style={{ borderTop: "1px solid rgba(120, 100, 70, 0.15)" }}
-          >
+          <div className="mt-3.5 flex flex-wrap items-center gap-2.5 border-t border-t-(--paper-divider) pt-3 text-[12.5px] text-[oklch(0.4_0_0)]">
             <MemberAvatar member={authorMember} size="sm" />
             <span className="text-accent-800 font-medium">{author.name}</span>
             <span
               aria-hidden="true"
-              className="h-0.75 w-0.75 rounded-full bg-[oklch(0.6_0_0)]"
+              className="size-0.75 rounded-full bg-[oklch(0.6_0_0)]"
             />
             <span>{postedShort(postedAt)}</span>
             <span
               aria-hidden="true"
-              className="h-0.75 w-0.75 rounded-full bg-[oklch(0.6_0_0)]"
+              className="size-0.75 rounded-full bg-[oklch(0.6_0_0)]"
             />
             <span>
               {replyCount} {replyCount === 1 ? "reply" : "replies"}

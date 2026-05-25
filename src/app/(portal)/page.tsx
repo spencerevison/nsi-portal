@@ -235,7 +235,7 @@ export default async function HomePage() {
         {hasPinned && pinnedPost && (
           <section>
             <div className="mb-3 flex items-baseline justify-between">
-              <h2 className="text-accent-900 text-lg font-semibold tracking-[-0.005em]">
+              <h2 className="text-accent-900 text-lg font-semibold">
                 From the message board
               </h2>
               <Link
@@ -264,7 +264,7 @@ export default async function HomePage() {
 
         <section>
           <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="text-accent-900 text-lg font-semibold tracking-[-0.005em]">
+            <h2 className="text-accent-900 text-lg font-semibold">
               Recent activity
             </h2>
           </div>

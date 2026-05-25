@@ -54,34 +54,33 @@ export function SignInCard() {
   }
 
   const inputBase =
-    "h-11 w-full rounded-[var(--radius-md)] border border-cream-400 bg-white px-[14px] text-[14px] text-foreground transition-[border-color,box-shadow] duration-[120ms] outline-none focus:border-accent-600 focus:shadow-[0_0_0_3px_color-mix(in_oklch,var(--accent-600)_18%,transparent)] aria-invalid:border-destructive aria-invalid:shadow-[0_0_0_3px_color-mix(in_oklch,var(--destructive)_18%,transparent)]";
+    "h-11 w-full rounded-md border border-cream-400 bg-white px-3.5 text-sm text-foreground transition-[border-color,box-shadow] duration-[120ms] outline-none focus:border-accent-600 focus:shadow-[0_0_0_3px_color-mix(in_oklch,var(--accent-600)_18%,transparent)] aria-invalid:border-destructive aria-invalid:shadow-[0_0_0_3px_color-mix(in_oklch,var(--destructive)_18%,transparent)]";
 
-  const labelBase =
-    "text-accent-800 mb-[6px] block text-[12px] font-medium tracking-[0.01em]";
+  const labelBase = "text-accent-800 mb-1.5 block text-xs font-medium";
 
   return (
     <section className="w-full max-w-[380px]">
       <div className="mb-8">
         <NsiMark variant="onpaper" />
       </div>
-      <h1 className="text-accent-900 m-0 mb-[10px] text-[28px] leading-[1.2] font-semibold tracking-[-0.015em]">
+      <h1 className="text-accent-900 m-0 mb-2.5 text-[28px] leading-[1.2] font-semibold tracking-tight">
         Sign in
       </h1>
-      <p className="m-0 mb-8 text-[14px] leading-[1.5] text-[oklch(0.48_0_0)]">
+      <p className="m-0 mb-8 text-sm leading-[1.5] text-[oklch(0.48_0_0)]">
         Welcome back to the NSI community.
       </p>
 
       {error ? (
         <div
           role="alert"
-          className="text-destructive mb-4 text-[14px] leading-[1.4]"
+          className="text-destructive mb-4 text-sm leading-[1.4]"
         >
           {error}
         </div>
       ) : null}
 
       <form onSubmit={onSubmit} noValidate>
-        <div className="mb-[14px]">
+        <div className="mb-3.5">
           <label htmlFor="email" className={labelBase}>
             Email
           </label>
@@ -98,14 +97,14 @@ export function SignInCard() {
           />
         </div>
 
-        <div className="mb-[14px]">
+        <div className="mb-3.5">
           <div className="flex items-baseline justify-between">
             <label htmlFor="password" className={labelBase}>
               Password
             </label>
             <Link
               href="/sign-in/forgot-password"
-              className="text-accent-600 text-[12px] font-medium no-underline hover:underline"
+              className="text-accent-600 text-xs font-medium no-underline hover:underline"
             >
               Forgot?
             </Link>
@@ -127,7 +126,7 @@ export function SignInCard() {
           type="submit"
           disabled={submitting}
           className={cn(
-            "bg-accent-600 text-cream-50 hover:bg-accent-800 mt-[10px] flex h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-md)] border-0 text-[14px] font-medium transition-[background,transform] duration-[120ms] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-60",
+            "bg-accent-600 text-cream-50 hover:bg-accent-800 mt-2.5 flex h-11 w-full items-center justify-center gap-2 rounded-md border-0 text-sm font-medium transition-[background,transform] duration-[120ms] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-60",
           )}
         >
           {submitting ? (

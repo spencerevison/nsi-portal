@@ -140,7 +140,7 @@ export function Reactions(props: Props) {
                   CategoryHeader: ({ category, ...rest }) => (
                     <div
                       {...rest}
-                      className="text-muted-foreground bg-popover sticky top-0 px-3 py-1 text-[11px] font-medium tracking-wide uppercase"
+                      className="text-muted-foreground bg-popover text-2xs sticky top-0 px-3 py-1 font-medium tracking-wide uppercase"
                     >
                       {category.label}
                     </div>

@@ -4,6 +4,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* extra text size — sits between text-xs (12px) and nothing.
+   kept in a plain @theme block so turbopack actually emits it
+   (it has a known bug with @theme inline token generation). */
+@theme {
+  --text-2xs: 0.6875rem;
+}
+
 :root {
   color-scheme: light;
   --background: #fbf8f2bc;
@@ -52,6 +59,7 @@
      used by <PinnedCard> for the bulletin-board treatment. */
   --paper-ring: rgba(120, 100, 70, 0.12);
   --paper-ring-hover: rgba(120, 100, 70, 0.16);
+  --paper-divider: rgba(120, 100, 70, 0.15);
   --paper-shadow:
     0 0 0 1px var(--paper-ring), 0 1px 2px rgba(60, 40, 20, 0.04),
     0 8px 20px -12px rgba(60, 40, 20, 0.18);
