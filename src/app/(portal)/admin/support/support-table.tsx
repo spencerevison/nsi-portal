@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -16,60 +15,18 @@ import { useRouter } from "next/navigation";
 import type { SupportRequestRow } from "./page";
 import { timeAgo } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-
-const categoryLabels: Record<string, string> = {
-  bug: "Bug / Issue",
-  feature: "Feature Request",
-  question: "Question",
-  other: "Other",
-};
-
-const categoryColors: Record<string, string> = {
-  bug: "bg-red-100 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800",
-  feature:
-    "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800",
-  question:
-    "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
-  other: "",
-};
-
-const statusConfig: Record<string, { label: string; badge: React.ReactNode }> =
-  {
-    new: {
-      label: "New",
-      badge: (
-        <Badge
-          variant="secondary"
-          className="border-amber-200 bg-amber-100 text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
-        >
-          New
-        </Badge>
-      ),
-    },
-    read: {
-      label: "Read",
-      badge: <Badge variant="outline">Read</Badge>,
-    },
-    complete: {
-      label: "Complete",
-      badge: (
-        <Badge
-          variant="secondary"
-          className="border-green-200 bg-green-100 text-green-900 dark:border-green-800 dark:bg-green-950/40 dark:text-green-300"
-        >
-          Complete
-        </Badge>
-      ),
-    },
-  };
+import {
+  CATEGORY_LABELS,
+  STATUS_LABELS,
+  STATUS_SORT_ORDER,
+  SUPPORT_CATEGORIES,
+  SUPPORT_STATUSES,
+  type SupportStatus,
+} from "./_config";
+import { CategoryBadge, StatusBadge } from "./_badges";
 
 type SortKey = "status" | "category" | "date";
 type SortDir = "asc" | "desc";
-
-const statusOrder: Record<string, number> = { new: 0, read: 1, complete: 2 };
-
-const allStatuses = ["new", "read", "complete"];
-const allCategories = ["bug", "feature", "question", "other"];
 
 export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
   const router = useRouter();
@@ -104,7 +61,9 @@ export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
     result = [...result].sort((a, b) => {
       let cmp = 0;
       if (sortKey === "status") {
-        cmp = (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0);
+        cmp =
+          (STATUS_SORT_ORDER[a.status as SupportStatus] ?? 0) -
+          (STATUS_SORT_ORDER[b.status as SupportStatus] ?? 0);
       } else if (sortKey === "category") {
         cmp = a.category.localeCompare(b.category);
       } else {
@@ -140,13 +99,13 @@ export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
             >
               All
             </FilterChip>
-            {allStatuses.map((s) => (
+            {SUPPORT_STATUSES.map((s) => (
               <FilterChip
                 key={s}
                 active={statusFilter === s}
                 onClick={() => setStatusFilter(s)}
               >
-                {statusConfig[s]?.label ?? s}
+                {STATUS_LABELS[s]}
               </FilterChip>
             ))}
           </div>
@@ -160,13 +119,13 @@ export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
             >
               All
             </FilterChip>
-            {allCategories.map((c) => (
+            {SUPPORT_CATEGORIES.map((c) => (
               <FilterChip
                 key={c}
                 active={categoryFilter === c}
                 onClick={() => setCategoryFilter(c)}
               >
-                {categoryLabels[c] ?? c}
+                {CATEGORY_LABELS[c]}
               </FilterChip>
             ))}
           </div>
@@ -230,17 +189,10 @@ export function SupportTable({ requests }: { requests: SupportRequestRow[] }) {
                       #{req.request_number}
                     </TableCell>
                     <TableCell>
-                      {statusConfig[req.status]?.badge ?? (
-                        <Badge variant="outline">{req.status}</Badge>
-                      )}
+                      <StatusBadge status={req.status} />
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={categoryColors[req.category] ?? ""}
-                      >
-                        {categoryLabels[req.category] ?? req.category}
-                      </Badge>
+                      <CategoryBadge category={req.category} />
                     </TableCell>
                     <TableCell
                       className={req.status === "new" ? "font-medium" : ""}

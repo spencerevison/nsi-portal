@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -17,42 +16,7 @@ import { Check, RotateCcw, ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
 import type { SupportRequestRow } from "../page";
 import { updateRequestStatus, deleteSupportRequest } from "../actions";
-
-const categoryLabels: Record<string, string> = {
-  bug: "Bug / Issue",
-  feature: "Feature Request",
-  question: "Question",
-  other: "Other",
-};
-
-const categoryColors: Record<string, string> = {
-  bug: "bg-red-100 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800",
-  feature:
-    "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800",
-  question:
-    "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
-  other: "",
-};
-
-const statusBadge: Record<string, React.ReactNode> = {
-  new: (
-    <Badge
-      variant="secondary"
-      className="border-amber-200 bg-amber-100 text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
-    >
-      New
-    </Badge>
-  ),
-  read: <Badge variant="outline">Read</Badge>,
-  complete: (
-    <Badge
-      variant="secondary"
-      className="border-green-200 bg-green-100 text-green-900 dark:border-green-800 dark:bg-green-950/40 dark:text-green-300"
-    >
-      Complete
-    </Badge>
-  ),
-};
+import { CategoryBadge, StatusBadge } from "../_badges";
 
 export function SupportDetailView({
   request: req,
@@ -92,15 +56,9 @@ export function SupportDetailView({
       <Card>
         <CardContent className="space-y-4 pt-6">
           <div className="flex flex-wrap items-center gap-2 text-sm">
-            {statusBadge[req.status] ?? (
-              <Badge variant="outline">{req.status}</Badge>
-            )}
-            <Badge
-              variant="secondary"
-              className={categoryColors[req.category] ?? ""}
-            >
-              {categoryLabels[req.category] ?? req.category}
-            </Badge>
+            <StatusBadge status={req.status} />
+            <CategoryBadge category={req.category} />
+
             <span className="text-muted-foreground">
               {new Date(req.created_at).toLocaleDateString("en-CA", {
                 year: "numeric",

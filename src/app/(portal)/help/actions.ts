@@ -6,24 +6,18 @@ import { getCurrentAppUser } from "@/lib/current-user";
 import { escapeHtml } from "@/lib/utils";
 import { isDeliverable } from "@/lib/notifications";
 import { checkAndRecord, rateLimitMessage } from "@/lib/rate-limit";
+import type { ActionResult } from "@/lib/action-result";
+import {
+  CATEGORY_LABELS,
+  isSupportCategory,
+  type SupportCategory,
+} from "../admin/support/_config";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-const VALID_CATEGORIES = ["bug", "feature", "question", "other"] as const;
-type Category = (typeof VALID_CATEGORIES)[number];
-
-const CATEGORY_LABELS: Record<Category, string> = {
-  bug: "Bug / Issue",
-  feature: "Feature Request",
-  question: "General Question",
-  other: "Other",
-};
 
 const RATE_BUCKET = "support.submit";
 const RATE_USER_HOUR = 3;
 const RATE_USER_DAY = 10;
-
-type ActionResult = { ok: true } | { ok: false; error: string };
 
 export async function submitSupportRequest(input: {
   category: string;
@@ -42,10 +36,10 @@ export async function submitSupportRequest(input: {
   if (!rl.ok) return { ok: false, error: rateLimitMessage(rl.reason) };
 
   // validate category
-  if (!VALID_CATEGORIES.includes(input.category as Category)) {
+  if (!isSupportCategory(input.category)) {
     return { ok: false, error: "Please select a category" };
   }
-  const category = input.category as Category;
+  const category: SupportCategory = input.category;
 
   const subject = input.subject.trim();
   const message = input.message.trim();

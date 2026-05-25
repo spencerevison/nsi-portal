@@ -15,13 +15,14 @@ import {
 import { Send } from "lucide-react";
 import { submitSupportRequest } from "./actions";
 import { cn } from "@/lib/utils";
+import { CATEGORY_LABELS, SUPPORT_CATEGORIES } from "../admin/support/_config";
 
-const categories = [
-  { value: "bug", label: "Bug / Issue" },
-  { value: "feature", label: "Feature Request" },
-  { value: "question", label: "General Question" },
-  { value: "other", label: "Other" },
-];
+// the form picker uses the shared labels — keeps form copy in sync with
+// the admin badge and the email notification.
+const categories = SUPPORT_CATEGORIES.map((value) => ({
+  value,
+  label: CATEGORY_LABELS[value],
+}));
 
 export function SupportForm() {
   const [pending, startTransition] = useTransition();
