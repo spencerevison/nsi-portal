@@ -74,10 +74,8 @@ export function PinnedCard({
   return (
     <article
       className={cn(
-        "relative isolate rounded-xl shadow-[var(--paper-shadow)] transition-shadow duration-200 hover:shadow-[var(--paper-shadow-hover)]",
-        isListing
-          ? "px-6 pt-[22px] pr-6 pb-5 pl-7"
-          : "px-6 pt-[22px] pr-6 pb-[18px]",
+        "relative isolate rounded-xl px-6 pt-5.5 pr-6 shadow-(--paper-shadow) transition-shadow duration-200 hover:shadow-(--paper-shadow-hover)",
+        isListing ? "pb-5 pl-7" : "pb-4.5",
       )}
       style={{
         background: paperBg,
@@ -97,13 +95,13 @@ export function PinnedCard({
       {/* Pin icon — top-right, rotated like it was actually tacked */}
       <span
         aria-hidden="true"
-        className="absolute top-[14px] right-[18px] z-10 flex h-[22px] w-[22px] items-center justify-center text-amber-500"
+        className="absolute top-3.5 right-4.5 z-10 flex h-5.5 w-5.5 items-center justify-center text-amber-500"
         style={{
           transform: "rotate(28deg)",
           filter: "drop-shadow(0 2px 3px rgba(60, 40, 20, 0.22))",
         }}
       >
-        <Pin className="size-[18px]" fill="currentColor" strokeWidth={0.5} />
+        <Pin className="size-4.5" fill="currentColor" strokeWidth={0.5} />
       </span>
 
       {/* Moderator actions slot — sits to the left of the pin, outside the Link */}
@@ -139,12 +137,12 @@ export function PinnedCard({
             <span>{author.name}</span>
             <span
               aria-hidden="true"
-              className="h-[3px] w-[3px] rounded-full bg-[oklch(0.7_0_0)]"
+              className="h-0.75 w-0.75 rounded-full bg-[oklch(0.7_0_0)]"
             />
             <span>Posted {postedShort(postedAt)}</span>
             <span
               aria-hidden="true"
-              className="h-[3px] w-[3px] rounded-full bg-[oklch(0.7_0_0)]"
+              className="h-0.75 w-0.75 rounded-full bg-[oklch(0.7_0_0)]"
             />
             <span>
               {replyCount} {replyCount === 1 ? "reply" : "replies"}
@@ -171,7 +169,7 @@ export function PinnedCard({
           </h3>
 
           <blockquote className="m-0 border-0 p-0 text-[14.5px] leading-[1.55] text-[oklch(0.28_0_0)]">
-            &ldquo;{firstParagraph(body)}&rdquo;
+            {firstParagraph(body)}...
           </blockquote>
 
           <div
@@ -182,12 +180,12 @@ export function PinnedCard({
             <span className="text-accent-800 font-medium">{author.name}</span>
             <span
               aria-hidden="true"
-              className="h-[3px] w-[3px] rounded-full bg-[oklch(0.6_0_0)]"
+              className="h-0.75 w-0.75 rounded-full bg-[oklch(0.6_0_0)]"
             />
             <span>{postedShort(postedAt)}</span>
             <span
               aria-hidden="true"
-              className="h-[3px] w-[3px] rounded-full bg-[oklch(0.6_0_0)]"
+              className="h-0.75 w-0.75 rounded-full bg-[oklch(0.6_0_0)]"
             />
             <span>
               {replyCount} {replyCount === 1 ? "reply" : "replies"}
