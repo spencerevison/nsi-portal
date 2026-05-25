@@ -1,6 +1,9 @@
-# NSI Portal — Build Status
+# NSI Portal — Build Log
 
-**Current Phase:** Phase 8 (complete)
+> Frozen at v1.0 launch. Kept as a record of what shipped in each phase
+> and the running session notes from the build. For anything after v1.0
+> see `git log`.
+
 **Last Updated:** 2026-04-27
 **Last Session:** Added Vercel Cron keep-alive (`/api/cron/keep-alive`, every 3 days) to prevent Supabase free-tier auto-pause. Deferral, not a reversal of ADR-002 — Pro upgrade still planned for launch.
 
