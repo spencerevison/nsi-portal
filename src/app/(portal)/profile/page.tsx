@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { getProfileData } from "@/lib/directory";
 import { ProfileForm } from "./profile-form";
+import { ReviewBanner } from "./review-banner";
 
 export default async function ProfilePage() {
   const user = await getCurrentAppUser();
@@ -9,6 +10,8 @@ export default async function ProfilePage() {
 
   const profile = await getProfileData(user.id);
   if (!profile) redirect("/sign-in");
+
+  const needsReview = !user.profile_confirmed_at;
 
   return (
     <div className="space-y-4">
@@ -19,7 +22,9 @@ export default async function ProfilePage() {
         </p>
       </div>
 
-      <ProfileForm profile={profile} />
+      {needsReview && <ReviewBanner />}
+
+      <ProfileForm profile={profile} showConfirmButton={needsReview} />
     </div>
   );
 }

@@ -4,9 +4,13 @@ import { getCurrentAppUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
 import { PinnedCard } from "@/components/pinned-card";
 import { MemberAvatar } from "./directory/member-avatar";
-import { WelcomeBanner } from "./welcome-banner";
+import {
+  ProfileVerificationCard,
+  type VerificationProfile,
+} from "./profile-verification-card";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { listFolders } from "@/lib/documents";
+import { getProfileData } from "@/lib/directory";
 import { timeAgo } from "@/lib/utils";
 
 type ActivityItem =
@@ -169,16 +173,29 @@ export default async function HomePage() {
     )
     .slice(0, 7);
 
-  const showWelcome = user && !user.onboarded_at;
+  // verification card shows whenever the user hasn't confirmed their info.
+  // the page heading does the welcoming; onboarded_at is still tracked so we
+  // can stop greeting returning members, but the card itself stays focused on
+  // the verification ask.
+  const needsVerification = !!user && !user.profile_confirmed_at;
 
-  let profileIncomplete = false;
-  if (showWelcome && user) {
-    const { data: profile } = await supabaseAdmin
-      .from("app_user")
-      .select("phone, lot_number")
-      .eq("id", user.id)
-      .single();
-    profileIncomplete = !profile?.phone && !profile?.lot_number;
+  let verificationProfile: VerificationProfile | null = null;
+  if (needsVerification && user) {
+    const profile = await getProfileData(user.id);
+    if (profile) {
+      verificationProfile = {
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        email: profile.email,
+        phone: profile.phone,
+        lot_number: profile.lot_number,
+        address: profile.address,
+        custom_fields: profile.custom_fields.map((f) => ({
+          field_name: f.field_name,
+          value: f.value,
+        })),
+      };
+    }
   }
 
   // shape pinned post for <PinnedCard>
@@ -197,20 +214,17 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      {showWelcome ? (
-        <WelcomeBanner
-          firstName={user.first_name}
-          showProfilePrompt={profileIncomplete}
-        />
-      ) : (
-        <div>
-          <h1 className="text-2xl font-semibold">
-            Welcome{user ? `, ${user.first_name}` : ""}
-          </h1>
-          <p className="text-muted-foreground">
-            North Secretary Island Community Portal
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-semibold">
+          Welcome{user ? `, ${user.first_name}` : ""}
+        </h1>
+        <p className="text-muted-foreground">
+          North Secretary Island Community Portal
+        </p>
+      </div>
+
+      {needsVerification && verificationProfile && (
+        <ProfileVerificationCard profile={verificationProfile} />
       )}
 
       <div

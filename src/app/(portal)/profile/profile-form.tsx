@@ -13,14 +13,23 @@ import {
   parseFieldValue,
 } from "@/components/custom-field-editor";
 import type { ProfileData } from "@/lib/directory";
+import { useRouter } from "next/navigation";
 import {
   updateProfile,
   updateCustomFieldValue,
   updateNotifications,
+  confirmProfile,
 } from "./actions";
 
-export function ProfileForm({ profile }: { profile: ProfileData }) {
+export function ProfileForm({
+  profile,
+  showConfirmButton = false,
+}: {
+  profile: ProfileData;
+  showConfirmButton?: boolean;
+}) {
   const { openUserProfile } = useClerk();
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
 
@@ -202,9 +211,23 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
         </CardContent>
       </Card>
 
-      <div className="flex items-center justify-end gap-3">
+      <div className="flex flex-wrap items-center justify-end gap-3">
         {saved && (
           <span className="text-muted-foreground text-sm">Changes saved</span>
+        )}
+        {showConfirmButton && (
+          <Button
+            variant="outline"
+            onClick={() => {
+              startTransition(async () => {
+                await confirmProfile();
+                router.push("/");
+              });
+            }}
+            disabled={pending}
+          >
+            Everything&apos;s correct
+          </Button>
         )}
         <Button onClick={handleSave} disabled={pending}>
           {pending ? "Saving..." : "Save Changes"}

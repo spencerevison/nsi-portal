@@ -184,6 +184,8 @@ export async function updateMember(
     return { ok: false, error: "Role required" };
   }
 
+  // an admin edit invalidates any prior self-confirmation — member should see
+  // the change and confirm again
   const { error } = await supabaseAdmin
     .from("app_user")
     .update({
@@ -193,6 +195,7 @@ export async function updateMember(
       lot_number: input.lot_number?.trim() || null,
       address: input.address?.trim() || null,
       role_id: input.role_id,
+      profile_confirmed_at: null,
     })
     .eq("id", input.id);
 
@@ -259,6 +262,12 @@ export async function adminUpdateCustomFieldValue(input: {
     console.error("adminUpdateCustomFieldValue failed", error);
     return { ok: false, error: "Failed to update" };
   }
+
+  // admin touched their record — make the member re-confirm next visit
+  await supabaseAdmin
+    .from("app_user")
+    .update({ profile_confirmed_at: null })
+    .eq("id", input.userId);
 
   revalidatePath("/admin/members");
   revalidatePath("/directory");

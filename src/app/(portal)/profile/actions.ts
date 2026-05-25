@@ -14,12 +14,16 @@ export async function updateProfile(input: {
   const user = await getCurrentAppUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
+  // self-edit counts as confirmation — they wouldn't be saving if it was wrong
+  const now = new Date().toISOString();
   const { error } = await supabaseAdmin
     .from("app_user")
     .update({
       phone: input.phone.trim() || null,
       lot_number: input.lotNumber.trim() || null,
       address: input.address.trim() || null,
+      profile_confirmed_at: now,
+      onboarded_at: user.onboarded_at ?? now,
     })
     .eq("id", user.id);
 
@@ -28,6 +32,7 @@ export async function updateProfile(input: {
     return { ok: false, error: "Failed to update profile" };
   }
 
+  revalidatePath("/");
   revalidatePath("/profile");
   revalidatePath("/directory");
   return { ok: true };
@@ -56,26 +61,42 @@ export async function updateCustomFieldValue(input: {
     return { ok: false, error: "Failed to update" };
   }
 
+  // editing a custom field is also a tacit confirmation
+  const now = new Date().toISOString();
+  await supabaseAdmin
+    .from("app_user")
+    .update({
+      profile_confirmed_at: now,
+      onboarded_at: user.onboarded_at ?? now,
+    })
+    .eq("id", user.id);
+
+  revalidatePath("/");
   revalidatePath("/profile");
   revalidatePath("/directory");
   return { ok: true };
 }
 
-export async function dismissWelcome(): Promise<ActionResult> {
+export async function confirmProfile(): Promise<ActionResult> {
   const user = await getCurrentAppUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
+  const now = new Date().toISOString();
   const { error } = await supabaseAdmin
     .from("app_user")
-    .update({ onboarded_at: new Date().toISOString() })
+    .update({
+      profile_confirmed_at: now,
+      onboarded_at: user.onboarded_at ?? now,
+    })
     .eq("id", user.id);
 
   if (error) {
-    console.error("dismissWelcome failed", error);
-    return { ok: false, error: "Failed to dismiss" };
+    console.error("confirmProfile failed", error);
+    return { ok: false, error: "Failed to confirm" };
   }
 
   revalidatePath("/");
+  revalidatePath("/profile");
   return { ok: true };
 }
 
