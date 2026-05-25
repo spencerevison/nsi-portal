@@ -5,6 +5,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { requireCapability } from "@/lib/current-user";
 import { sendInvitationEmail } from "@/lib/notifications";
+import type { ActionResult } from "@/lib/action-result";
 
 export type InviteMemberInput = {
   email: string;
@@ -275,8 +276,6 @@ export async function adminUpdateCustomFieldValue(input: {
 }
 
 // --- Row actions ---
-
-type ActionResult = { ok: true } | { ok: false; error: string };
 
 export async function resendInvitation(userId: string): Promise<ActionResult> {
   await requireCapability("admin.access");

@@ -3,8 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { requireCapability } from "@/lib/current-user";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
+import type { ActionResult } from "@/lib/action-result";
 
 export async function updateRequestStatus(input: {
   id: string;

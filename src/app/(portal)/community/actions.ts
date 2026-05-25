@@ -16,8 +16,7 @@ import {
   uploadAttachmentBlob,
 } from "@/lib/attachments-server";
 import { sanitizeRichText, stripHtml, isEmptyRichText } from "@/lib/rich-text";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
+import type { ActionResult } from "@/lib/action-result";
 
 const MAX_POST_TITLE = 200;
 // limits apply to the visible/plaintext length — HTML tags don't count
