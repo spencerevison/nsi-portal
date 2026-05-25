@@ -41,19 +41,43 @@ export function sanitizeRichText(input: string): string {
   return sanitizeHtml(input, SANITIZE_OPTS).trim();
 }
 
+// minimal entity decoder — sanitize-html re-encodes & < > " ' in its text
+// output, so previews ended up showing "AGM &amp;" literally. Covers the
+// named entities we care about plus numeric refs.
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+};
+
+function decodeEntities(s: string): string {
+  return s.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (m, ref: string) => {
+    if (ref[0] === "#") {
+      const code =
+        ref[1] === "x" || ref[1] === "X"
+          ? parseInt(ref.slice(2), 16)
+          : parseInt(ref.slice(1), 10);
+      return Number.isFinite(code) ? String.fromCodePoint(code) : m;
+    }
+    return NAMED_ENTITIES[ref.toLowerCase()] ?? m;
+  });
+}
+
 // strip tags for plaintext fallbacks: list previews, length checks,
 // notification email subjects, etc.
 export function stripHtml(input: string): string {
   if (!input) return "";
-  return sanitizeHtml(input, {
+  const stripped = sanitizeHtml(input, {
     allowedTags: [],
     allowedAttributes: {},
     // collapse block breaks into single space so previews don't smash
     // paragraphs together
     textFilter: (text) => text,
-  })
-    .replace(/\s+/g, " ")
-    .trim();
+  });
+  return decodeEntities(stripped).replace(/\s+/g, " ").trim();
 }
 
 // Old posts (pre-rich-text) were stored as raw text — no markup at all.
