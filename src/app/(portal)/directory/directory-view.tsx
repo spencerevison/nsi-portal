@@ -63,7 +63,8 @@ export function DirectoryView({
       m.first_name.toLowerCase().includes(q) ||
       m.last_name.toLowerCase().includes(q) ||
       (m.lot_number?.includes(q) ?? false) ||
-      m.email.toLowerCase().includes(q)
+      m.email.toLowerCase().includes(q) ||
+      (m.address?.toLowerCase().includes(q) ?? false)
     );
   });
 
@@ -135,6 +136,7 @@ export function DirectoryView({
                   <SortableTableHead sortKey="email" {...sortProps}>
                     Email
                   </SortableTableHead>
+                  <TableHead>Address</TableHead>
                   {customFields.map((f) => (
                     <TableHead key={f.id}>{f.name}</TableHead>
                   ))}
@@ -144,7 +146,7 @@ export function DirectoryView({
                 {sorted.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={4 + customFields.length}
+                      colSpan={5 + customFields.length}
                       className="text-muted-foreground py-8 text-center"
                     >
                       {search
@@ -183,6 +185,9 @@ export function DirectoryView({
                       >
                         {m.email}
                       </a>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground whitespace-pre-line">
+                      {m.address ?? "—"}
                     </TableCell>
                     {customFields.map((f) => (
                       <TableCell key={f.id} className="text-muted-foreground">
@@ -237,6 +242,9 @@ export function DirectoryView({
                     {m.email}
                   </a>
                 </div>
+                {m.address && (
+                  <div className="text-xs whitespace-pre-line">{m.address}</div>
+                )}
                 {customFields.map((f) => {
                   const val = formatFieldValue(
                     m.custom_fields[f.id]?.value ?? null,

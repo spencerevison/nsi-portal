@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useClerk } from "@clerk/nextjs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,6 +27,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
   // profile fields (name + email are managed by Clerk, read-only here)
   const [phone, setPhone] = useState(profile.phone ?? "");
   const [lotNumber, setLotNumber] = useState(profile.lot_number ?? "");
+  const [address, setAddress] = useState(profile.address ?? "");
 
   // notification prefs
   const [notifyNewPost, setNotifyNewPost] = useState(profile.notify_new_post);
@@ -44,7 +46,7 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
   function handleSave() {
     setSaved(false);
     startTransition(async () => {
-      await updateProfile({ phone, lotNumber });
+      await updateProfile({ phone, lotNumber, address });
 
       for (const cf of cfState) {
         await updateCustomFieldValue({
@@ -114,6 +116,21 @@ export function ProfileForm({ profile }: { profile: ProfileData }) {
                 id="lot_number"
                 value={lotNumber}
                 onChange={(e) => setLotNumber(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label
+                htmlFor="address"
+                className="text-muted-foreground text-xs"
+              >
+                Mailing Address
+              </Label>
+              <Textarea
+                id="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Street, city, province, postal code"
+                rows={3}
               />
             </div>
           </div>

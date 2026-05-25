@@ -9,6 +9,7 @@ type ActionResult = { ok: true } | { ok: false; error: string };
 export async function updateProfile(input: {
   phone: string;
   lotNumber: string;
+  address: string;
 }): Promise<ActionResult> {
   const user = await getCurrentAppUser();
   if (!user) return { ok: false, error: "Not authenticated" };
@@ -18,6 +19,7 @@ export async function updateProfile(input: {
     .update({
       phone: input.phone.trim() || null,
       lot_number: input.lotNumber.trim() || null,
+      address: input.address.trim() || null,
     })
     .eq("id", user.id);
 

@@ -31,8 +31,9 @@ type ImportResult = {
 type Step = "upload" | "preview" | "importing" | "results";
 
 // CSV template content
+// address is optional — quoted in case it contains commas
 const TEMPLATE_CSV =
-  "email,first_name,last_name,lot_number,role\njane@example.com,Jane,Doe,42,Member\n";
+  'email,first_name,last_name,lot_number,address,role\njane@example.com,Jane,Doe,42,"123 Main St, Vancouver, BC V6B 1A1",Member\n';
 
 function downloadTemplate() {
   const blob = new Blob([TEMPLATE_CSV], { type: "text/csv" });
@@ -85,6 +86,7 @@ export function CsvImportDialog({ roles }: { roles: RoleOption[] }) {
           first_name: r.first_name,
           last_name: r.last_name,
           lot_number: r.lot_number || undefined,
+          address: r.address || undefined,
           role_id: r.role_id,
         })),
       );
@@ -125,7 +127,7 @@ export function CsvImportDialog({ roles }: { roles: RoleOption[] }) {
             <p className="text-muted-foreground text-sm">
               Upload a CSV file with columns:{" "}
               <code className="bg-muted rounded px-1 text-xs">
-                email, first_name, last_name, lot_number, role
+                email, first_name, last_name, lot_number, address, role
               </code>
             </p>
             <div className="flex items-center gap-3">

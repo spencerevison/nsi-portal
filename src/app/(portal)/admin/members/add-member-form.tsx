@@ -5,6 +5,7 @@ import { inviteMember } from "./actions";
 import type { RoleOption } from "@/lib/members";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -38,6 +39,7 @@ export function AddMemberForm({ roles, onClose }: Props) {
         first_name: String(fd.get("first_name") ?? ""),
         last_name: String(fd.get("last_name") ?? ""),
         lot_number: String(fd.get("lot_number") ?? ""),
+        address: String(fd.get("address") ?? ""),
         role_id: roleId,
       });
 
@@ -95,6 +97,16 @@ export function AddMemberForm({ roles, onClose }: Props) {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="address">Mailing address</Label>
+            <Textarea
+              id="address"
+              name="address"
+              rows={2}
+              placeholder="Street, city, province, postal code"
+            />
           </div>
 
           {error && <p className="text-destructive text-sm">{error}</p>}

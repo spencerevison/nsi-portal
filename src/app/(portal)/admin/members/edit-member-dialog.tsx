@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -82,6 +83,7 @@ export function EditMemberDialog({
         first_name: String(fd.get("first_name") ?? ""),
         last_name: String(fd.get("last_name") ?? ""),
         lot_number: String(fd.get("lot_number") ?? ""),
+        address: String(fd.get("address") ?? ""),
         role_id: roleId,
       });
 
@@ -171,6 +173,17 @@ export function EditMemberDialog({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="edit_address">Mailing address</Label>
+            <Textarea
+              id="edit_address"
+              name="address"
+              rows={2}
+              defaultValue={member.address ?? ""}
+              placeholder="Street, city, province, postal code"
+            />
           </div>
 
           {/* Custom fields */}

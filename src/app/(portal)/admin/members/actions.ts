@@ -11,6 +11,7 @@ export type InviteMemberInput = {
   first_name?: string;
   last_name?: string;
   lot_number?: string;
+  address?: string;
   role_id: string;
 };
 
@@ -52,6 +53,7 @@ export async function inviteMember(
       first_name: input.first_name?.trim() || "",
       last_name: input.last_name?.trim() || "",
       lot_number: input.lot_number?.trim() || null,
+      address: input.address?.trim() || null,
       role_id: input.role_id,
     })
     .select("id")
@@ -122,6 +124,7 @@ export type BulkInviteRow = {
   first_name: string;
   last_name: string;
   lot_number?: string;
+  address?: string;
   role_id: string;
 };
 
@@ -159,6 +162,7 @@ export type UpdateMemberInput = {
   first_name: string;
   last_name: string;
   lot_number?: string;
+  address?: string;
   role_id: string;
 };
 
@@ -182,6 +186,7 @@ export async function updateMember(
       first_name: input.first_name.trim(),
       last_name: input.last_name.trim(),
       lot_number: input.lot_number?.trim() || null,
+      address: input.address?.trim() || null,
       role_id: input.role_id,
     })
     .eq("id", input.id);
