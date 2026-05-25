@@ -115,12 +115,17 @@ export async function sendInvitationEmail(opts: {
     });
     if (result.error) {
       console.error("sendInvitationEmail: resend error", result.error);
-      return { ok: false, error: "Email provider rejected the message" };
+      // surface the actual reason so admins can act on it (unverified domain,
+      // testing-mode restriction, bad API key, etc) instead of just "rejected".
+      const detail =
+        result.error.message || result.error.name || "unknown reason";
+      return { ok: false, error: `Resend: ${detail}` };
     }
     return { ok: true };
   } catch (err) {
     console.error("sendInvitationEmail failed", err);
-    return { ok: false, error: "Failed to send invitation email" };
+    const msg = err instanceof Error ? err.message : "unknown error";
+    return { ok: false, error: `Failed to send: ${msg}` };
   }
 }
 
