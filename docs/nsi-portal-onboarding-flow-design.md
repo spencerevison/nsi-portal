@@ -54,20 +54,20 @@ stateDiagram-v2
 
 ```mermaid
 sequenceDiagram
-    actor the primary admin as the primary admin (Admin)
+    actor Admin
     participant App as Next.js App
     participant SB as Supabase
     participant CK as Clerk
     participant Email as Member's Inbox
     actor Member as New Member
 
-    the primary admin->>App: Fill in member form + click "Add Member"
+    Admin->>App: Fill in member form + click "Add Member"
     App->>SB: INSERT User (name, email, lot, role_id, groups, invited_at=now)
     SB-->>App: User record created
     App->>CK: createInvitation(email, redirectUrl=/sign-up)
     CK-->>App: Invitation created (invitation_id)
     CK->>Email: Sends invitation email
-    App-->>the primary admin: Success — "Invitation sent to member@example.com"
+    App-->>Admin: Success — "Invitation sent to member@example.com"
 
     Email-->>Member: Opens email, clicks invitation link
     Member->>App: GET /sign-up?__clerk_ticket=abc123
@@ -85,42 +85,42 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor the primary admin as the primary admin (Admin)
+    actor Admin
     participant App as Next.js App
     participant SB as Supabase
     participant CK as Clerk
 
-    the primary admin->>App: Upload CSV or fill in bulk import form
+    Admin->>App: Upload CSV or fill in bulk import form
     App->>App: Validate all rows (email format, required fields, duplicates)
-    App-->>the primary admin: Preview — "42 members ready, 3 errors (show details)"
-    the primary admin->>App: Fix errors, click "Import Members"
+    App-->>Admin: Preview — "42 members ready, 3 errors (show details)"
+    Admin->>App: Fix errors, click "Import Members"
     
     loop For each member
         App->>SB: INSERT User (name, email, lot, role_id, groups)
     end
-    App-->>the primary admin: "42 profiles created. Ready to send invitations."
+    App-->>Admin: "42 profiles created. Ready to send invitations."
     
-    the primary admin->>App: Click "Send All Invitations"
+    Admin->>App: Click "Send All Invitations"
     App->>CK: createInvitationBulk([ {email, redirectUrl}, ... ])
     CK-->>App: Invitations created
     CK->>CK: Sends invitation emails (rate limited: 25 bulk requests/hour)
-    App-->>the primary admin: "42 invitations sent. Track progress in the Members table."
+    App-->>Admin: "42 invitations sent. Track progress in the Members table."
 ```
 
 ### 2.3 Re-invitation (Member Never Accepted)
 
 ```mermaid
 sequenceDiagram
-    actor the primary admin as the primary admin (Admin)
+    actor Admin
     participant App as Next.js App
     participant CK as Clerk
     participant Email as Member's Inbox
 
-    the primary admin->>App: Views member with status "Invited" — clicks "Resend"
+    Admin->>App: Views member with status "Invited" — clicks "Resend"
     App->>CK: createInvitation(email, ignoreExisting=true)
     CK-->>App: New invitation created (old token invalidated)
     CK->>Email: Sends new invitation email
-    App-->>the primary admin: "Invitation resent to member@example.com"
+    App-->>Admin: "Invitation resent to member@example.com"
 ```
 
 ---
@@ -259,7 +259,7 @@ up contact information, and stay connected.
 [Set Up Your Account]  ← primary CTA button linking to /sign-up?__clerk_ticket=...
 
 This link will expire in 30 days. If you have any trouble, 
-contact the primary admin at [allison's email].
+contact the primary admin at [primary admin's email].
 
 — NSI Community Portal
 ```
@@ -269,7 +269,7 @@ contact the primary admin at [allison's email].
 - Plain, minimal design — no heavy branding or images that might trigger spam filters
 - Sender name includes "NSI" so members recognize it
 - Expiration note sets expectations
-- the primary admin's email as fallback contact
+- The primary admin's email as fallback contact
 
 ### 4.5 Member: Sign-Up Page (Invitation Acceptance)
 
@@ -393,13 +393,13 @@ If the webhook handler is unreachable when a member accepts their invitation:
 
 For the initial community launch (~70 members):
 
-1. **Day 1:** the primary admin imports all member profiles via CSV (creates Draft records)
-2. **Day 1:** the primary admin reviews and sends invitations (Clerk bulk API, ~3 API calls)
+1. **Day 1:** The primary admin imports all member profiles via CSV (creates Draft records)
+2. **Day 1:** The primary admin reviews and sends invitations (Clerk bulk API, ~3 API calls)
 3. **Day 1–7:** Members receive emails and accept at their own pace
-4. **Day 7:** the primary admin checks the Members table for members still in "Invited" status
-5. **Day 7–14:** the primary admin contacts stragglers directly (phone/text) and offers to help them through the process
-6. **Day 14:** the primary admin resends invitations to anyone who hasn't accepted
-7. **Day 30:** Invitations expire. the primary admin re-invites remaining holdouts as needed
+4. **Day 7:** The primary admin checks the Members table for members still in "Invited" status
+5. **Day 7–14:** The primary admin contacts stragglers directly (phone/text) and offers to help them through the process
+6. **Day 14:** The primary admin resends invitations to anyone who hasn't accepted
+7. **Day 30:** Invitations expire. The primary admin re-invites remaining holdouts as needed
 
 This timeline accounts for the reality that some 1st gen members will need personal assistance from the primary admin to complete the sign-up process.
 

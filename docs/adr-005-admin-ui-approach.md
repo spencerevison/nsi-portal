@@ -6,7 +6,7 @@
 
 ## Context
 
-The NSI Community Portal has two classes of users with different capabilities: regular members (browse documents, view directory, edit own profile, post on community board) and administrators (manage members, upload documents, send group emails, manage roles and groups). the primary admin is the primary admin and will handle day-to-day content management. Spencer has full admin access for technical administration.
+The NSI Community Portal has two classes of users with different capabilities: regular members (browse documents, view directory, edit own profile, post on community board) and administrators (manage members, upload documents, send group emails, manage roles and groups). The primary admin handles day-to-day content management. Spencer has full admin access for technical administration.
 
 The question is how to surface admin functionality in the UI: as a separate admin application, or as capability-gated elements within the same interface members use.
 
@@ -21,7 +21,7 @@ A single application where admin controls (upload buttons, member management, ro
 **Pros:**
 
 - One codebase, one deployment, one URL — minimal maintenance surface
-- the primary admin sees the portal exactly as members do, plus admin controls — she can spot issues from the member's perspective while managing content
+- The primary admin sees the portal exactly as members do, plus admin controls — they can spot issues from the member's perspective while managing content
 - Admin actions happen in context: uploading a document happens inside the document library, not in a separate admin panel
 - Shared components (navigation, layout, design system) reduce code duplication
 - The prototype already validates this approach across all screens
@@ -77,7 +77,7 @@ An off-the-shelf admin panel connected to the Supabase database, providing auto-
 
 This decision was validated during the prototype phase — the high-fidelity prototype demonstrates all admin functionality (member management, document upload, group management, email compose, role configuration) integrated into the same interface members use, with admin-only elements gated behind capability checks.
 
-The primary driver is simplicity. For a community with two admins and ~70–112 members, a separate admin application is unnecessary complexity. the primary admin's admin workflows — uploading a document, inviting a member, sending a group email — are infrequent, low-volume tasks that don't require a dedicated data management interface. They happen naturally within the same portal she'd be browsing anyway.
+The primary driver is simplicity. For a community with two admins and ~70–112 members, a separate admin application is unnecessary complexity. The primary admin's workflows — uploading a document, inviting a member, sending a group email — are infrequent, low-volume tasks that don't require a dedicated data management interface. They happen naturally within the same portal they'd be browsing anyway.
 
 The secondary driver is maintenance burden. One codebase, one deployment, one set of components. A separate admin app would mean two sets of layouts, two navigation structures, and shared data access logic that needs to be kept in sync. For a volunteer-maintained project, this is unjustifiable overhead.
 
@@ -115,7 +115,7 @@ These appear contextually within member-facing pages:
 
 - Single codebase and deployment for the entire portal
 - Admin workflows happen in context alongside the member experience
-- the primary admin sees what members see, plus her admin controls — no context switching
+- The primary admin sees what members see, plus their admin controls — no context switching
 - Reduced development and maintenance time compared to a separate admin app
 
 **Constrains:**

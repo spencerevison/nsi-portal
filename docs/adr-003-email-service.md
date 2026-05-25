@@ -98,7 +98,7 @@ AWS SES was eliminated because it trades infrastructure cost for maintenance cos
 
 ### Group email flow
 
-1. the primary admin (or a council member with `email.send` capability) opens the email compose UI in the portal
+1. The primary admin (or a council member with `email.send` capability) opens the email compose UI in the portal
 2. Selects target group(s) — e.g., "Work Party" or "All Members"
 3. Writes subject and body using a rich text editor
 4. Clicks send → the application resolves group membership to a list of email addresses from Supabase

@@ -58,7 +58,7 @@
 - Bulk import: CSV upload, validation preview, batch profile creation, batch invitation sending with rate limit handling
 - Status tracking: Draft → Invited → Active → Revoked → Inactive badges and transitions
 
-**Done when:** the primary admin (or Spencer acting as the primary admin) can add a member, send an invitation, see the member appear as "Invited," watch it transition to "Active" when the member accepts, and resend/revoke invitations for members who haven't accepted.
+**Done when:** The primary admin (or Spencer acting as the primary admin) can add a member, send an invitation, see the member appear as "Invited," watch it transition to "Active" when the member accepts, and resend/revoke invitations for members who haven't accepted.
 
 **Depends on:** Phase 1 (invitation flow must work end-to-end before the admin UI wraps it).
 
@@ -135,7 +135,7 @@
 - Resend webhook handler: `POST /api/webhooks/resend` — log delivery events against EmailLog records
 - React Email templates: group broadcast template with portal branding
 
-**Done when:** the primary admin can compose an email, select "Work Party" as the target group, see "23 members" as the recipient count, confirm, and send. The email arrives in members' inboxes. The sent email appears in the history log with delivery status.
+**Done when:** The primary admin can compose an email, select "Work Party" as the target group, see "23 members" as the recipient count, confirm, and send. The email arrives in members' inboxes. The sent email appears in the history log with delivery status.
 
 **Depends on:** Phase 1 (auth), Phase 2 (member management — need members assigned to groups).
 
@@ -152,7 +152,7 @@
 - Role assignment: dropdown on member edit form
 - Validate that capability checks work end-to-end: create a test role with limited capabilities, assign to a user, verify they can/can't access gated features
 
-**Done when:** the primary admin can create a new role, assign capabilities to it, assign the role to a member, and that member sees only the features their role permits. Role changes take effect immediately.
+**Done when:** The primary admin can create a new role, assign capabilities to it, assign the role to a member, and that member sees only the features their role permits. Role changes take effect immediately.
 
 **Depends on:** Phases 1–6 (all capability-gated features must exist before the role editor is meaningful to test).
 
@@ -175,7 +175,7 @@
 - Welcome email template (React Email): sent after member completes onboarding
 - Documentation: admin guide for the primary admin (how to invite members, upload documents, send emails)
 
-**Done when:** Spencer and the primary admin walk through every feature on mobile and desktop. the primary admin can independently add a member, upload a document, and send a group email without Spencer's help. The portal is ready for community launch.
+**Done when:** Spencer and the primary admin walk through every feature on mobile and desktop. The primary admin can independently add a member, upload a document, and send a group email without Spencer's help. The portal is ready for community launch.
 
 **Depends on:** All previous phases.
 

@@ -377,7 +377,7 @@ Mobile: hamburger menu with slide-out drawer from the right.
 ### 6.1 Member Invitation
 
 ```
-the primary admin (Admin UI)
+Admin (Admin UI)
   │
   ├─ 1. Fills in member form (name, email, lot, role, groups)
   │
@@ -435,7 +435,7 @@ Member (Document Library)
 ### 6.4 Group Email Send
 
 ```
-the primary admin (Email Compose)
+Admin (Email Compose)
   │
   ├─ 1. Selects group(s), writes subject + body
   ├─ 2. Confirmation dialog: "Send to Work Party (23 members)?"
