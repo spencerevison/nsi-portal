@@ -38,6 +38,7 @@ export function AddMemberForm({ roles, onClose }: Props) {
         email: String(fd.get("email") ?? ""),
         first_name: String(fd.get("first_name") ?? ""),
         last_name: String(fd.get("last_name") ?? ""),
+        phone: String(fd.get("phone") ?? ""),
         lot_number: String(fd.get("lot_number") ?? ""),
         address: String(fd.get("address") ?? ""),
         role_id: roleId,
@@ -68,9 +69,15 @@ export function AddMemberForm({ roles, onClose }: Props) {
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" required />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" name="email" type="email" required />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="phone">Phone</Label>
+              <Input id="phone" name="phone" type="tel" />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

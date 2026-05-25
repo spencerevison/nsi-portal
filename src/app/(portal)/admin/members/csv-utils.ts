@@ -4,6 +4,7 @@ export type ParsedRow = {
   email: string;
   first_name: string;
   last_name: string;
+  phone: string;
   lot_number: string;
   address: string;
   role: string;
@@ -78,6 +79,7 @@ export function parseCSV(text: string, roles: RoleOption[]): ParsedRow[] {
     email: header.indexOf("email"),
     first_name: header.indexOf("first_name"),
     last_name: header.indexOf("last_name"),
+    phone: header.indexOf("phone"),
     lot_number: header.indexOf("lot_number"),
     address: header.indexOf("address"),
     role: header.indexOf("role"),
@@ -89,6 +91,7 @@ export function parseCSV(text: string, roles: RoleOption[]): ParsedRow[] {
         email: "",
         first_name: "",
         last_name: "",
+        phone: "",
         lot_number: "",
         address: "",
         role: "",
@@ -109,6 +112,7 @@ export function parseCSV(text: string, roles: RoleOption[]): ParsedRow[] {
       colIdx.first_name >= 0 ? (cols[colIdx.first_name] ?? "") : "";
     const last_name =
       colIdx.last_name >= 0 ? (cols[colIdx.last_name] ?? "") : "";
+    const phone = colIdx.phone >= 0 ? (cols[colIdx.phone] ?? "") : "";
     const lot_number =
       colIdx.lot_number >= 0 ? (cols[colIdx.lot_number] ?? "") : "";
     const address = colIdx.address >= 0 ? (cols[colIdx.address] ?? "") : "";
@@ -132,6 +136,7 @@ export function parseCSV(text: string, roles: RoleOption[]): ParsedRow[] {
       email,
       first_name,
       last_name,
+      phone,
       lot_number,
       address,
       role: roleName || defaultRole?.name || "",

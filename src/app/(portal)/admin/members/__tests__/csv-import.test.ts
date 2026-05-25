@@ -149,17 +149,32 @@ describe("parseCSV", () => {
   it("round-trips the dialog's TEMPLATE_CSV", () => {
     // Mirrors csv-import-dialog.tsx — keep these in sync.
     const TEMPLATE_CSV =
-      'email,first_name,last_name,lot_number,address,role\njane@example.com,Jane,Doe,42,"123 Main St, Vancouver, BC V6B 1A1",Member\n';
+      'email,first_name,last_name,phone,lot_number,address,role\njane@example.com,Jane,Doe,604-555-0142,42,"123 Main St, Vancouver, BC V6B 1A1",Member\n';
     const rows = parseCSV(TEMPLATE_CSV, roles);
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       email: "jane@example.com",
       first_name: "Jane",
       last_name: "Doe",
+      phone: "604-555-0142",
       lot_number: "42",
       address: "123 Main St, Vancouver, BC V6B 1A1",
       role: "Member",
       errors: [],
     });
+  });
+
+  it("parses an optional phone column", () => {
+    const csv =
+      "email,first_name,last_name,phone\njane@test.com,Jane,Doe,604-555-0142\n";
+    const rows = parseCSV(csv, roles);
+    expect(rows[0].phone).toBe("604-555-0142");
+    expect(rows[0].errors).toHaveLength(0);
+  });
+
+  it("leaves phone empty when column is absent", () => {
+    const csv = "email,first_name,last_name\njane@test.com,Jane,Doe\n";
+    const rows = parseCSV(csv, roles);
+    expect(rows[0].phone).toBe("");
   });
 });

@@ -82,6 +82,7 @@ export function EditMemberDialog({
         id: member.id,
         first_name: String(fd.get("first_name") ?? ""),
         last_name: String(fd.get("last_name") ?? ""),
+        phone: String(fd.get("phone") ?? ""),
         lot_number: String(fd.get("lot_number") ?? ""),
         address: String(fd.get("address") ?? ""),
         role_id: roleId,
@@ -147,6 +148,15 @@ export function EditMemberDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
+              <Label htmlFor="edit_phone">Phone</Label>
+              <Input
+                id="edit_phone"
+                name="phone"
+                type="tel"
+                defaultValue={member.phone ?? ""}
+              />
+            </div>
+            <div className="space-y-1.5">
               <Label htmlFor="edit_lot_number">Lot number</Label>
               <Input
                 id="edit_lot_number"
@@ -154,25 +164,26 @@ export function EditMemberDialog({
                 defaultValue={member.lot_number ?? ""}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="edit_role">Role</Label>
-              <Select
-                items={roles.map((r) => ({ value: r.id, label: r.name }))}
-                value={roleId}
-                onValueChange={(v) => setRoleId(v ?? "")}
-              >
-                <SelectTrigger id="edit_role" className="w-full">
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roles.map((r) => (
-                    <SelectItem key={r.id} value={r.id}>
-                      {r.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="edit_role">Role</Label>
+            <Select
+              items={roles.map((r) => ({ value: r.id, label: r.name }))}
+              value={roleId}
+              onValueChange={(v) => setRoleId(v ?? "")}
+            >
+              <SelectTrigger id="edit_role" className="w-full">
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                {roles.map((r) => (
+                  <SelectItem key={r.id} value={r.id}>
+                    {r.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-1.5">

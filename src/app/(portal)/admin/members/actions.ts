@@ -10,6 +10,7 @@ export type InviteMemberInput = {
   email: string;
   first_name?: string;
   last_name?: string;
+  phone?: string;
   lot_number?: string;
   address?: string;
   role_id: string;
@@ -52,6 +53,7 @@ export async function inviteMember(
       email,
       first_name: input.first_name?.trim() || "",
       last_name: input.last_name?.trim() || "",
+      phone: input.phone?.trim() || null,
       lot_number: input.lot_number?.trim() || null,
       address: input.address?.trim() || null,
       role_id: input.role_id,
@@ -123,6 +125,7 @@ export type BulkInviteRow = {
   email: string;
   first_name: string;
   last_name: string;
+  phone?: string;
   lot_number?: string;
   address?: string;
   role_id: string;
@@ -161,6 +164,7 @@ export type UpdateMemberInput = {
   id: string;
   first_name: string;
   last_name: string;
+  phone?: string;
   lot_number?: string;
   address?: string;
   role_id: string;
@@ -185,6 +189,7 @@ export async function updateMember(
     .update({
       first_name: input.first_name.trim(),
       last_name: input.last_name.trim(),
+      phone: input.phone?.trim() || null,
       lot_number: input.lot_number?.trim() || null,
       address: input.address?.trim() || null,
       role_id: input.role_id,
