@@ -3,8 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getCurrentAppUser } from "@/lib/current-user";
+import type { ActionResult } from "@/lib/action-result";
 
-type ActionResult = { ok: true } | { ok: false; error: string };
+// paths that may render the editing user's profile data — invalidated as a
+// set whenever phone/lot/address/custom fields change. confirmProfile and
+// updateNotifications use narrower sets since those don't affect /directory.
+const PROFILE_CHANGE_PATHS = ["/", "/profile", "/directory"] as const;
+
+function revalidateProfileChange() {
+  for (const p of PROFILE_CHANGE_PATHS) revalidatePath(p);
+}
 
 export async function updateProfile(input: {
   phone: string;
@@ -32,9 +40,7 @@ export async function updateProfile(input: {
     return { ok: false, error: "Failed to update profile" };
   }
 
-  revalidatePath("/");
-  revalidatePath("/profile");
-  revalidatePath("/directory");
+  revalidateProfileChange();
   return { ok: true };
 }
 
@@ -71,9 +77,7 @@ export async function updateCustomFieldValue(input: {
     })
     .eq("id", user.id);
 
-  revalidatePath("/");
-  revalidatePath("/profile");
-  revalidatePath("/directory");
+  revalidateProfileChange();
   return { ok: true };
 }
 
