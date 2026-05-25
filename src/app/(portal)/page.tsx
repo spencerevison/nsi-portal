@@ -37,7 +37,7 @@ const BATCH_WINDOW_MS = 60_000;
 export default async function HomePage() {
   const user = await getCurrentAppUser();
 
-  // newest pinned post — drives the "From the board" preview card
+  // newest pinned post — drives the "From the message board" preview card
   const { data: pinnedRows } = await supabaseAdmin
     .from("post")
     .select(
@@ -222,7 +222,7 @@ export default async function HomePage() {
           <section>
             <div className="mb-3 flex items-baseline justify-between">
               <h2 className="text-accent-900 text-lg font-semibold tracking-[-0.005em]">
-                From the board
+                From the message board
               </h2>
               <Link
                 href="/community"
