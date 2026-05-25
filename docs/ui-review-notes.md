@@ -32,7 +32,7 @@ Hamburger menu visible. "Community Portal" text hidden on narrow screens (only N
 
 ## No issues found
 
-All pages render without overflow, broken layouts, or visual regressions. The known issues from STATUS.md (mobile nav overflow, mobile table truncation) are resolved.
+All pages render without overflow, broken layouts, or visual regressions. The known issues from `docs/build-log.md` (mobile nav overflow, mobile table truncation) are resolved.
 
 ## Minor observations (non-blocking)
 

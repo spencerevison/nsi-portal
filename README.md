@@ -91,6 +91,7 @@ walkthrough — see [`docs/nsi-portal-system-design.md`](docs/nsi-portal-system-
 - [`docs/nsi-portal-system-design.md`](docs/nsi-portal-system-design.md) — architecture, data model, routes, security model
 - [`docs/nsi-portal-onboarding-flow-design.md`](docs/nsi-portal-onboarding-flow-design.md) — invitation state machine, error handling, UI states
 - [`docs/nsi-portal-build-sequence.md`](docs/nsi-portal-build-sequence.md) — dependency-aware build order across 8 phases
+- [`docs/build-log.md`](docs/build-log.md) — phase-by-phase delivery record + session notes, frozen at v1.0
 - [`docs/adr-001-authentication-provider.md`](docs/adr-001-authentication-provider.md) --> [`docs/adr-005-admin-ui-approach.md`](docs/adr-005-admin-ui-approach.md) — five ADRs covering each load-bearing technical decision
 - [`docs/admin-guide.md`](docs/admin-guide.md) — end-user admin reference (written for the actual non-technical admin)
 - [`CLAUDE.md`](CLAUDE.md) — conventions and patterns for contributors
