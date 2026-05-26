@@ -5,6 +5,9 @@ community on the BC coast (~70–112 members). Three things people actually use
 it for: browsing strata documents, looking up other members, and sending group
 email. Live at **[nsiportal.ca](https://nsiportal.ca)**.
 
+[![CI](https://github.com/spencerevison/nsi-portal/actions/workflows/ci.yml/badge.svg)](https://github.com/spencerevison/nsi-portal/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 ![NSI Community Portal — home page](docs/screenshots/home.png)
 
 ## What it does
@@ -86,6 +89,30 @@ walkthrough — see [`docs/nsi-portal-system-design.md`](docs/nsi-portal-system-
 | ![Admin — members table](docs/screenshots/admin-members.png) | |
 | **Admin** — members table with status, role, CSV import, row-level actions. | |
 
+## Run locally
+
+Needs Node 22, a Clerk dev project, a Supabase project, and a Resend account
+(free tiers are fine for all three).
+
+```bash
+git clone git@github.com:spencerevison/nsi-portal.git
+cd nsi-portal
+cp .env.example .env.local
+# Fill in keys from each dashboard — see comments in .env.example
+npm install
+npm run dev
+```
+
+Visit <http://localhost:3000>. To get past the sign-in screen, seed an admin
+row in Supabase and invite yourself through the admin UI:
+
+```bash
+node scripts/seed-admin.mjs you@example.com "First" "Last"
+```
+
+Migrations live in `supabase/migrations/` and apply via `npx supabase db push`
+against the linked Supabase project.
+
 ## Documentation
 
 - [`docs/case-study.md`](docs/case-study.md) — plain-English walkthrough of the highest-leverage decisions and trade-offs
@@ -95,7 +122,6 @@ walkthrough — see [`docs/nsi-portal-system-design.md`](docs/nsi-portal-system-
 - [`docs/build-log.md`](docs/build-log.md) — phase-by-phase delivery record + session notes, frozen at v1.0
 - [`docs/adr-001-authentication-provider.md`](docs/adr-001-authentication-provider.md) --> [`docs/adr-005-admin-ui-approach.md`](docs/adr-005-admin-ui-approach.md) — five ADRs covering each load-bearing technical decision
 - [`docs/admin-guide.md`](docs/admin-guide.md) — end-user admin reference (written for the actual non-technical admin)
-- [`CLAUDE.md`](CLAUDE.md) — conventions and patterns for contributors
 
 ---
 
@@ -124,3 +150,7 @@ pause. We learned this the hard way once.
 - Vercel dashboard --> project --> **Crons** tab shows last run + next run.
 - Function logs should show `keep-alive ok { timestamp, rows }` after each invocation. (Hobby plan only retains ~1h of logs, so check soon after a run.)
 - Locally: `curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/keep-alive` — expect `{ ok: true, ... }`. Without the header it should 401 (assuming `CRON_SECRET` is set locally).
+
+---
+
+Built by **Spencer Campbell** — [spence@twentyhertz.com](mailto:spence@twentyhertz.com). If you're hiring and this looks like the sort of work you'd want done, get in touch.

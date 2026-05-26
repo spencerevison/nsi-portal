@@ -21,13 +21,11 @@ setup("sign in and save state", async ({ page }) => {
   await setupClerkTestingToken({ page });
 
   await page.goto("/sign-in", { waitUntil: "networkidle" });
-  await page.locator('input[name="identifier"]').fill(email);
-  await page.getByRole("button", { name: /continue/i }).click();
-
-  const pwd = page.locator('input[name="password"]');
-  await pwd.waitFor({ timeout: 10000 });
-  await pwd.fill(password);
-  await page.getByRole("button", { name: /continue/i }).click();
+  // The sign-in screen is a single-step custom form (name="email" / name="password"),
+  // not Clerk's stock two-step <SignIn /> flow. Was identifier-then-password historically.
+  await page.locator('input[name="email"]').fill(email);
+  await page.locator('input[name="password"]').fill(password);
+  await page.getByRole("button", { name: /^sign in$/i }).click();
 
   // handle device verification if needed
   try {
