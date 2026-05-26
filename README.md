@@ -88,6 +88,7 @@ walkthrough — see [`docs/nsi-portal-system-design.md`](docs/nsi-portal-system-
 
 ## Documentation
 
+- [`docs/case-study.md`](docs/case-study.md) — plain-English walkthrough of the highest-leverage decisions and trade-offs
 - [`docs/nsi-portal-system-design.md`](docs/nsi-portal-system-design.md) — architecture, data model, routes, security model
 - [`docs/nsi-portal-onboarding-flow-design.md`](docs/nsi-portal-onboarding-flow-design.md) — invitation state machine, error handling, UI states
 - [`docs/nsi-portal-build-sequence.md`](docs/nsi-portal-build-sequence.md) — dependency-aware build order across 8 phases
