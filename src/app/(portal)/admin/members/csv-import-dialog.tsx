@@ -153,7 +153,9 @@ export function CsvImportDialog({ roles }: { roles: RoleOption[] }) {
 
         {/* Preview step */}
         {step === "preview" && (
-          <div className="space-y-4">
+          // min-w-0 so the table can shrink to the modal instead of overflowing
+          // the grid track (DialogContent is display:grid)
+          <div className="min-w-0 space-y-4">
             <div className="flex items-center gap-3">
               <Badge
                 variant="secondary"
@@ -240,7 +242,7 @@ export function CsvImportDialog({ roles }: { roles: RoleOption[] }) {
 
         {/* Results step */}
         {step === "results" && (
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <div className="flex items-center gap-3">
               {successCount > 0 && (
                 <Badge
