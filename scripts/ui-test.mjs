@@ -43,13 +43,12 @@ await setupClerkTestingToken({ page });
 console.log(`Signing in as ${email}...`);
 await page.goto("http://localhost:3000/sign-in", { waitUntil: "networkidle" });
 
-await page.locator('input[name="identifier"]').fill(email);
-await page.getByRole("button", { name: /continue/i }).click();
-
+// Clerk's @clerk/ui sign-in shows email + password on one screen now
+await page.locator('input[name="email"]').fill(email);
 const pwd = page.locator('input[name="password"]');
 await pwd.waitFor({ timeout: 10000 });
 await pwd.fill(password);
-await page.getByRole("button", { name: /continue/i }).click();
+await page.getByRole("button", { name: /sign in/i }).click();
 
 // handle device verification if it triggers
 // handle intermediate Clerk screens (factor-two, client-trust, etc.)
@@ -105,7 +104,7 @@ if (await addBtn.isVisible()) {
   console.log("  52-admin-add-form");
 
   // open role select
-  const trigger = page.locator('[data-slot="select-trigger"]');
+  const trigger = page.locator('button#role_id[data-slot="select-trigger"]');
   if (await trigger.isVisible()) {
     await trigger.click();
     await page.waitForTimeout(300);
@@ -118,6 +117,29 @@ if (await addBtn.isVisible()) {
 }
 
 await capture("54-directory", "/directory");
+
+// member sheet + family tree
+const firstRow = page.locator("table tbody tr").first();
+if (await firstRow.isVisible()) {
+  // click the name cell — row center lands on the mailto link
+  await firstRow.locator("td").first().click();
+  await page.waitForTimeout(500);
+  await page.screenshot({
+    path: `${OUT}/54b-directory-sheet.png`,
+    fullPage: true,
+  });
+  console.log("  54b-directory-sheet");
+
+  const treeLink = page.getByRole("link", { name: /view family tree/i });
+  if (await treeLink.isVisible()) {
+    await treeLink.click();
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: `${OUT}/54c-family-tree.png` });
+    console.log("  54c-family-tree");
+  }
+}
+
 await capture("55-profile", "/profile");
 await capture("56-documents", "/documents");
 await capture("57-documents-folder", "/documents/strata-documents");

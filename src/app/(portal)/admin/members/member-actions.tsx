@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { MemberRow, RoleOption } from "@/lib/members";
 import { EditMemberDialog } from "./edit-member-dialog";
+import { FamilyDialog } from "./family-dialog";
 import {
   resendInvitation,
   revokeInvitation,
@@ -37,6 +38,7 @@ export function MemberActions({
   const [pending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [familyOpen, setFamilyOpen] = useState(false);
 
   function run(
     action: (id: string) => Promise<{ ok: boolean; error?: string }>,
@@ -79,6 +81,9 @@ export function MemberActions({
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
             Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setFamilyOpen(true)}>
+            Family
           </DropdownMenuItem>
           {canResend && (
             <DropdownMenuItem onClick={() => run(resendInvitation)}>
@@ -127,6 +132,12 @@ export function MemberActions({
         roles={roles}
         open={editOpen}
         onOpenChange={setEditOpen}
+      />
+
+      <FamilyDialog
+        member={member}
+        open={familyOpen}
+        onOpenChange={setFamilyOpen}
       />
 
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>

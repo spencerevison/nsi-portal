@@ -7,6 +7,11 @@ import { ThemeToggle } from "./theme-toggle";
 import { Button } from "@/components/ui/button";
 import { getCurrentAppUser, getCurrentCapabilities } from "@/lib/current-user";
 
+// Every portal route is per-user and auth-gated — never prerender. This also
+// stops `next build` from evaluating these pages (and touching the DB) when
+// server secrets aren't present, e.g. in CI.
+export const dynamic = "force-dynamic";
+
 export default async function PortalLayout({
   children,
 }: {

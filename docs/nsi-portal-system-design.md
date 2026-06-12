@@ -90,9 +90,9 @@ Clerk handles identity verification. The application never sees or stores passwo
 6. Application reads the Clerk user ID from the session and looks up the corresponding Supabase profile
 
 **Invitation flow (detailed in the Onboarding Flow Design document):**
-1. Admin creates a member profile in Supabase (pre-seeded with name, lot number, role, groups)
-2. Application calls `clerkClient.invitations.createInvitation()` with the member's email
-3. Clerk sends the invitation email with a link to `/sign-up?__clerk_ticket=...`
+1. Admin creates a member profile in Supabase (pre-seeded with name, lot number, role, groups) — either with an immediate invitation, or as a Draft (individually via "Save as draft" or in bulk via CSV "Import as drafts"), to be invited later one at a time or all at once
+2. Application calls `clerkClient.invitations.createInvitation()` with the member's email (`notify: false`)
+3. The app sends the invitation email via Resend with a link to `/sign-up?__clerk_ticket=...`
 4. Member clicks link, sets password, account activates
 5. Clerk `user.created` webhook fires → application links Clerk user to existing Supabase profile
 
@@ -250,6 +250,28 @@ EmailLog
   sent_at           timestamptz
 ```
 
+### family_node / family_link
+
+Family graph. `family_node` is a person — `app_user_id` set for members,
+null for placeholders (non-member kids, deceased connectors); placeholders
+carry `display_name`, optional `birth_year`/`death_year`/`gender`. An optional
+`family_name_override` lets a member (or admin) rename their family's display
+title; it lives on a node and is cleared from the rest of the component on
+write, so there's at most one per family.
+`family_link` stores only `parent` (from = parent, to = child) and `partner`
+(canonical from < to) edges; unique on (type, from, to), self-links blocked.
+All other relationships (sibling, grandparent, cousin, in-law, step-) are
+derived in `src/lib/family.ts` by labeling BFS paths. A "family" is a
+connected component — never stored, so its name is derived from the most
+common member surnames unless overridden. Cycle prevention is enforced in
+server actions. Visible to any member with `directory.read`; members edit
+links touching their own node; `admin.access` edits everything.
+
+The directory's children/family data is read from this graph (the directory
+table itself no longer carries Children/Dogs columns — both surface in the
+per-member detail sheet, and children also in the family tree). The legacy
+free-text Children custom field has been retired in favour of these links.
+
 ### Key Relationships
 
 - A **User** belongs to one **Role** and many **Groups**
@@ -276,10 +298,11 @@ EmailLog
 /                 -- Dashboard (landing page, pinned posts, quick links)
 /documents        -- Document library (browsable folder tree)
 /documents/:slug  -- Folder contents
-/directory        -- Member directory (searchable table)
+/directory        -- Member directory (searchable table + detail sheet)
+/family/:nodeId   -- Family tree for the node's connected component
 /community        -- Community board (post feed)
 /community/:id    -- Single post with comments
-/profile          -- Edit community profile (lot number, phone, custom fields, notification preferences). Account data (name, email, avatar, password) managed via Clerk's built-in UI.
+/profile          -- Edit community profile (lot number, phone, custom fields, family links, notification preferences). Account data (name, email, avatar, password) managed via Clerk's built-in UI.
 ```
 
 ### Capability-Gated Routes
@@ -387,7 +410,7 @@ Admin (Admin UI)
   ├─ 3. Server action: clerkClient.invitations.createInvitation()
   │     (email, redirectUrl → /sign-up)
   │
-  └─ 4. Clerk sends invitation email
+  └─ 4. App sends invitation email via Resend (Clerk notify: false)
        │
        Member clicks link
        │

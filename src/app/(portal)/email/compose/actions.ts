@@ -1,6 +1,5 @@
 "use server";
 
-import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import {
   getCurrentAppUser,
@@ -16,8 +15,7 @@ import {
   uploadAttachmentBlob,
 } from "@/lib/attachments-server";
 import { checkAndRecord, rateLimitMessage } from "@/lib/rate-limit";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { getResend } from "@/lib/resend";
 
 // Rate limit caps: per-sender hour/day, plus a portal-wide daily ceiling so
 // no one can torch Resend quota or domain reputation with a single account.
@@ -168,7 +166,7 @@ export async function sendGroupEmail(formData: FormData): Promise<SendResult> {
       // across SDK versions. Individual sends are guaranteed to work.
       const results = await Promise.all(
         recipients.map((r) =>
-          resend.emails.send({
+          getResend().emails.send({
             from: fromAddress,
             replyTo: replyToAddress,
             to: r.email,
@@ -202,7 +200,7 @@ export async function sendGroupEmail(formData: FormData): Promise<SendResult> {
         subject,
         html,
       }));
-      const result = await resend.batch.send(emails);
+      const result = await getResend().batch.send(emails);
       if (result.error) {
         console.error("resend batch error", result.error);
         return {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { inviteMember } from "./actions";
 import type { RoleOption } from "@/lib/members";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ export function AddMemberForm({ roles, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
   const defaultRole = roles.find((r) => r.is_default);
   const [roleId, setRoleId] = useState<string>(defaultRole?.id ?? "");
+  const asDraft = useRef(false);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -42,6 +43,7 @@ export function AddMemberForm({ roles, onClose }: Props) {
         lot_number: String(fd.get("lot_number") ?? ""),
         address: String(fd.get("address") ?? ""),
         role_id: roleId,
+        sendInvite: !asDraft.current,
       });
 
       if (!result.ok) {
@@ -119,8 +121,20 @@ export function AddMemberForm({ roles, onClose }: Props) {
           {error && <p className="text-destructive text-sm">{error}</p>}
 
           <div className="flex flex-wrap gap-2 pt-1">
-            <Button type="submit" disabled={pending || !roleId}>
-              {pending ? "Sending..." : "Send invitation"}
+            <Button
+              type="submit"
+              disabled={pending || !roleId}
+              onClick={() => (asDraft.current = false)}
+            >
+              {pending ? "Working..." : "Send invitation"}
+            </Button>
+            <Button
+              type="submit"
+              variant="secondary"
+              disabled={pending || !roleId}
+              onClick={() => (asDraft.current = true)}
+            >
+              Save as draft
             </Button>
             <Button
               type="button"

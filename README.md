@@ -14,8 +14,14 @@ email. Live at **[nsiportal.ca](https://nsiportal.ca)**.
 
 - **Document library** — folder tree, drag-and-drop upload, signed-URL
   downloads for private files (60s expiry).
-- **Member directory** — searchable table with admin-defined custom fields
-  (kids, dogs, etc.) and per-field visibility toggles owned by each member.
+- **Member directory** — searchable table (name, lot, phone, email, address)
+  with a per-member detail sheet, admin-defined custom fields, and per-field
+  visibility toggles owned by each member.
+- **Family relationships** — members link parents, partners, and children;
+  siblings, grandparents, cousins, and in-laws are all _derived_ from those
+  two edge types, never stored. Each family renders as a generational tree at
+  `/family/[nodeId]`, built for a multi-generational community where many of
+  someone's relatives are members too.
 - **Community board** — posts, comments, pinned announcements.
 - **Group email** — admin compose UI that sends to named groups via Resend's
   batch API, with delivery-event tracking through Resend webhooks.
@@ -74,6 +80,14 @@ service-role key from trusted server code only. That trade-off (and why it's
 appropriate at this scale) is documented in
 [ADR-002](docs/adr-002-database-and-hosting.md).
 
+The **family graph** is a small example of the same "keep the stored model
+minimal" instinct: `family_node` (a person, optionally linked to an `app_user`)
+and `family_link` (only `parent` and `partner` edges). Every other
+relationship label and the family groupings themselves are computed on read in
+`src/lib/family.ts` — a "family" is just a connected component of the graph, so
+there's no family table to administer and intermarriage between island
+families resolves on its own.
+
 Mutations run through **Server Actions**; API routes exist only for webhook
 handlers (Clerk, Resend) and the keep-alive cron.
 
@@ -84,10 +98,10 @@ walkthrough — see [`docs/nsi-portal-system-design.md`](docs/nsi-portal-system-
 
 | | |
 | --- | --- |
-| ![Documents — folder tree + upload zone](docs/screenshots/documents.png) | ![Directory — search + custom fields](docs/screenshots/directory.png) |
-| **Documents** — folder tree, drag-and-drop upload, signed-URL downloads. | **Directory** — name/lot/email search; "Children", "Dogs" are admin-defined custom fields. |
-| ![Admin — members table](docs/screenshots/admin-members.png) | |
-| **Admin** — members table with status, role, CSV import, row-level actions. | |
+| ![Documents — folder tree + upload zone](docs/screenshots/documents.png) | ![Directory — search + detail sheet](docs/screenshots/directory.png) |
+| **Documents** — folder tree, drag-and-drop upload, signed-URL downloads. | **Directory** — name/lot/phone/email/address search; click a row for the full member detail sheet. |
+| ![Family tree — generational layout](docs/screenshots/family-tree.png) | ![Admin — members table](docs/screenshots/admin-members.png) |
+| **Family tree** — generational layout; member cards and non-member placeholders, with derived relationship labels. | **Admin** — members table with status, role, CSV import, row-level actions. |
 
 ## Run locally
 

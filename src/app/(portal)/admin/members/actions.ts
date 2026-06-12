@@ -15,6 +15,8 @@ export type InviteMemberInput = {
   lot_number?: string;
   address?: string;
   role_id: string;
+  // false => create as Draft, no Clerk invitation, no email
+  sendInvite?: boolean;
 };
 
 export type InviteMemberResult =
@@ -67,9 +69,14 @@ export async function inviteMember(
     return { ok: false, error: "Failed to create member record" };
   }
 
+  if (input.sendInvite === false) {
+    revalidatePath("/admin/members");
+    return { ok: true, user_id: inserted.id };
+  }
+
   // Create the Clerk invitation (notify:false — we deliver the email ourselves
   // via Resend, since Clerk's shared SendGrid IPs were ending up in Gmail spam).
-  // If Clerk itself fails, roll back the app_user row so the admin can retry.
+  // If Clerk itself fails the profile survives as a Draft so the admin can retry.
   let invitationUrl: string | undefined;
   try {
     const clerk = await clerkClient();
@@ -83,16 +90,24 @@ export async function inviteMember(
     invitationUrl = inv.url;
   } catch (err) {
     console.error("clerk invitation failed", err);
-    await supabaseAdmin.from("app_user").delete().eq("id", inserted.id);
-    return { ok: false, error: "Failed to create invitation" };
+    revalidatePath("/admin/members");
+    return {
+      ok: false,
+      error:
+        "Member saved as a draft, but the invitation could not be created. Use Send invitation in the members table to retry.",
+    };
   }
 
   if (!invitationUrl) {
     // shouldn't happen in practice — the Clerk SDK populates `url` on the
     // returned invitation object — but if it ever doesn't we need to know.
     console.error("clerk invitation returned no url", { email });
-    await supabaseAdmin.from("app_user").delete().eq("id", inserted.id);
-    return { ok: false, error: "Invitation created but no link returned" };
+    revalidatePath("/admin/members");
+    return {
+      ok: false,
+      error:
+        "Member saved as a draft, but no invitation link was returned. Use Send invitation in the members table to retry.",
+    };
   }
 
   // Mark as invited before sending — if the send fails the member still
@@ -138,6 +153,7 @@ export type BulkInviteResult = {
 
 export async function bulkInviteMembers(
   rows: BulkInviteRow[],
+  options?: { asDrafts?: boolean },
 ): Promise<BulkInviteResult> {
   await requireCapability("admin.access");
 
@@ -153,7 +169,10 @@ export async function bulkInviteMembers(
 
   const results: BulkInviteResult["results"] = [];
   for (const row of rows) {
-    const res = await inviteMember(row);
+    const res = await inviteMember({
+      ...row,
+      sendInvite: options?.asDrafts ? false : undefined,
+    });
     results.push({ email: row.email, ...res });
   }
 
@@ -185,13 +204,45 @@ export async function updateMember(
     return { ok: false, error: "Role required" };
   }
 
+  const firstName = input.first_name.trim();
+  const lastName = input.last_name.trim();
+
+  const { data: member, error: fetchErr } = await supabaseAdmin
+    .from("app_user")
+    .select("id, clerk_id, first_name, last_name")
+    .eq("id", input.id)
+    .single();
+
+  if (fetchErr || !member) {
+    return { ok: false, error: "Member not found" };
+  }
+
+  // Clerk owns identity for accepted members — getCurrentAppUser syncs name
+  // FROM Clerk on every request, so writing only to Supabase would get
+  // silently reverted the next time the member loads a page. Push the name
+  // to Clerk first; if that fails, bail without touching Supabase.
+  const nameChanged =
+    firstName !== member.first_name || lastName !== member.last_name;
+  if (member.clerk_id && nameChanged) {
+    try {
+      const clerk = await clerkClient();
+      await clerk.users.updateUser(member.clerk_id, { firstName, lastName });
+    } catch (err) {
+      console.error("clerk name update failed", err);
+      return {
+        ok: false,
+        error: "Failed to update name in the member's account - try again",
+      };
+    }
+  }
+
   // an admin edit invalidates any prior self-confirmation — member should see
   // the change and confirm again
   const { error } = await supabaseAdmin
     .from("app_user")
     .update({
-      first_name: input.first_name.trim(),
-      last_name: input.last_name.trim(),
+      first_name: firstName,
+      last_name: lastName,
       phone: input.phone?.trim() || null,
       lot_number: input.lot_number?.trim() || null,
       address: input.address?.trim() || null,
@@ -233,12 +284,14 @@ export async function getAdminMemberCustomFields(userId: string) {
     ]),
   );
 
-  return (fields ?? []).map((f) => ({
-    field_id: f.id,
-    field_name: f.name,
-    value: valueMap.get(f.id)?.value ?? null,
-    visible: valueMap.get(f.id)?.visible ?? true,
-  }));
+  return (fields ?? [])
+    .filter((f) => f.name !== "Children")
+    .map((f) => ({
+      field_id: f.id,
+      field_name: f.name,
+      value: valueMap.get(f.id)?.value ?? null,
+      visible: valueMap.get(f.id)?.visible ?? true,
+    }));
 }
 
 export async function adminUpdateCustomFieldValue(input: {
@@ -421,7 +474,9 @@ export async function deleteMember(userId: string): Promise<ActionResult> {
 
   const { data: user, error: fetchErr } = await supabaseAdmin
     .from("app_user")
-    .select("id, active, clerk_id, accepted_at, revoked_at")
+    .select(
+      "id, active, clerk_id, accepted_at, revoked_at, first_name, last_name, email",
+    )
     .eq("id", userId)
     .single();
 
@@ -443,6 +498,15 @@ export async function deleteMember(userId: string): Promise<ActionResult> {
     }
   }
 
+  // keep the family tree intact — freeze their name onto the node before the
+  // FK sets app_user_id to null
+  const frozenName =
+    `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() || user.email;
+  await supabaseAdmin
+    .from("family_node")
+    .update({ display_name: frozenName })
+    .eq("app_user_id", userId);
+
   const { error } = await supabaseAdmin
     .from("app_user")
     .delete()
@@ -452,4 +516,37 @@ export async function deleteMember(userId: string): Promise<ActionResult> {
 
   revalidatePath("/admin/members");
   return { ok: true };
+}
+
+export type InviteAllDraftsResult =
+  | { ok: true; sent: number; failed: { email: string; error: string }[] }
+  | { ok: false; error: string };
+
+export async function inviteAllDrafts(): Promise<InviteAllDraftsResult> {
+  await requireCapability("admin.access");
+
+  const { data: drafts, error } = await supabaseAdmin
+    .from("app_user")
+    .select("id, email")
+    .is("invited_at", null)
+    .is("accepted_at", null)
+    .is("revoked_at", null)
+    .eq("active", true)
+    .not("email", "ilike", "%+clerk_test%");
+
+  if (error) {
+    console.error("inviteAllDrafts query failed", error);
+    return { ok: false, error: "Failed to load drafts" };
+  }
+
+  let sent = 0;
+  const failed: { email: string; error: string }[] = [];
+  for (const d of drafts ?? []) {
+    const res = await resendInvitation(d.id);
+    if (res.ok) sent++;
+    else failed.push({ email: d.email, error: res.error });
+  }
+
+  revalidatePath("/admin/members");
+  return { ok: true, sent, failed };
 }

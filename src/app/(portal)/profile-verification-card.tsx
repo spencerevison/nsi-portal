@@ -14,6 +14,8 @@ export type VerificationProfile = {
   phone: string | null;
   lot_number: string | null;
   address: string | null;
+  // grouped family links (Parents / Partner / Children) — only non-empty groups
+  family: { label: string; value: string }[];
   custom_fields: { field_name: string; value: string | null }[];
 };
 
@@ -53,6 +55,7 @@ export function ProfileVerificationCard({
     { label: "Phone", value: profile.phone },
     { label: "Mailing", value: profile.address },
     { label: "Lot", value: profile.lot_number },
+    ...profile.family,
     ...profile.custom_fields.map((f) => ({
       label: f.field_name,
       value: formatCustomField(f.value, f.field_name),

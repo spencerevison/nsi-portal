@@ -1,6 +1,5 @@
 "use server";
 
-import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { escapeHtml } from "@/lib/utils";
@@ -12,8 +11,7 @@ import {
   isSupportCategory,
   type SupportCategory,
 } from "../admin/support/_config";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { getResend } from "@/lib/resend";
 
 const RATE_BUCKET = "support.submit";
 const RATE_USER_HOUR = 3;
@@ -119,7 +117,7 @@ export async function submitSupportRequest(input: {
           `,
         }));
 
-        const result = await resend.batch.send(batch);
+        const result = await getResend().batch.send(batch);
         if (result.error) {
           console.error("submitSupportRequest: resend error", result.error);
         }

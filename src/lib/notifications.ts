@@ -1,8 +1,6 @@
-import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { escapeHtml } from "@/lib/utils";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { getResend } from "@/lib/resend";
 
 export const BLOCKED_DOMAINS = ["example.com", "example.org", "example.net"];
 
@@ -106,7 +104,7 @@ export async function sendInvitationEmail(opts: {
   ].join("\n");
 
   try {
-    const result = await resend.emails.send({
+    const result = await getResend().emails.send({
       from: fromAddress,
       to: opts.email,
       subject,
@@ -143,7 +141,7 @@ export async function sendWelcomeEmail(opts: {
     process.env.RESEND_FROM_ADDRESS ?? "NSI Portal <noreply@resend.dev>";
 
   try {
-    const result = await resend.emails.send({
+    const result = await getResend().emails.send({
       from: fromAddress,
       to: opts.email,
       subject: "Welcome to the NSI Community Portal",
@@ -232,7 +230,7 @@ export async function notifyNewPost(opts: {
       `,
     }));
 
-    const result = await resend.batch.send(batch);
+    const result = await getResend().batch.send(batch);
     if (result.error) {
       console.error("notifyNewPost: resend batch error", result.error);
     }
@@ -280,7 +278,7 @@ export async function notifyNewComment(opts: {
   const postUrl = `${portalUrl}/community/${opts.postId}`;
 
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: fromAddress,
       to: author.email,
       subject: `${opts.commenterName} replied to your post`,

@@ -13,6 +13,8 @@ import {
   parseFieldValue,
 } from "@/components/custom-field-editor";
 import type { ProfileData } from "@/lib/directory";
+import { FamilyEditor } from "./family-editor";
+import type { FamilyEditorData, LinkableMember } from "@/lib/family-data";
 import { useRouter } from "next/navigation";
 import {
   updateProfile,
@@ -23,9 +25,13 @@ import {
 
 export function ProfileForm({
   profile,
+  family,
+  members,
   showConfirmButton = false,
 }: {
   profile: ProfileData;
+  family: FamilyEditorData;
+  members: LinkableMember[];
   showConfirmButton?: boolean;
 }) {
   const { openUserProfile } = useClerk();
@@ -145,6 +151,9 @@ export function ProfileForm({
           </div>
         </CardContent>
       </Card>
+
+      {/* Family links */}
+      <FamilyEditor family={family} members={members} />
 
       {/* Directory info (custom fields) */}
       <Card>
