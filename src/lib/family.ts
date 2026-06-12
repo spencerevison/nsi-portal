@@ -254,10 +254,18 @@ export function validateYears(
 type Move = "P" | "C" | "S";
 const MOVE_ORDER: Record<Move, number> = { P: 0, C: 1, S: 2 };
 
-function adjacency(
-  g: FamilyGraph,
-): Map<string, Array<{ to: string; move: Move }>> {
-  const adj = new Map<string, Array<{ to: string; move: Move }>>();
+type Adjacency = Map<string, Array<{ to: string; move: Move }>>;
+
+// Cached per graph: the directory labels every member's relation to the viewer,
+// so pathBetween runs ~N times against the same immutable graph — build the
+// adjacency once. WeakMap keys on the graph object, so it's GC'd with it.
+const adjacencyCache = new WeakMap<FamilyGraph, Adjacency>();
+
+function adjacency(g: FamilyGraph): Adjacency {
+  const cached = adjacencyCache.get(g);
+  if (cached) return cached;
+
+  const adj: Adjacency = new Map();
   const add = (from: string, to: string, move: Move) => {
     const arr = adj.get(from);
     if (arr) arr.push({ to, move });
@@ -273,6 +281,7 @@ function adjacency(
         MOVE_ORDER[x.move] - MOVE_ORDER[y.move] || x.to.localeCompare(y.to),
     );
   }
+  adjacencyCache.set(g, adj);
   return adj;
 }
 

@@ -1,6 +1,5 @@
 "use server";
 
-import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { escapeHtml } from "@/lib/utils";
@@ -12,12 +11,7 @@ import {
   isSupportCategory,
   type SupportCategory,
 } from "../admin/support/_config";
-
-// lazy — keep RESEND_API_KEY out of the build, only needed when sending
-let _resend: Resend | null = null;
-function getResend(): Resend {
-  return (_resend ??= new Resend(process.env.RESEND_API_KEY));
-}
+import { getResend } from "@/lib/resend";
 
 const RATE_BUCKET = "support.submit";
 const RATE_USER_HOUR = 3;

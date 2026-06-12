@@ -152,19 +152,29 @@ export async function setFamilyNameOverride(
   anchorNodeId: string,
   name: string | null,
 ): Promise<void> {
-  if (componentNodeIds.length) {
-    await supabaseAdmin
-      .from("family_node")
-      .update({ family_name_override: null })
-      .in("id", componentNodeIds);
-  }
-
   const trimmed = name?.trim();
   if (trimmed) {
+    // stamp the anchor first so there's never a window with no title, then
+    // clear the override off the rest of the component. If two renames race,
+    // both anchors may keep a value, but familyName() resolves that
+    // deterministically (lowest node id wins).
     await supabaseAdmin
       .from("family_node")
       .update({ family_name_override: trimmed })
       .eq("id", anchorNodeId);
+    const others = componentNodeIds.filter((id) => id !== anchorNodeId);
+    if (others.length) {
+      await supabaseAdmin
+        .from("family_node")
+        .update({ family_name_override: null })
+        .in("id", others);
+    }
+  } else if (componentNodeIds.length) {
+    // reset — clear the whole component
+    await supabaseAdmin
+      .from("family_node")
+      .update({ family_name_override: null })
+      .in("id", componentNodeIds);
   }
 }
 

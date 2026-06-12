@@ -1,14 +1,6 @@
-import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { escapeHtml } from "@/lib/utils";
-
-// Construct lazily — `next build` evaluates this module while collecting page
-// data (the Clerk webhook route imports it), and we don't want the build to
-// require RESEND_API_KEY. Only an actual send needs the key, at runtime.
-let _resend: Resend | null = null;
-function getResend(): Resend {
-  return (_resend ??= new Resend(process.env.RESEND_API_KEY));
-}
+import { getResend } from "@/lib/resend";
 
 export const BLOCKED_DOMAINS = ["example.com", "example.org", "example.net"];
 

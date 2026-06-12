@@ -1,6 +1,5 @@
 "use server";
 
-import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import {
   getCurrentAppUser,
@@ -16,12 +15,7 @@ import {
   uploadAttachmentBlob,
 } from "@/lib/attachments-server";
 import { checkAndRecord, rateLimitMessage } from "@/lib/rate-limit";
-
-// lazy — keep RESEND_API_KEY out of the build, only needed when sending
-let _resend: Resend | null = null;
-function getResend(): Resend {
-  return (_resend ??= new Resend(process.env.RESEND_API_KEY));
-}
+import { getResend } from "@/lib/resend";
 
 // Rate limit caps: per-sender hour/day, plus a portal-wide daily ceiling so
 // no one can torch Resend quota or domain reputation with a single account.
