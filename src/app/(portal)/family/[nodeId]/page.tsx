@@ -6,7 +6,12 @@ import {
 } from "@/lib/current-user";
 import { componentOf, familyName } from "@/lib/family";
 import { loadFamilyGraph } from "@/lib/family-data";
-import { layoutFamily, PARTNER_HANDLE_TOP } from "@/lib/family-tree-layout";
+import {
+  layoutFamily,
+  PARTNER_HANDLE_TOP,
+  CARD_W,
+  CARD_H,
+} from "@/lib/family-tree-layout";
 import { FamilyTree, type TreeCard, type TreeEdge } from "./family-tree";
 import { FamilyTitle } from "./family-title";
 
@@ -81,7 +86,24 @@ export default async function FamilyPage({
   // those get a union dot on their partner line.
   const edges: TreeEdge[] = [];
   const couplesWithKids = new Set<string>();
+
+  // x of a card's bottom/top handle (handles sit centered on the card)
+  const cx = (id: string) => pos.get(id)!.x + CARD_W / 2;
+
+  // Collect drops with the geometry we need to stagger their bus lines. Each
+  // sibship (a couple, or a single parent) owns one horizontal "bus"; we give
+  // overlapping sibships distinct heights so their lines don't merge.
+  type DropMeta = {
+    edge: TreeEdge;
+    rowY: number;
+    group: string;
+    lo: number;
+    hi: number;
+  };
+  const drops: DropMeta[] = [];
+
   for (const [child, parents] of childParents) {
+    const childX = cx(child);
     if (
       parents.length === 2 &&
       arePartners(parents[0], parents[1]) &&
@@ -93,25 +115,82 @@ export default async function FamilyPage({
           : [parents[1], parents[0]];
       couplesWithKids.add(`${left}|${right}`);
       const dx = (pos.get(right)!.x - pos.get(left)!.x) / 2;
-      edges.push({
-        id: `drop-${child}`,
-        kind: "drop",
-        source: left,
-        target: child,
-        dx,
-        unionY: pos.get(left)!.y + PARTNER_HANDLE_TOP,
+      const trunkX = cx(left) + dx;
+      drops.push({
+        edge: {
+          id: `drop-${child}`,
+          kind: "drop",
+          source: left,
+          target: child,
+          dx,
+          unionY: pos.get(left)!.y + PARTNER_HANDLE_TOP,
+        },
+        rowY: pos.get(left)!.y,
+        group: `${left}|${right}`,
+        lo: Math.min(trunkX, childX),
+        hi: Math.max(trunkX, childX),
       });
     } else {
       for (const p of parents) {
-        edges.push({
-          id: `drop-${child}-${p}`,
-          kind: "drop",
-          source: p,
-          target: child,
-          dx: 0,
+        const trunkX = cx(p);
+        drops.push({
+          edge: {
+            id: `drop-${child}-${p}`,
+            kind: "drop",
+            source: p,
+            target: child,
+            dx: 0,
+          },
+          rowY: pos.get(p)!.y,
+          group: p,
+          lo: Math.min(trunkX, childX),
+          hi: Math.max(trunkX, childX),
         });
       }
     }
+  }
+
+  // One bus per sibship; merge each sibship's children into a single x-span.
+  const spans = new Map<string, { rowY: number; x0: number; x1: number }>();
+  for (const d of drops) {
+    const s = spans.get(d.group);
+    if (!s) spans.set(d.group, { rowY: d.rowY, x0: d.lo, x1: d.hi });
+    else {
+      s.x0 = Math.min(s.x0, d.lo);
+      s.x1 = Math.max(s.x1, d.hi);
+    }
+  }
+
+  // Greedy interval colouring per parent-row: sibships whose x-spans overlap
+  // get different levels, so their horizontal lines never sit on the same Y.
+  const level = new Map<string, number>();
+  const rows = new Map<number, string[]>();
+  for (const [key, s] of spans) {
+    rows.set(s.rowY, [...(rows.get(s.rowY) ?? []), key]);
+  }
+  for (const keys of rows.values()) {
+    keys.sort((a, b) => spans.get(a)!.x0 - spans.get(b)!.x0);
+    const ends: number[] = []; // rightmost x1 placed on each level so far
+    for (const k of keys) {
+      const s = spans.get(k)!;
+      let lvl = ends.findIndex((e) => e < s.x0 - 0.5);
+      if (lvl === -1) {
+        lvl = ends.length;
+        ends.push(s.x1);
+      } else {
+        ends[lvl] = s.x1;
+      }
+      level.set(k, lvl);
+    }
+  }
+
+  // Drop the bus into the gap below the parent row, one step per level.
+  const BUS_BASE = 28; // px below the card bottom for the first sibship
+  const BUS_STEP = 16; // extra drop per overlapping sibship
+  for (const d of drops) {
+    d.edge.busY =
+      d.rowY + CARD_H + BUS_BASE + (level.get(d.group) ?? 0) * BUS_STEP;
+    edges.push(d.edge);
   }
 
   for (const l of links) {

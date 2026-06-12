@@ -41,6 +41,8 @@ export type TreeEdge = {
   hasChildren?: boolean;
   // couple drop edges: absolute Y of the union dot so the trunk starts there
   unionY?: number;
+  // absolute Y of this sibship's horizontal bus line (staggered per sibship)
+  busY?: number;
 };
 
 type PersonNode = Node<{ card: TreeCard }, "person">;
@@ -146,7 +148,9 @@ function DropEdge({ sourceX, sourceY, targetX, targetY, data }: EdgeProps) {
   // for couples the trunk starts at the union dot (up on the partner line);
   // the bus stays below the cards, so keep it referenced to the card bottom.
   const startY = unionY ?? sourceY;
-  const busY = sourceY + (targetY - sourceY) / 2;
+  // bus Y is staggered per-sibship server-side; fall back to the midpoint.
+  const busY =
+    (data?.busY as number | undefined) ?? sourceY + (targetY - sourceY) / 2;
   const dist = Math.abs(targetX - sx);
 
   let path: string;
@@ -243,7 +247,7 @@ export function FamilyTree({
               sourceHandle: "b",
               targetHandle: "t",
               type: "drop",
-              data: { dx: e.dx ?? 0, unionY: e.unionY },
+              data: { dx: e.dx ?? 0, unionY: e.unionY, busY: e.busY },
             },
       ),
     [edges],
