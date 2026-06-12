@@ -454,23 +454,32 @@ export async function reconcileSameNamePlaceholders(
   targetNodeId: string,
 ): Promise<boolean> {
   let merged = false;
+  // names are stable across merges, so read them off the original graph; but
+  // topology changes with every merge, so the cycle guard reads `work`, which
+  // we reload after each merge to keep it current.
+  let work = g;
   const nameOf = (id: string) => normalizeName(g.nodes.get(id)?.name ?? "");
 
   const mergeMatches = async (keepId: string, candidateIds: string[]) => {
     const want = nameOf(keepId);
     if (!want) return;
     for (const id of candidateIds) {
-      const n = g.nodes.get(id);
-      if (!n || n.appUserId) continue; // placeholders only
+      const n = work.nodes.get(id);
+      if (!n || n.appUserId) continue; // placeholders only, still present
       if (nameOf(id) !== want) continue;
       // best-effort dedupe — skip (don't fail) if the merge would fold
-      // someone into their own ancestor line
-      if (wouldCreateCycle(g, keepId, id) || wouldCreateCycle(g, id, keepId)) {
+      // someone into their own ancestor line. Checked against the current
+      // graph, not a snapshot from before earlier merges.
+      if (
+        wouldCreateCycle(work, keepId, id) ||
+        wouldCreateCycle(work, id, keepId)
+      ) {
         console.warn("reconcile skipped: merge would create cycle", keepId, id);
         continue;
       }
       await mergeNodeLinks(keepId, id);
       merged = true;
+      work = await loadFamilyGraph();
     }
   };
 

@@ -151,6 +151,8 @@ export async function adminAddRelative(input: {
       }
       await mergeNodeLinks(targetNodeId, ph.id);
       mergedDup = true;
+      // the merge moved edges — refresh so reconcile's cycle guard is current
+      graph = await loadFamilyGraph();
     }
 
     // member may be filling a slot held by a same-named placeholder
@@ -212,7 +214,10 @@ export async function adminAddRelative(input: {
   }
 
   if (type === "parent") {
-    const g = graph ?? (await loadFamilyGraph());
+    // after a merge the snapshot is stale — reload so the cycle check is current
+    const g = mergedDup
+      ? await loadFamilyGraph()
+      : (graph ?? (await loadFamilyGraph()));
     if (wouldCreateCycle(g, from, to)) {
       return {
         ok: false,

@@ -178,6 +178,8 @@ export async function addRelative(
       }
       await mergeNodeLinks(targetNodeId, ph.id);
       mergedDup = true;
+      // the merge moved edges — refresh so reconcile's cycle guard is current
+      graph = await loadFamilyGraph();
     }
 
     // a placeholder may already be standing in for this member (added by
@@ -228,7 +230,9 @@ export async function addRelative(
   }
 
   const res = await insertLink(input.relationship, myNodeId, targetNodeId, {
-    graph,
+    // if a merge happened, the snapshot is stale — let insertLink reload so the
+    // cycle check sees the post-merge graph
+    graph: mergedDup ? undefined : graph,
     dupIsOk: mergedDup,
   });
   if (res.ok || mergedDup) revalidateFamily();
