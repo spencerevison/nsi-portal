@@ -28,7 +28,6 @@ export function layoutFamily(
 ): { nodes: PlacedNode[]; width: number; height: number } {
   const ids = new Set(nodeIds);
   const parents = new Map<string, string[]>();
-  const children = new Map<string, string[]>();
   const partners = new Map<string, string[]>();
   const push = (m: Map<string, string[]>, k: string, v: string) => {
     m.set(k, [...(m.get(k) ?? []), v]);
@@ -37,7 +36,6 @@ export function layoutFamily(
     if (!ids.has(l.fromNode) || !ids.has(l.toNode)) continue;
     if (l.type === "parent") {
       push(parents, l.toNode, l.fromNode);
-      push(children, l.fromNode, l.toNode);
     } else {
       push(partners, l.fromNode, l.toNode);
       push(partners, l.toNode, l.fromNode);

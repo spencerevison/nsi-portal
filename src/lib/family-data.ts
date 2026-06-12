@@ -202,8 +202,9 @@ function entry(g: FamilyGraph, id: string): FamilyEntry {
 
 export async function getDirectoryFamilySummaries(
   viewerUserId: string,
+  graph?: FamilyGraph,
 ): Promise<Record<string, DirectoryFamilySummary>> {
-  const g = await loadFamilyGraph();
+  const g = graph ?? (await loadFamilyGraph());
   const userToNode = new Map<string, string>();
   for (const n of g.nodes.values()) {
     if (n.appUserId) userToNode.set(n.appUserId, n.id);
@@ -235,8 +236,10 @@ export type FamilyListItem = {
 
 // Families for the directory dropdown — connected components with at least
 // 2 people and at least one actual member.
-export async function listFamilies(): Promise<FamilyListItem[]> {
-  const g = await loadFamilyGraph();
+export async function listFamilies(
+  graph?: FamilyGraph,
+): Promise<FamilyListItem[]> {
+  const g = graph ?? (await loadFamilyGraph());
   const seen = new Set<string>();
   const out: FamilyListItem[] = [];
 
@@ -403,20 +406,39 @@ export async function mergeNodeLinks(
     .select("id, type, from_node, to_node")
     .or(`from_node.eq.${dropId},to_node.eq.${dropId}`);
 
+  // Re-home each of dropId's links onto keepId. Insert the rewritten edge
+  // FIRST, then delete the old row — so a failed insert never leaves the
+  // relationship with no row at all. If any link can't be moved, keep the
+  // placeholder (and its un-migrated links) instead of deleting it, so nothing
+  // is lost; a retry re-processes only what's left.
+  let allMoved = true;
   for (const l of links ?? []) {
     let from = l.from_node === dropId ? keepId : l.from_node;
     let to = l.to_node === dropId ? keepId : l.to_node;
-    await supabaseAdmin.from("family_link").delete().eq("id", l.id);
-    if (from === to) continue; // self-link after merge, drop it
+    if (from === to) {
+      // collapses to a self-link (was the dropId↔keepId edge) — just remove it
+      await supabaseAdmin.from("family_link").delete().eq("id", l.id);
+      continue;
+    }
     if (l.type === "partner" && from > to) [from, to] = [to, from];
     const { error } = await supabaseAdmin
       .from("family_link")
       .insert({ type: l.type, from_node: from, to_node: to });
+    // 23505 = the edge already exists, so the relationship is represented and
+    // the old row is safe to drop. Any other error: keep the old row.
     if (error && error.code !== "23505") {
-      console.error("mergeNodeLinks insert failed", error);
+      console.error(
+        "mergeNodeLinks insert failed, keeping original link",
+        error,
+      );
+      allMoved = false;
+      continue;
     }
+    await supabaseAdmin.from("family_link").delete().eq("id", l.id);
   }
-  await supabaseAdmin.from("family_node").delete().eq("id", dropId);
+  if (allMoved) {
+    await supabaseAdmin.from("family_node").delete().eq("id", dropId);
+  }
 }
 
 // P2 reconciliation: a member is being linked into a slot that's already

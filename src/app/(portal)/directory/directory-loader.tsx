@@ -1,18 +1,25 @@
 import { listDirectoryMembers, listCustomFields } from "@/lib/directory";
 import { requireCapability, getCurrentAppUser } from "@/lib/current-user";
-import { getDirectoryFamilySummaries, listFamilies } from "@/lib/family-data";
+import {
+  getDirectoryFamilySummaries,
+  listFamilies,
+  loadFamilyGraph,
+} from "@/lib/family-data";
 import { DirectoryView } from "./directory-view";
 
 export async function DirectoryLoader() {
   await requireCapability("directory.read");
   const viewer = await getCurrentAppUser();
 
-  const [members, fields, families, familyList] = await Promise.all([
+  // load the family graph once, then derive both the per-member summaries and
+  // the families dropdown from it (previously each did its own full graph load)
+  const [members, fields, graph] = await Promise.all([
     listDirectoryMembers(),
     listCustomFields(),
-    getDirectoryFamilySummaries(viewer?.id ?? ""),
-    listFamilies(),
+    loadFamilyGraph(),
   ]);
+  const families = await getDirectoryFamilySummaries(viewer?.id ?? "", graph);
+  const familyList = await listFamilies(graph);
 
   // Children renders as a derived column from the family graph now
   const directoryFields = fields.filter(
