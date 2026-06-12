@@ -11,6 +11,7 @@ import {
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { listFolders } from "@/lib/documents";
 import { getProfileData } from "@/lib/directory";
+import { getFamilyEditorData } from "@/lib/family-data";
 import { timeAgo } from "@/lib/utils";
 
 type ActivityItem =
@@ -181,8 +182,24 @@ export default async function HomePage() {
 
   let verificationProfile: VerificationProfile | null = null;
   if (needsVerification && user) {
-    const profile = await getProfileData(user.id);
+    const [profile, family] = await Promise.all([
+      getProfileData(user.id),
+      getFamilyEditorData(user.id),
+    ]);
     if (profile) {
+      // Children lives in the family graph now — show it under Family below,
+      // not as the retired custom field.
+      const familyRows = [
+        { label: "Parents", entries: family.parents },
+        { label: "Partner", entries: family.partners },
+        { label: "Children", entries: family.children },
+      ]
+        .filter((g) => g.entries.length > 0)
+        .map((g) => ({
+          label: g.label,
+          value: g.entries.map((e) => e.name).join(", "),
+        }));
+
       verificationProfile = {
         first_name: profile.first_name,
         last_name: profile.last_name,
@@ -190,10 +207,13 @@ export default async function HomePage() {
         phone: profile.phone,
         lot_number: profile.lot_number,
         address: profile.address,
-        custom_fields: profile.custom_fields.map((f) => ({
-          field_name: f.field_name,
-          value: f.value,
-        })),
+        family: familyRows,
+        custom_fields: profile.custom_fields
+          .filter((f) => f.field_name !== "Children")
+          .map((f) => ({
+            field_name: f.field_name,
+            value: f.value,
+          })),
       };
     }
   }

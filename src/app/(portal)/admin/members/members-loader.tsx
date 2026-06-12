@@ -4,6 +4,7 @@ import { MembersTable } from "./members-table";
 
 export async function MembersLoader() {
   const [members, roles] = await Promise.all([listMembers(), listRoles()]);
+  const draftCount = members.filter((m) => m.status === "Draft").length;
 
   return (
     <>
@@ -13,7 +14,7 @@ export async function MembersLoader() {
           {members.length} {members.length === 1 ? "member" : "members"}
         </span>
       </div>
-      <MembersActions roles={roles} />
+      <MembersActions roles={roles} draftCount={draftCount} />
       <MembersTable members={members} roles={roles} />
     </>
   );

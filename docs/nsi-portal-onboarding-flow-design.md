@@ -3,6 +3,7 @@
 **Date:** 2026-04-04
 **Author:** Spencer Campbell
 **Status:** Pre-build
+**Updated 2026-06-11:** Draft creation paths shipped (add-form "Save as draft", CSV "Import as drafts", "Send all draft invitations").
 
 > **Why this document exists:** The invitation flow is the single highest-risk feature in the portal. It's the first interaction every member has with the system, and it's the feature that failed on every platform evaluated during the 3-month evaluation phase. This document goes deep on the states, transitions, error handling, and UI for the full lifecycle from admin invitation to active member.
 
@@ -38,7 +39,7 @@ stateDiagram-v2
 
 | Transition | Trigger | What Happens |
 |-----------|---------|-------------|
-| Draft → Invited | Admin clicks "Send Invitation" | `clerkClient.invitations.createInvitation()` called; `invited_at` set |
+| Draft → Invited | Admin clicks "Send Invitation" | `clerkClient.invitations.createInvitation()` called; `invited_at` set; invitation email delivered by Resend (`notify: false` — Clerk's shared IPs were landing in spam) |
 | Invited → Invited | Admin clicks "Resend" | New `createInvitation()` call with `ignoreExisting: true`; original token invalidated |
 | Invited → Active | Member completes sign-up | Clerk `user.created` webhook fires; handler sets `clerk_id` and `accepted_at` |
 | Invited → Revoked | Admin clicks "Revoke" | `clerkClient.invitations.revokeInvitation()` called; token invalidated |
@@ -64,9 +65,9 @@ sequenceDiagram
     Admin->>App: Fill in member form + click "Add Member"
     App->>SB: INSERT User (name, email, lot, role_id, groups, invited_at=now)
     SB-->>App: User record created
-    App->>CK: createInvitation(email, redirectUrl=/sign-up)
+    App->>CK: createInvitation(email, redirectUrl=/sign-up, notify=false)
     CK-->>App: Invitation created (invitation_id)
-    CK->>Email: Sends invitation email
+    App->>Email: Sends invitation email via Resend
     App-->>Admin: Success — "Invitation sent to member@example.com"
 
     Email-->>Member: Opens email, clicks invitation link
@@ -103,7 +104,7 @@ sequenceDiagram
     Admin->>App: Click "Send All Invitations"
     App->>CK: createInvitationBulk([ {email, redirectUrl}, ... ])
     CK-->>App: Invitations created
-    CK->>CK: Sends invitation emails (rate limited: 25 bulk requests/hour)
+    App->>App: Sends invitation emails via Resend (Clerk notify=false)
     App-->>Admin: "42 invitations sent. Track progress in the Members table."
 ```
 
@@ -119,7 +120,7 @@ sequenceDiagram
     Admin->>App: Views member with status "Invited" — clicks "Resend"
     App->>CK: createInvitation(email, ignoreExisting=true)
     CK-->>App: New invitation created (old token invalidated)
-    CK->>Email: Sends new invitation email
+    App->>Email: Sends new invitation email via Resend
     App-->>Admin: "Invitation resent to member@example.com"
 ```
 
@@ -300,9 +301,9 @@ After setting their password and being redirected to the dashboard, the member s
 - Pinned posts (if any exist)
 - Dismissible — once dismissed, doesn't show again (stored in localStorage or a user preference)
 
-**Profile prompt (optional):**
-- If custom fields (Kids, Dogs) are empty, a subtle prompt on the dashboard: "Complete your profile — add info like kids' names or pets so other members can find you in the directory." Links to `/profile`.
-- Non-blocking — the member can use the portal fully without completing their profile.
+**Profile confirmation card:**
+- On first sign-in (until the member confirms), the dashboard shows a "Does this look right?" card summarizing what's on file — contact details, plus any seeded family links (parents/partner/children) and custom fields (Dogs). "Looks right" confirms; "Edit details" links to `/profile`.
+- Non-blocking — the member can use the portal fully without confirming.
 
 ### 4.7 Member: Sign-In Page
 
@@ -387,7 +388,7 @@ If the webhook handler is unreachable when a member accepts their invitation:
 | Clerk `createInvitation` | 100 requests/hour per instance | Individual invites: no impact. Bulk: may need to batch across multiple hours for 70+ members |
 | Clerk `createInvitationBulk` | 25 requests/hour per instance | Each request can contain multiple invitations. 70 members in 3 requests is well within limits |
 | Clerk invitation expiry | 30 days (default, configurable) | Adequate for NSI. Members who haven't accepted after 30 days get a reminder from the primary admin, then a re-invite |
-| Resend daily API cap (free tier) | 100 requests/day | Not relevant to invitations (Clerk sends those). Relevant to group emails and notifications only |
+| Resend daily API cap (free tier) | 100 requests/day | Relevant to invitation emails too — Resend delivers them now (Clerk `notify: false`), alongside group emails and notifications |
 
 ### Bulk Onboarding Timeline
 

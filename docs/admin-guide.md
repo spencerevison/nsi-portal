@@ -44,8 +44,36 @@ This creates their profile and sends a Clerk invitation email. When they click t
 
 1. Click the three-dot menu on a member row
 2. Select **Edit**
-3. Update name, lot number, role, and directory fields (Children, Dogs, etc.)
+3. Update name, lot number, role, and directory fields (Dogs, etc.)
 4. Click **Save changes**
+
+A member's name is owned by their account, so editing the name here also
+updates it in their sign-in account; phone, lot, and directory fields are
+portal-only.
+
+### Managing a Member's Family
+
+Family relationships (parents, partners, children) power the member detail
+sheet and the family tree. Members can manage their own from their profile,
+but admins can edit anyone's — useful for seeding families before launch.
+
+1. Click the three-dot menu on a member row
+2. Select **Family**
+3. From the dialog you can:
+   - **Add a link** — pick Parent / Partner / Child, then search for a member
+     or add a **non-member** by name (for young kids or relatives without an
+     account). Siblings, grandparents, and cousins appear automatically once
+     shared parents are linked.
+   - **Edit a non-member** — rename, set birth/death year or gender, or
+     **Convert to member account** when that person later gets invited (their
+     links carry over).
+   - **Merge** two non-member entries that are the same person (e.g. a child
+     both parents added separately).
+   - **Remove** a link with the **×**.
+
+> Tip: before launch, import everyone as **drafts**, link up the families,
+> then send invitations — new members arrive to a populated directory and
+> working family trees on day one.
 
 ### Managing Invitations
 

@@ -7,6 +7,7 @@ import { parseCSV, type ParsedRow } from "./csv-utils";
 import type { RoleOption } from "@/lib/members";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,7 @@ export function CsvImportDialog({ roles }: { roles: RoleOption[] }) {
   const [step, setStep] = useState<Step>("upload");
   const [rows, setRows] = useState<ParsedRow[]>([]);
   const [results, setResults] = useState<ImportResult[]>([]);
+  const [asDrafts, setAsDrafts] = useState(false);
   const [, startTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -57,6 +59,7 @@ export function CsvImportDialog({ roles }: { roles: RoleOption[] }) {
     setStep("upload");
     setRows([]);
     setResults([]);
+    setAsDrafts(false);
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -90,6 +93,7 @@ export function CsvImportDialog({ roles }: { roles: RoleOption[] }) {
           address: r.address || undefined,
           role_id: r.role_id,
         })),
+        { asDrafts },
       );
       setResults(
         res.results.map((r) => ({
@@ -206,10 +210,19 @@ export function CsvImportDialog({ roles }: { roles: RoleOption[] }) {
               </Table>
             </div>
 
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={asDrafts}
+                onCheckedChange={(v) => setAsDrafts(v === true)}
+              />
+              Import as drafts — don&apos;t send invitations yet
+            </label>
+
             <div className="flex gap-2">
               <Button onClick={handleImport} disabled={validRows.length === 0}>
                 Import {validRows.length} member
                 {validRows.length !== 1 ? "s" : ""}
+                {asDrafts ? " as drafts" : ""}
               </Button>
               <Button variant="outline" onClick={reset}>
                 Cancel
@@ -261,7 +274,7 @@ export function CsvImportDialog({ roles }: { roles: RoleOption[] }) {
                               aria-hidden="true"
                               className="size-3.5"
                             />
-                            Invited
+                            {asDrafts ? "Imported" : "Invited"}
                           </span>
                         ) : (
                           <span className="flex items-center gap-1.5 text-xs text-red-600">
