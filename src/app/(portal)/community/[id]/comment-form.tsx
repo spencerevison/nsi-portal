@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import {
@@ -16,6 +16,22 @@ export function CommentForm({ postId }: { postId: string }) {
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [resetSignal, setResetSignal] = useState(0);
+
+  // focus the editor when we land on (or click through to) #reply
+  useEffect(() => {
+    function focusIfReply() {
+      if (window.location.hash !== "#reply") return;
+      // editor mounts after hydration, give it a tick
+      setTimeout(() => {
+        document
+          .querySelector<HTMLElement>("#reply .ProseMirror")
+          ?.focus({ preventScroll: true });
+      }, 150);
+    }
+    focusIfReply();
+    window.addEventListener("hashchange", focusIfReply);
+    return () => window.removeEventListener("hashchange", focusIfReply);
+  }, []);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

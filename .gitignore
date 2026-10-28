@@ -48,3 +48,6 @@ test-results/
 next-env.d.ts
 
 .family-migration-backup.json
+
+# brainstorm mockups
+.superpowers/

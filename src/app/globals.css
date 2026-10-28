@@ -255,6 +255,13 @@
 .rich-text-content a:hover {
   text-decoration-thickness: 2px;
 }
+.rich-text-content span[data-type="mention"] {
+  color: var(--accent-800);
+  background: var(--accent-50);
+  border-radius: 4px;
+  padding: 0.05em 0.3em;
+  font-weight: 500;
+}
 .rich-text-content code {
   font-family: var(--font-mono, ui-monospace, monospace);
   background: var(--muted);

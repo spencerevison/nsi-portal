@@ -70,7 +70,8 @@ export async function listPosts(): Promise<PostRow[]> {
        post_reaction ( emoji, user_id, user:user_id ( first_name, last_name, avatar_url ) )`,
     )
     .order("pinned", { ascending: false })
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .order("created_at", { referencedTable: "post_reaction" });
 
   if (error) {
     console.error("listPosts failed", error);
@@ -110,6 +111,7 @@ export async function getPost(postId: string): Promise<PostRow | null> {
        post_reaction ( emoji, user_id, user:user_id ( first_name, last_name, avatar_url ) )`,
     )
     .eq("id", postId)
+    .order("created_at", { referencedTable: "post_reaction" })
     .maybeSingle();
 
   if (error || !data) return null;
@@ -145,7 +147,8 @@ export async function listComments(postId: string): Promise<CommentRow[]> {
        comment_reaction ( emoji, user_id, user:user_id ( first_name, last_name, avatar_url ) )`,
     )
     .eq("post_id", postId)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
+    .order("created_at", { referencedTable: "comment_reaction" });
 
   if (error) {
     console.error("listComments failed", error);
@@ -179,7 +182,7 @@ function sortAttachments(raw: unknown): AttachmentRow[] {
 // Group raw reaction rows by emoji and preserve insertion order — first
 // reactor for each emoji wins the slot order. Within an emoji we keep
 // reactor insertion order too (newest reactions show at the end).
-function groupReactions(
+export function groupReactions(
   raw: ReactionRow[] | null | undefined,
 ): ReactionGroup[] {
   if (!Array.isArray(raw) || raw.length === 0) return [];

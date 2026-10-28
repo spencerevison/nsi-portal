@@ -8,14 +8,24 @@ import {
   getCurrentCapabilities,
   requireCapability,
 } from "@/lib/current-user";
-import { notifyNewPost, notifyNewComment } from "@/lib/notifications";
+import {
+  notifyNewPost,
+  notifyNewComment,
+  notifyMentions,
+} from "@/lib/notifications";
 import { validateAttachmentSet } from "@/lib/attachments";
 import {
   createAttachmentSignedUrl,
   removeAttachmentBlobs,
   uploadAttachmentBlob,
 } from "@/lib/attachments-server";
-import { sanitizeRichText, stripHtml, isEmptyRichText } from "@/lib/rich-text";
+import {
+  sanitizeRichText,
+  stripHtml,
+  isEmptyRichText,
+  extractMentionIds,
+  MAX_MENTIONS,
+} from "@/lib/rich-text";
 import type { ActionResult } from "@/lib/action-result";
 
 const MAX_POST_TITLE = 200;
@@ -23,6 +33,8 @@ const MAX_POST_TITLE = 200;
 // against the user's character budget.
 const MAX_POST_BODY = 10000;
 const MAX_COMMENT_BODY = 5000;
+const MAX_REACTIONS_PER_USER = 10;
+const TOO_MANY_MENTIONS = `You can tag at most ${MAX_MENTIONS} people`;
 
 // Success path redirects server-side; only failure cases return here.
 export async function createPost(formData: FormData): Promise<ActionResult> {
@@ -43,6 +55,8 @@ export async function createPost(formData: FormData): Promise<ActionResult> {
     return { ok: false, error: "Title too long (max 200 characters)" };
   if (visibleLen > MAX_POST_BODY)
     return { ok: false, error: "Post too long (max 10,000 characters)" };
+  if (extractMentionIds(body).length > MAX_MENTIONS)
+    return { ok: false, error: TOO_MANY_MENTIONS };
 
   const attCheck = validateAttachmentSet(
     files.map((f) => ({ size: f.size, type: f.type, name: f.name })),
@@ -104,6 +118,15 @@ export async function createPost(formData: FormData): Promise<ActionResult> {
     authorName: `${user.first_name} ${user.last_name}`,
   }).catch((err) => console.error("notifyNewPost error", err));
 
+  await notifyMentions({
+    userIds: extractMentionIds(body),
+    authorId: user.id,
+    authorName: `${user.first_name} ${user.last_name}`,
+    postId: post.id,
+    postTitle: title,
+    in: "post",
+  }).catch((err) => console.error("notifyMentions error", err));
+
   // Invalidate the list cache so the new post shows on /community the next
   // time the user visits it. Do this before redirect() — redirect throws.
   revalidatePath("/community");
@@ -130,6 +153,8 @@ export async function createComment(formData: FormData): Promise<ActionResult> {
     return { ok: false, error: "Comment cannot be empty" };
   if (stripHtml(body).length > MAX_COMMENT_BODY)
     return { ok: false, error: "Comment too long (max 5,000 characters)" };
+  if (extractMentionIds(body).length > MAX_MENTIONS)
+    return { ok: false, error: TOO_MANY_MENTIONS };
 
   const attCheck = validateAttachmentSet(
     files.map((f) => ({ size: f.size, type: f.type, name: f.name })),
@@ -198,6 +223,16 @@ export async function createComment(formData: FormData): Promise<ActionResult> {
       commenterName: `${user.first_name} ${user.last_name}`,
       commenterId: user.id,
     }).catch((err) => console.error("notifyNewComment error", err));
+
+    await notifyMentions({
+      // post author already gets the reply email
+      userIds: extractMentionIds(body).filter((id) => id !== post.author_id),
+      authorId: user.id,
+      authorName: `${user.first_name} ${user.last_name}`,
+      postId,
+      postTitle: post.title,
+      in: "comment",
+    }).catch((err) => console.error("notifyMentions error", err));
   }
 
   return { ok: true };
@@ -276,10 +311,12 @@ export async function editPost(input: {
     return { ok: false, error: "Title too long (max 200 characters)" };
   if (stripHtml(sanitized).length > MAX_POST_BODY)
     return { ok: false, error: "Post too long (max 10,000 characters)" };
+  if (extractMentionIds(sanitized).length > MAX_MENTIONS)
+    return { ok: false, error: TOO_MANY_MENTIONS };
 
   const { data: post } = await supabaseAdmin
     .from("post")
-    .select("author_id")
+    .select("author_id, body")
     .eq("id", input.postId)
     .single();
 
@@ -294,6 +331,17 @@ export async function editPost(input: {
     .eq("id", input.postId);
 
   if (error) return { ok: false, error: "Failed to update post" };
+
+  // only ping people who weren't already tagged before this edit
+  const before = extractMentionIds(post.body);
+  await notifyMentions({
+    userIds: extractMentionIds(sanitized).filter((id) => !before.includes(id)),
+    authorId: user.id,
+    authorName: `${user.first_name} ${user.last_name}`,
+    postId: input.postId,
+    postTitle: title,
+    in: "post",
+  }).catch((err) => console.error("notifyMentions error", err));
 
   revalidatePath("/community");
   revalidatePath(`/community/${input.postId}`);
@@ -314,10 +362,12 @@ export async function editComment(input: {
     return { ok: false, error: "Comment cannot be empty" };
   if (stripHtml(sanitized).length > MAX_COMMENT_BODY)
     return { ok: false, error: "Comment too long (max 5,000 characters)" };
+  if (extractMentionIds(sanitized).length > MAX_MENTIONS)
+    return { ok: false, error: TOO_MANY_MENTIONS };
 
   const { data: comment } = await supabaseAdmin
     .from("comment")
-    .select("author_id")
+    .select("author_id, body, post_id")
     .eq("id", input.commentId)
     .single();
 
@@ -332,7 +382,27 @@ export async function editComment(input: {
 
   if (error) return { ok: false, error: "Failed to update comment" };
 
-  revalidatePath(`/community/${input.postId}`);
+  const before = extractMentionIds(comment.body);
+  const added = extractMentionIds(sanitized).filter(
+    (id) => !before.includes(id),
+  );
+  if (added.length > 0) {
+    const { data: post } = await supabaseAdmin
+      .from("post")
+      .select("title")
+      .eq("id", comment.post_id)
+      .single();
+    await notifyMentions({
+      userIds: added,
+      authorId: user.id,
+      authorName: `${user.first_name} ${user.last_name}`,
+      postId: comment.post_id,
+      postTitle: post?.title ?? "a post",
+      in: "comment",
+    }).catch((err) => console.error("notifyMentions error", err));
+  }
+
+  revalidatePath(`/community/${comment.post_id}`);
   return { ok: true };
 }
 
@@ -377,9 +447,9 @@ export async function deleteComment(
   return { ok: true };
 }
 
-// One emoji per user per target. Picking the same emoji again removes it,
-// picking a different one replaces the previous reaction. Returns the
-// resulting emoji (or null) so the client can confirm its optimistic flip.
+// Add or remove one emoji for the current user. Each (target, user, emoji)
+// is its own row, so a user can hold several different reactions; picking
+// one they already have removes just that one.
 export async function toggleReaction(input: {
   target: "post" | "comment";
   targetId: string;
@@ -403,6 +473,7 @@ export async function toggleReaction(input: {
     .select("emoji")
     .eq(idCol, input.targetId)
     .eq("user_id", user.id)
+    .eq("emoji", emoji)
     .maybeSingle();
 
   const revalidate = () => {
@@ -410,13 +481,13 @@ export async function toggleReaction(input: {
     if (input.target === "post") revalidatePath("/community");
   };
 
-  // same emoji → remove
-  if (existing && existing.emoji === emoji) {
+  if (existing) {
     const { error } = await supabaseAdmin
       .from(table)
       .delete()
       .eq(idCol, input.targetId)
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .eq("emoji", emoji);
     if (error) {
       console.error("toggleReaction delete failed", error);
       return { ok: false, error: "Failed to remove reaction" };
@@ -425,22 +496,17 @@ export async function toggleReaction(input: {
     return { ok: true, emoji: null };
   }
 
-  // different emoji → update in place
-  if (existing) {
-    const { error } = await supabaseAdmin
-      .from(table)
-      .update({ emoji })
-      .eq(idCol, input.targetId)
-      .eq("user_id", user.id);
-    if (error) {
-      console.error("toggleReaction update failed", error);
-      return { ok: false, error: "Failed to change reaction" };
-    }
-    revalidate();
-    return { ok: true, emoji };
-  }
+  const { count } = await supabaseAdmin
+    .from(table)
+    .select("emoji", { count: "exact", head: true })
+    .eq(idCol, input.targetId)
+    .eq("user_id", user.id);
+  if ((count ?? 0) >= MAX_REACTIONS_PER_USER)
+    return {
+      ok: false,
+      error: `You can add at most ${MAX_REACTIONS_PER_USER} reactions`,
+    };
 
-  // nothing yet → insert
   const { error } = await supabaseAdmin
     .from(table)
     .insert({ [idCol]: input.targetId, user_id: user.id, emoji });
@@ -471,6 +537,28 @@ export async function getCommunityAttachmentUrl(
   return createAttachmentSignedUrl(data.storage_path, {
     downloadName: opts?.download ? data.display_name : undefined,
   });
+}
+
+// Members the @ picker can offer. Active + accepted only, same rule as
+// who can actually get the notification email.
+export async function listMentionable(): Promise<
+  { id: string; name: string }[]
+> {
+  await requireCapability("community.write");
+  const { data, error } = await supabaseAdmin
+    .from("app_user")
+    .select("id, first_name, last_name")
+    .eq("active", true)
+    .not("accepted_at", "is", null)
+    .order("first_name");
+  if (error) {
+    console.error("listMentionable failed", error);
+    return [];
+  }
+  return (data ?? []).map((m) => ({
+    id: m.id,
+    name: `${m.first_name} ${m.last_name}`.trim(),
+  }));
 }
 
 // narrow the FormDataEntryValue union down to File; guards against the
