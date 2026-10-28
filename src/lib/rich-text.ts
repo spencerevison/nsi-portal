@@ -20,9 +20,12 @@ const SANITIZE_OPTS: sanitizeHtml.IOptions = {
     "blockquote",
     "code",
     "pre",
+    "span",
   ],
   allowedAttributes: {
     a: ["href", "title", "target", "rel"],
+    // @mentions from the editor. plain spans are harmless w/o these attrs
+    span: ["data-type", "data-id", "data-label"],
   },
   allowedSchemes: ["http", "https", "mailto", "tel"],
   // Force safe link attributes — sanitize-html will add these if missing.
@@ -39,6 +42,24 @@ const SANITIZE_OPTS: sanitizeHtml.IOptions = {
 export function sanitizeRichText(input: string): string {
   if (!input) return "";
   return sanitizeHtml(input, SANITIZE_OPTS).trim();
+}
+
+// pull tagged user ids out of a sanitized body. attr order isn't guaranteed
+// so grab each mention span first, then the id inside it.
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export const MAX_MENTIONS = 10;
+
+// non-uuid ids are dropped: one junk value would make the whole `.in()`
+// lookup fail and nobody would get emailed.
+export function extractMentionIds(html: string): string[] {
+  const ids = new Set<string>();
+  for (const tag of html.match(/<span[^>]*data-type="mention"[^>]*>/g) ?? []) {
+    const id = tag.match(/data-id="([^"]+)"/)?.[1];
+    if (id && UUID_RE.test(id)) ids.add(id);
+  }
+  return [...ids];
 }
 
 // minimal entity decoder — sanitize-html re-encodes & < > " ' in its text

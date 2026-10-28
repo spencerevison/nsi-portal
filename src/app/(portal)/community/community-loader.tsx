@@ -81,6 +81,7 @@ export async function CommunityLoader() {
                     currentUserName={currentUserName}
                     currentUserAvatar={currentUserAvatar}
                     reactions={post.reactions}
+                    replyHref={`/community/${post.id}#reply`}
                   />
                 ) : null
               }
@@ -149,6 +150,7 @@ export async function CommunityLoader() {
                       currentUserName={currentUserName}
                       currentUserAvatar={currentUserAvatar}
                       reactions={post.reactions}
+                      replyHref={`/community/${post.id}#reply`}
                     />
                   </div>
                 )}

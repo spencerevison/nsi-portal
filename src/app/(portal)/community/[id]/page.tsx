@@ -78,6 +78,7 @@ export default async function PostPage({ params }: { params: Params }) {
                 currentUserName={currentUserName}
                 currentUserAvatar={currentUserAvatar}
                 reactions={post.reactions}
+                replyHref="#reply"
               />
             </div>
           )}
@@ -165,7 +166,7 @@ export default async function PostPage({ params }: { params: Params }) {
 
         {/* Comment input — button below textarea, right-aligned */}
         {canWrite && (
-          <div className="mt-4">
+          <div id="reply" className="mt-4 scroll-mt-20">
             <CommentForm postId={post.id} />
           </div>
         )}

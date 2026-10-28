@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useOptimistic, useTransition, useState } from "react";
+import Link from "next/link";
 import { SmilePlus } from "lucide-react";
 import { EmojiPicker, type Emoji } from "frimousse";
 
@@ -23,41 +24,37 @@ type Props = {
   currentUserName: string;
   currentUserAvatar: string | null;
   reactions: ReactionGroup[];
+  // when set, shows a plain "Reply" link after the emoji button
+  replyHref?: string;
 };
 
 type OptimisticAction = { emoji: string };
 
-function applyOptimistic(
+export function applyOptimistic(
   state: ReactionGroup[],
   action: OptimisticAction,
   me: Reactor,
 ): ReactionGroup[] {
-  // Strip the user out of any group they're currently in — one reaction
-  // per user, so a new pick replaces the old.
-  const stripped = state
-    .map((g) => ({
-      emoji: g.emoji,
-      reactors: g.reactors.filter((r) => r.id !== me.id),
-    }))
-    .filter((g) => g.reactors.length > 0);
+  const group = state.find((g) => g.emoji === action.emoji);
 
-  // Tapping the same emoji you already had = remove only.
-  const wasOnTarget = state.some(
-    (g) => g.emoji === action.emoji && g.reactors.some((r) => r.id === me.id),
-  );
-  if (wasOnTarget) return stripped;
+  // new emoji --> add a group with just me
+  if (!group) return [...state, { emoji: action.emoji, reactors: [me] }];
 
-  // Add me to the target emoji's group (or create it).
-  const idx = stripped.findIndex((g) => g.emoji === action.emoji);
-  if (idx === -1) {
-    return [...stripped, { emoji: action.emoji, reactors: [me] }];
+  // already in the group --> remove me (drop the group if it's now empty)
+  if (group.reactors.some((r) => r.id === me.id)) {
+    return state
+      .map((g) =>
+        g === group
+          ? { ...g, reactors: g.reactors.filter((r) => r.id !== me.id) }
+          : g,
+      )
+      .filter((g) => g.reactors.length > 0);
   }
-  const next = stripped.slice();
-  next[idx] = {
-    emoji: action.emoji,
-    reactors: [...stripped[idx].reactors, me],
-  };
-  return next;
+
+  // otherwise join the existing group
+  return state.map((g) =>
+    g === group ? { ...g, reactors: [...g.reactors, me] } : g,
+  );
 }
 
 export function Reactions(props: Props) {
@@ -165,6 +162,24 @@ export function Reactions(props: Props) {
           </EmojiPicker.Root>
         </PopoverContent>
       </Popover>
+
+      {props.replyHref && (
+        <Link
+          href={props.replyHref}
+          // Link to a hash doesn't fire hashchange, so focus directly
+          onClick={() => {
+            if (!props.replyHref?.startsWith("#")) return;
+            setTimeout(() => {
+              document
+                .querySelector<HTMLElement>("#reply .ProseMirror")
+                ?.focus({ preventScroll: true });
+            }, 0);
+          }}
+          className="text-muted-foreground hover:text-foreground ml-auto px-1.5 text-xs font-medium hover:underline"
+        >
+          Reply
+        </Link>
+      )}
     </div>
   );
 }
@@ -184,6 +199,8 @@ function ReactionChip({
   return (
     <Popover>
       <PopoverTrigger
+        openOnHover
+        delay={150}
         className={cn(
           "inline-flex h-7 items-center gap-1 rounded-full border px-2 text-xs leading-none transition-colors",
           reactedByMe

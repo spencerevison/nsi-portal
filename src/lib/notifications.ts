@@ -298,3 +298,67 @@ export async function notifyNewComment(opts: {
     console.error("notifyNewComment: send failed", err);
   }
 }
+
+/**
+ * Email members who were @tagged in a post or comment. Callers pass only
+ * the newly tagged ids (so edits don't re-send). Gated on notify_replies.
+ */
+export async function notifyMentions(opts: {
+  userIds: string[];
+  authorId: string;
+  authorName: string;
+  postId: string;
+  postTitle: string;
+  in: "post" | "comment";
+}) {
+  const ids = opts.userIds.filter((id) => id !== opts.authorId);
+  if (ids.length === 0) return;
+
+  const { data: recipients, error } = await supabaseAdmin
+    .from("app_user")
+    .select("email")
+    .in("id", ids)
+    .eq("active", true)
+    .eq("notify_replies", true)
+    .not("accepted_at", "is", null)
+    .not("email", "ilike", "%+clerk_test%");
+
+  if (error || !recipients?.length) {
+    if (error)
+      console.error("notifyMentions: failed to fetch recipients", error);
+    return;
+  }
+
+  const emails = recipients
+    .filter((r) => isDeliverable(r.email))
+    .map((r) => r.email);
+  if (emails.length === 0) return;
+
+  const fromAddress =
+    process.env.RESEND_FROM_ADDRESS ?? "NSI Portal <noreply@resend.dev>";
+  const postUrl = escapeHtml(
+    `${portalUrl}/community/${encodeURIComponent(opts.postId)}`,
+  );
+  const where = opts.in === "post" ? "a post" : "a comment on";
+
+  try {
+    const result = await getResend().batch.send(
+      emails.map((to) => ({
+        from: fromAddress,
+        to,
+        subject: `${opts.authorName} mentioned you on the message board`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px;">
+            <p><strong>${escapeHtml(opts.authorName)}</strong> mentioned you in ${where} <strong>${escapeHtml(opts.postTitle)}</strong>.</p>
+            <p><a href="${postUrl}" style="color: #22444e;">View on the message board</a></p>
+          </div>
+        `,
+      })),
+    );
+    if (result.error) {
+      console.error("notifyMentions: resend batch error", result.error);
+    }
+  } catch (err) {
+    console.error("notifyMentions: send failed", err);
+  }
+}

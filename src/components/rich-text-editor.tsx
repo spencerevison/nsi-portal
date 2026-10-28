@@ -4,6 +4,7 @@ import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import Mention from "@tiptap/extension-mention";
 import {
   Bold,
   Italic,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { mentionSuggestion } from "@/components/mention-suggestion";
 
 type Props = {
   value?: string;
@@ -57,6 +59,7 @@ export function RichTextEditor({
         },
       }),
       Placeholder.configure({ placeholder }),
+      Mention.configure({ suggestion: mentionSuggestion }),
     ],
     content: value || "",
     editable: !disabled,
