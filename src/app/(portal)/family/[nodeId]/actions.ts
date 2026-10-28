@@ -13,7 +13,7 @@ export async function setFamilyName(input: {
   name: string;
 }): Promise<ActionResult> {
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const g = await loadFamilyGraph();
   if (!g.nodes.has(input.nodeId)) {

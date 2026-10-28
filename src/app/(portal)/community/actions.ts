@@ -40,7 +40,7 @@ const TOO_MANY_MENTIONS = `You can tag at most ${MAX_MENTIONS} people`;
 export async function createPost(formData: FormData): Promise<ActionResult> {
   await requireCapability("community.write");
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const title = String(formData.get("title") ?? "").trim();
   const rawBody = String(formData.get("body") ?? "");
@@ -139,7 +139,7 @@ export async function createPost(formData: FormData): Promise<ActionResult> {
 export async function createComment(formData: FormData): Promise<ActionResult> {
   await requireCapability("community.write");
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const postId = String(formData.get("postId") ?? "");
   const rawBody = String(formData.get("body") ?? "");
@@ -300,7 +300,7 @@ export async function editPost(input: {
 }): Promise<ActionResult> {
   await requireCapability("community.write");
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const title = input.title.trim();
   const sanitized = sanitizeRichText(input.body);
@@ -355,7 +355,7 @@ export async function editComment(input: {
 }): Promise<ActionResult> {
   await requireCapability("community.write");
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const sanitized = sanitizeRichText(input.body);
   if (isEmptyRichText(sanitized))
@@ -412,7 +412,7 @@ export async function deleteComment(
 ): Promise<ActionResult> {
   await requireCapability("community.write");
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const caps = await getCurrentCapabilities();
 
@@ -458,7 +458,7 @@ export async function toggleReaction(input: {
 }): Promise<ActionResult & { emoji?: string | null }> {
   await requireCapability("community.write");
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const emoji = input.emoji.trim();
   // Cap on emoji string length — a real emoji is at most a few code points;

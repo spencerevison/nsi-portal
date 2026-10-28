@@ -20,7 +20,7 @@ export async function updateProfile(input: {
   address: string;
 }): Promise<ActionResult> {
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   // self-edit counts as confirmation — they wouldn't be saving if it was wrong
   const now = new Date().toISOString();
@@ -50,7 +50,7 @@ export async function updateCustomFieldValue(input: {
   visible: boolean;
 }): Promise<ActionResult> {
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const { error } = await supabaseAdmin.from("custom_field_value").upsert(
     {
@@ -83,7 +83,7 @@ export async function updateCustomFieldValue(input: {
 
 export async function confirmProfile(): Promise<ActionResult> {
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const now = new Date().toISOString();
   const { error } = await supabaseAdmin
@@ -109,7 +109,7 @@ export async function updateNotifications(input: {
   notifyReplies: boolean;
 }): Promise<ActionResult> {
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const { error } = await supabaseAdmin
     .from("app_user")

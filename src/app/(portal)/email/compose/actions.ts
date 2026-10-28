@@ -31,7 +31,7 @@ type SendResult =
 export async function sendGroupEmail(formData: FormData): Promise<SendResult> {
   await requireCapability("email.send");
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const rl = await checkAndRecord({
     bucket: RATE_BUCKET,
