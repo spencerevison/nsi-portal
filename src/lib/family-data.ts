@@ -397,10 +397,11 @@ export async function listLinkableMembers(
 
 // Move every link from dropId onto keepId (dedupe + re-canonicalize partner
 // ordering), then delete dropId. Used by admin merge and convert-to-member.
+// Returns false if dropId was kept because something couldn't be moved.
 export async function mergeNodeLinks(
   keepId: string,
   dropId: string,
-): Promise<void> {
+): Promise<boolean> {
   // carry over facts the keep node doesn't have yet — a placeholder often
   // knows the birth year before the real account does
   const { data: pair } = await supabaseAdmin
@@ -427,7 +428,7 @@ export async function mergeNodeLinks(
   // bail before the delete below, its links cascade
   if (linksErr) {
     console.error("mergeNodeLinks link select failed, keeping node", linksErr);
-    return;
+    return false;
   }
 
   // Re-home each of dropId's links onto keepId. Insert the rewritten edge
@@ -463,6 +464,7 @@ export async function mergeNodeLinks(
   if (allMoved) {
     await supabaseAdmin.from("family_node").delete().eq("id", dropId);
   }
+  return allMoved;
 }
 
 // P2 reconciliation: a member is being linked into a slot that's already
@@ -501,9 +503,10 @@ export async function reconcileSameNamePlaceholders(
         console.warn("reconcile skipped: merge would create cycle", keepId, id);
         continue;
       }
-      await mergeNodeLinks(keepId, id);
-      merged = true;
-      work = await loadFamilyGraph();
+      if (await mergeNodeLinks(keepId, id)) {
+        merged = true;
+        work = await loadFamilyGraph();
+      }
     }
   };
 

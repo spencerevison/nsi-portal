@@ -176,7 +176,9 @@ export async function addRelative(
           error: "Can't merge a person with their own ancestor or descendant",
         };
       }
-      await mergeNodeLinks(targetNodeId, ph.id);
+      if (!(await mergeNodeLinks(targetNodeId, ph.id))) {
+        return { ok: false, error: "Couldn't merge, please try again" };
+      }
       mergedDup = true;
       // the merge moved edges — refresh so reconcile's cycle guard is current
       graph = await loadFamilyGraph();
