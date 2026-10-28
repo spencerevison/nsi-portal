@@ -30,10 +30,18 @@ export function safeRedirectPath(
   fallback = "/",
 ): string {
   if (!url) return fallback;
+  // browsers strip tab/CR/LF inside URLs, so "/\t/evil.example" would turn
+  // into "//evil.example" at navigation time
+  let path = url.replace(/[\t\r\n]/g, "");
+  // Clerk's auth.protect() sends an absolute redirect_url for our own host
+  if (typeof window !== "undefined") {
+    const origin = window.location.origin;
+    if (path.startsWith(origin + "/")) path = path.slice(origin.length);
+  }
   // must start with "/" but not "//" (protocol-relative) or "/\" (backslash trick)
-  if (!url.startsWith("/")) return fallback;
-  if (url.startsWith("//") || url.startsWith("/\\")) return fallback;
-  return url;
+  if (!path.startsWith("/")) return fallback;
+  if (path.startsWith("//") || path.startsWith("/\\")) return fallback;
+  return path;
 }
 
 export function timeAgo(dateStr: string): string {

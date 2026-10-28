@@ -91,6 +91,12 @@ describe("safeRedirectPath", () => {
     expect(safeRedirectPath("/\\evil.example")).toBe("/");
   });
 
+  it("rejects control chars that collapse into a protocol-relative url", () => {
+    expect(safeRedirectPath("/\t/evil.example")).toBe("/");
+    expect(safeRedirectPath("/\n/evil.example")).toBe("/");
+    expect(safeRedirectPath("/\r/evil.example")).toBe("/");
+  });
+
   it("returns fallback for null/empty", () => {
     expect(safeRedirectPath(null)).toBe("/");
     expect(safeRedirectPath(undefined)).toBe("/");
