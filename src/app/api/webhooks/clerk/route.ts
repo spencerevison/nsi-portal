@@ -136,8 +136,8 @@ async function handleUserCreated(data: WebhookEvent["data"] & { id: string }) {
   // we reject rather than auto-creating, to keep membership gated.
   const { data: existing, error: selErr } = await supabaseAdmin
     .from("app_user")
-    .select("id, clerk_id, first_name")
-    .ilike("email", email)
+    .select("id, clerk_id, first_name, revoked_at")
+    .eq("email", email)
     .maybeSingle();
 
   if (selErr) {
@@ -150,6 +150,12 @@ async function handleUserCreated(data: WebhookEvent["data"] & { id: string }) {
     // are only sent after admin creates the app_user row
     console.warn("user.created for un-seeded email", { email, clerkId });
     return new Response("No matching profile", { status: 404 });
+  }
+
+  // admin revoked this invite, don't hand out access
+  if (existing.revoked_at) {
+    console.warn("user.created for revoked invitation", { email, clerkId });
+    return new Response("Invitation revoked", { status: 403 });
   }
 
   // already linked to a DIFFERENT clerk account? reject to prevent takeover

@@ -45,7 +45,7 @@ export async function placeholderCandidates(
   name: string,
 ): Promise<FamilyEntry[]> {
   const user = await getCurrentAppUser();
-  if (!user) return [];
+  if (!user?.active) return [];
   return findPlaceholderCandidates(user.id, name);
 }
 
@@ -56,7 +56,7 @@ export async function memberLinkPlaceholderCandidates(input: {
   targetUserId: string;
 }): Promise<FamilyEntry[]> {
   const user = await getCurrentAppUser();
-  if (!user) return [];
+  if (!user?.active) return [];
   return memberLinkCandidates(user.id, input.relationship, input.targetUserId);
 }
 
@@ -119,7 +119,7 @@ export async function addRelative(
   input: AddRelativeInput,
 ): Promise<ActionResult> {
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const myNodeId = await getOrCreateNodeForUser(user.id);
 
@@ -176,7 +176,9 @@ export async function addRelative(
           error: "Can't merge a person with their own ancestor or descendant",
         };
       }
-      await mergeNodeLinks(targetNodeId, ph.id);
+      if (!(await mergeNodeLinks(targetNodeId, ph.id))) {
+        return { ok: false, error: "Couldn't merge, please try again" };
+      }
       mergedDup = true;
       // the merge moved edges — refresh so reconcile's cycle guard is current
       graph = await loadFamilyGraph();
@@ -241,7 +243,7 @@ export async function addRelative(
 
 export async function removeRelative(linkId: string): Promise<ActionResult> {
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const { data: link } = await supabaseAdmin
     .from("family_link")
@@ -295,7 +297,7 @@ export async function removePlaceholderCompletely(
   nodeId: string,
 ): Promise<ActionResult> {
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const { data: node } = await supabaseAdmin
     .from("family_node")
@@ -344,7 +346,7 @@ export async function updatePlaceholder(input: {
   deathYear: number | null;
 }): Promise<ActionResult> {
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const name = input.name.trim();
   if (!name) return { ok: false, error: "Name is required" };

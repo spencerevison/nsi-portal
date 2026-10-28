@@ -37,38 +37,53 @@ export async function checkAndRecord(
   const dayCutoff = new Date(now - DAY_MS).toISOString();
 
   if (opts.hourLimit !== undefined) {
-    const { count } = await supabaseAdmin
+    const { count, error: cntErr } = await supabaseAdmin
       .from("rate_limit_event")
       .select("id", { count: "exact", head: true })
       .eq("bucket", opts.bucket)
       .eq("user_id", opts.userId)
       .gte("created_at", hourCutoff);
 
+    if (cntErr)
+      console.error("rate-limit count failed; allowing", {
+        bucket: opts.bucket,
+        cntErr,
+      });
     if ((count ?? 0) >= opts.hourLimit) {
       return { ok: false, reason: "user_hour" };
     }
   }
 
   if (opts.dayLimit !== undefined) {
-    const { count } = await supabaseAdmin
+    const { count, error: cntErr } = await supabaseAdmin
       .from("rate_limit_event")
       .select("id", { count: "exact", head: true })
       .eq("bucket", opts.bucket)
       .eq("user_id", opts.userId)
       .gte("created_at", dayCutoff);
 
+    if (cntErr)
+      console.error("rate-limit count failed; allowing", {
+        bucket: opts.bucket,
+        cntErr,
+      });
     if ((count ?? 0) >= opts.dayLimit) {
       return { ok: false, reason: "user_day" };
     }
   }
 
   if (opts.systemDayLimit !== undefined) {
-    const { count } = await supabaseAdmin
+    const { count, error: cntErr } = await supabaseAdmin
       .from("rate_limit_event")
       .select("id", { count: "exact", head: true })
       .eq("bucket", opts.bucket)
       .gte("created_at", dayCutoff);
 
+    if (cntErr)
+      console.error("rate-limit count failed; allowing", {
+        bucket: opts.bucket,
+        cntErr,
+      });
     if ((count ?? 0) >= opts.systemDayLimit) {
       return { ok: false, reason: "system_day" };
     }

@@ -40,6 +40,11 @@ export function useImageCompression() {
         type: out.type,
         lastModified: Date.now(),
       });
+    } catch (err) {
+      // e.g. HEIC in a browser with no decoder. Let the picker validate the
+      // original instead of rejecting a file the server would accept.
+      console.warn("image compression failed, using original", err);
+      return file;
     } finally {
       setCompressing((n) => n - 1);
     }

@@ -65,6 +65,7 @@ const payload = {
       {
         id: "idn_primary",
         email_address: testEmail,
+        verification: { status: "verified" },
       },
     ],
   },
@@ -91,6 +92,7 @@ console.log("   response:", res.status, await res.text());
 
 if (res.status !== 204) {
   console.error("unexpected status");
+  await supabase.from("app_user").delete().eq("id", seeded.id);
   process.exit(1);
 }
 

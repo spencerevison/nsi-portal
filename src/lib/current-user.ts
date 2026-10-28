@@ -14,6 +14,7 @@ export type AppUser = {
   onboarded_at: string | null;
   profile_confirmed_at: string | null;
   avatar_url: string | null;
+  revoked_at?: string | null;
 };
 
 /**
@@ -101,12 +102,15 @@ export const getCurrentAppUser = cache(async (): Promise<AppUser | null> => {
   const { data: byEmail } = await supabaseAdmin
     .from("app_user")
     .select(
-      "id, clerk_id, email, first_name, last_name, role_id, active, accepted_at, onboarded_at, profile_confirmed_at",
+      "id, clerk_id, email, first_name, last_name, role_id, active, accepted_at, onboarded_at, profile_confirmed_at, revoked_at",
     )
-    .ilike("email", email)
+    .eq("email", email)
     .maybeSingle();
 
   if (!byEmail) return null;
+
+  // revoked invite, don't self-link
+  if (byEmail.revoked_at) return null;
 
   // only link if not already linked to a different clerk account
   if (byEmail.clerk_id && byEmail.clerk_id !== clerkUser.id) {

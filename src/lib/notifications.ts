@@ -230,9 +230,12 @@ export async function notifyNewPost(opts: {
       `,
     }));
 
-    const result = await getResend().batch.send(batch);
-    if (result.error) {
-      console.error("notifyNewPost: resend batch error", result.error);
+    // resend caps batch.send at 100 emails per call
+    for (let i = 0; i < batch.length; i += 100) {
+      const result = await getResend().batch.send(batch.slice(i, i + 100));
+      if (result.error) {
+        console.error("notifyNewPost: resend batch error", result.error);
+      }
     }
   } catch (err) {
     console.error("notifyNewPost: send failed", err);

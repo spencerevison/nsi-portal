@@ -30,7 +30,10 @@ type NodeRow = {
 };
 
 export async function loadFamilyGraph(): Promise<FamilyGraph> {
-  const [{ data: nodeRows }, { data: linkRows }] = await Promise.all([
+  const [
+    { data: nodeRows, error: nodeErr },
+    { data: linkRows, error: linkErr },
+  ] = await Promise.all([
     supabaseAdmin
       .from("family_node")
       .select(
@@ -38,6 +41,11 @@ export async function loadFamilyGraph(): Promise<FamilyGraph> {
       ),
     supabaseAdmin.from("family_link").select("id, type, from_node, to_node"),
   ]);
+
+  // fail loud, a partial graph would let cycle guards pass
+  if (nodeErr || linkErr) {
+    throw new Error(`loadFamilyGraph failed: ${(nodeErr ?? linkErr)!.message}`);
+  }
 
   const rows = (nodeRows ?? []) as NodeRow[];
   const userIds = rows.map((r) => r.app_user_id).filter(Boolean) as string[];
@@ -389,10 +397,11 @@ export async function listLinkableMembers(
 
 // Move every link from dropId onto keepId (dedupe + re-canonicalize partner
 // ordering), then delete dropId. Used by admin merge and convert-to-member.
+// Returns false if dropId was kept because something couldn't be moved.
 export async function mergeNodeLinks(
   keepId: string,
   dropId: string,
-): Promise<void> {
+): Promise<boolean> {
   // carry over facts the keep node doesn't have yet — a placeholder often
   // knows the birth year before the real account does
   const { data: pair } = await supabaseAdmin
@@ -411,10 +420,16 @@ export async function mergeNodeLinks(
     }
   }
 
-  const { data: links } = await supabaseAdmin
+  const { data: links, error: linksErr } = await supabaseAdmin
     .from("family_link")
     .select("id, type, from_node, to_node")
     .or(`from_node.eq.${dropId},to_node.eq.${dropId}`);
+
+  // bail before the delete below, its links cascade
+  if (linksErr) {
+    console.error("mergeNodeLinks link select failed, keeping node", linksErr);
+    return false;
+  }
 
   // Re-home each of dropId's links onto keepId. Insert the rewritten edge
   // FIRST, then delete the old row — so a failed insert never leaves the
@@ -449,6 +464,7 @@ export async function mergeNodeLinks(
   if (allMoved) {
     await supabaseAdmin.from("family_node").delete().eq("id", dropId);
   }
+  return allMoved;
 }
 
 // P2 reconciliation: a member is being linked into a slot that's already
@@ -487,9 +503,10 @@ export async function reconcileSameNamePlaceholders(
         console.warn("reconcile skipped: merge would create cycle", keepId, id);
         continue;
       }
-      await mergeNodeLinks(keepId, id);
-      merged = true;
-      work = await loadFamilyGraph();
+      if (await mergeNodeLinks(keepId, id)) {
+        merged = true;
+        work = await loadFamilyGraph();
+      }
     }
   };
 

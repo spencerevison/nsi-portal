@@ -149,7 +149,9 @@ export async function adminAddRelative(input: {
           error: "Can't merge a person with their own ancestor or descendant",
         };
       }
-      await mergeNodeLinks(targetNodeId, ph.id);
+      if (!(await mergeNodeLinks(targetNodeId, ph.id))) {
+        return { ok: false, error: "Couldn't merge, please try again" };
+      }
       mergedDup = true;
       // the merge moved edges — refresh so reconcile's cycle guard is current
       graph = await loadFamilyGraph();
@@ -364,7 +366,9 @@ export async function adminConvertPlaceholder(input: {
         error: "Can't merge a person with their own ancestor or descendant",
       };
     }
-    await mergeNodeLinks(existingNode, input.nodeId);
+    if (!(await mergeNodeLinks(existingNode, input.nodeId))) {
+      return { ok: false, error: "Couldn't merge, please try again" };
+    }
   } else {
     const { error } = await supabaseAdmin
       .from("family_node")
@@ -418,7 +422,9 @@ export async function adminMergeNodes(input: {
     };
   }
 
-  await mergeNodeLinks(input.keepId, input.dropId);
+  if (!(await mergeNodeLinks(input.keepId, input.dropId))) {
+    return { ok: false, error: "Couldn't merge, please try again" };
+  }
   revalidateFamily();
   return { ok: true };
 }

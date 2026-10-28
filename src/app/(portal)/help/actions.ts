@@ -23,7 +23,7 @@ export async function submitSupportRequest(input: {
   message: string;
 }): Promise<ActionResult> {
   const user = await getCurrentAppUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
+  if (!user?.active) return { ok: false, error: "Not authenticated" };
 
   const rl = await checkAndRecord({
     bucket: RATE_BUCKET,
