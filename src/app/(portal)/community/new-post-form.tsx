@@ -105,6 +105,7 @@ export function NewPostForm() {
               onChange={setAttachments}
               onError={setError}
               disabled={pending}
+              pasteImages
             />
 
             {error && <p className="text-destructive text-sm">{error}</p>}

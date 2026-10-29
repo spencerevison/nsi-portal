@@ -1,6 +1,7 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { escapeHtml } from "@/lib/utils";
 import { getResend } from "@/lib/resend";
+import { looksLikeHtml, sanitizeRichText } from "@/lib/rich-text";
 
 export const BLOCKED_DOMAINS = ["example.com", "example.org", "example.net"];
 
@@ -176,6 +177,35 @@ export async function sendWelcomeEmail(opts: {
 }
 
 /**
+ * Quoted post body + attachment name list, shared by the new-post and
+ * mention emails.
+ */
+async function postBodyBlock(postId: string, body: string): Promise<string> {
+  const postUrl = `${portalUrl}/community/${postId}`;
+
+  // Resend's batch API doesn't take attachments, and the storage bucket is
+  // private, so we just list the files and send people to the post for them.
+  const { data: atts } = await supabaseAdmin
+    .from("post_attachment")
+    .select("display_name")
+    .eq("post_id", postId)
+    .order("sort_order");
+  const attHtml = atts?.length
+    ? `<p style="color: #666; font-size: 13px; margin: 16px 0 0;">Attachments (<a href="${postUrl}" style="color: #22444e;">view on the portal</a>):<br />${atts
+        .map((a) => escapeHtml(a.display_name))
+        .join("<br />")}</p>`
+    : "";
+
+  // old posts were plain text. sanitize again here so we don't depend on
+  // the caller having done it
+  const bodyHtml = looksLikeHtml(body)
+    ? sanitizeRichText(body)
+    : `<p style="white-space: pre-wrap;">${escapeHtml(body)}</p>`;
+
+  return `<div style="border-left: 3px solid #e5e5e5; padding-left: 14px; margin: 0 0 16px;">${bodyHtml}</div>${attHtml}`;
+}
+
+/**
  * Send notification emails for a new community post.
  * Sends to all active members with notify_new_post = true, excluding the author
  * and test users.
@@ -183,12 +213,15 @@ export async function sendWelcomeEmail(opts: {
 export async function notifyNewPost(opts: {
   postId: string;
   title: string;
+  body: string;
   authorId: string;
   authorName: string;
+  // people who already got a mention email for this post
+  skipUserIds?: string[];
 }) {
   const { data: recipients, error } = await supabaseAdmin
     .from("app_user")
-    .select("email")
+    .select("id, email")
     .eq("active", true)
     .eq("notify_new_post", true)
     .not("accepted_at", "is", null)
@@ -201,8 +234,9 @@ export async function notifyNewPost(opts: {
     return;
   }
 
+  const skip = new Set(opts.skipUserIds ?? []);
   const emails = recipients
-    .filter((r) => isDeliverable(r.email))
+    .filter((r) => !skip.has(r.id) && isDeliverable(r.email))
     .map((r) => r.email);
 
   if (emails.length === 0) return;
@@ -210,6 +244,8 @@ export async function notifyNewPost(opts: {
   const fromAddress =
     process.env.RESEND_FROM_ADDRESS ?? "NSI Portal <noreply@resend.dev>";
   const postUrl = `${portalUrl}/community/${opts.postId}`;
+
+  const bodyBlock = await postBodyBlock(opts.postId, opts.body);
 
   try {
     const batch = emails.map((to) => ({
@@ -220,7 +256,8 @@ export async function notifyNewPost(opts: {
         <div style="font-family: sans-serif; max-width: 600px;">
           <p><strong>${escapeHtml(opts.authorName)}</strong> posted on the community board:</p>
           <p style="font-size: 18px; margin: 16px 0;">${escapeHtml(opts.title)}</p>
-          <p><a href="${postUrl}" style="color: #22444e;">View post</a></p>
+          ${bodyBlock}
+          <p><a href="${postUrl}" style="color: #22444e;">View post and reply</a></p>
           <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 16px 0;" />
           <p style="color: #888; font-size: 12px;">
             You received this because you have new post notifications enabled.
@@ -313,13 +350,15 @@ export async function notifyMentions(opts: {
   postId: string;
   postTitle: string;
   in: "post" | "comment";
-}) {
+  // when set, the email includes the post text + attachment list
+  body?: string;
+}): Promise<string[]> {
   const ids = opts.userIds.filter((id) => id !== opts.authorId);
-  if (ids.length === 0) return;
+  if (ids.length === 0) return [];
 
   const { data: recipients, error } = await supabaseAdmin
     .from("app_user")
-    .select("email")
+    .select("id, email")
     .in("id", ids)
     .eq("active", true)
     .eq("notify_replies", true)
@@ -329,13 +368,11 @@ export async function notifyMentions(opts: {
   if (error || !recipients?.length) {
     if (error)
       console.error("notifyMentions: failed to fetch recipients", error);
-    return;
+    return [];
   }
 
-  const emails = recipients
-    .filter((r) => isDeliverable(r.email))
-    .map((r) => r.email);
-  if (emails.length === 0) return;
+  const deliverable = recipients.filter((r) => isDeliverable(r.email));
+  if (deliverable.length === 0) return [];
 
   const fromAddress =
     process.env.RESEND_FROM_ADDRESS ?? "NSI Portal <noreply@resend.dev>";
@@ -343,16 +380,19 @@ export async function notifyMentions(opts: {
     `${portalUrl}/community/${encodeURIComponent(opts.postId)}`,
   );
   const where = opts.in === "post" ? "a post" : "a comment on";
+  const bodyBlock =
+    opts.body !== undefined ? await postBodyBlock(opts.postId, opts.body) : "";
 
   try {
     const result = await getResend().batch.send(
-      emails.map((to) => ({
+      deliverable.map(({ email: to }) => ({
         from: fromAddress,
         to,
         subject: `${opts.authorName} mentioned you on the message board`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px;">
             <p><strong>${escapeHtml(opts.authorName)}</strong> mentioned you in ${where} <strong>${escapeHtml(opts.postTitle)}</strong>.</p>
+            ${bodyBlock}
             <p><a href="${postUrl}" style="color: #22444e;">View on the message board</a></p>
           </div>
         `,
@@ -360,8 +400,11 @@ export async function notifyMentions(opts: {
     );
     if (result.error) {
       console.error("notifyMentions: resend batch error", result.error);
+      return [];
     }
+    return deliverable.map((r) => r.id);
   } catch (err) {
     console.error("notifyMentions: send failed", err);
+    return [];
   }
 }

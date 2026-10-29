@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Paperclip, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -30,6 +30,9 @@ type Props = {
   onError?: (msg: string) => void;
   compact?: boolean;
   disabled?: boolean;
+  // listen for cmd/ctrl+v of images anywhere on the page. Only turn on for
+  // one picker per page or pastes get added twice.
+  pasteImages?: boolean;
 };
 
 export function AttachmentPicker({
@@ -38,6 +41,7 @@ export function AttachmentPicker({
   onError,
   compact,
   disabled,
+  pasteImages,
 }: Props) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -106,6 +110,36 @@ export function AttachmentPicker({
       }
     }
   }
+
+  // addFiles closes over `value`, so keep the latest copy in a ref for the
+  // paste listener
+  const addFilesRef = useRef(addFiles);
+  useEffect(() => {
+    addFilesRef.current = addFiles;
+  });
+
+  useEffect(() => {
+    if (!pasteImages || disabled) return;
+    function onPaste(e: ClipboardEvent) {
+      const imgs = Array.from(e.clipboardData?.files ?? []).filter((f) =>
+        isImageMime(f.type),
+      );
+      if (imgs.length === 0) return;
+      e.preventDefault();
+      // screenshots all come through as "image.png"
+      const named = imgs.map(
+        (f, i) =>
+          new File(
+            [f],
+            `pasted-image-${Date.now()}-${i + 1}.${f.type.split("/")[1] ?? "png"}`,
+            { type: f.type },
+          ),
+      );
+      void addFilesRef.current(named);
+    }
+    document.addEventListener("paste", onPaste);
+    return () => document.removeEventListener("paste", onPaste);
+  }, [pasteImages, disabled]);
 
   function remove(id: string) {
     onChange(value.filter((a) => a.id !== id));
