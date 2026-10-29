@@ -111,21 +111,29 @@ export async function createPost(formData: FormData): Promise<ActionResult> {
 
   // Fire notifications before we redirect (server actions can't do work
   // after redirect() — it throws). Swallow errors; the post is already in.
-  await notifyNewPost({
-    postId: post.id,
-    title,
-    authorId: user.id,
-    authorName: `${user.first_name} ${user.last_name}`,
-  }).catch((err) => console.error("notifyNewPost error", err));
-
-  await notifyMentions({
+  // mentions go first: tagged people get one email (with the post text)
+  // instead of that plus the new-post one
+  const mentioned = await notifyMentions({
     userIds: extractMentionIds(body),
     authorId: user.id,
     authorName: `${user.first_name} ${user.last_name}`,
     postId: post.id,
     postTitle: title,
     in: "post",
-  }).catch((err) => console.error("notifyMentions error", err));
+    body,
+  }).catch((err) => {
+    console.error("notifyMentions error", err);
+    return [] as string[];
+  });
+
+  await notifyNewPost({
+    postId: post.id,
+    title,
+    body,
+    authorId: user.id,
+    authorName: `${user.first_name} ${user.last_name}`,
+    skipUserIds: mentioned,
+  }).catch((err) => console.error("notifyNewPost error", err));
 
   // Invalidate the list cache so the new post shows on /community the next
   // time the user visits it. Do this before redirect() — redirect throws.
