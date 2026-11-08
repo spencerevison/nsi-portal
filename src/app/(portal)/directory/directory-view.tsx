@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import type { DirectoryMember, CustomField } from "@/lib/directory";
 import type { DirectoryFamilySummary, FamilyListItem } from "@/lib/family-data";
+import { PhoneLinks } from "@/components/phone-links";
 import { MemberAvatar } from "./member-avatar";
 import { MemberSheet } from "./member-sheet";
 
@@ -214,16 +215,7 @@ export function DirectoryView({
                       {m.lot_number ?? "—"}
                     </TableCell>
                     <TableCell className="text-muted-foreground whitespace-nowrap">
-                      {m.phone ? (
-                        <a
-                          href={`tel:${m.phone}`}
-                          className="text-foreground/80 decoration-muted-foreground/30 hover:decoration-foreground/50 underline underline-offset-2"
-                        >
-                          {m.phone}
-                        </a>
-                      ) : (
-                        "—"
-                      )}
+                      <PhoneLinks m={m} />
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       <a
@@ -268,16 +260,7 @@ export function DirectoryView({
                 )}
               </div>
               <div className="text-muted-foreground space-y-2 text-sm">
-                {m.phone && (
-                  <div>
-                    <a
-                      href={`tel:${m.phone}`}
-                      className="text-foreground/80 decoration-muted-foreground/30 hover:decoration-foreground/50 underline underline-offset-2"
-                    >
-                      {m.phone}
-                    </a>
-                  </div>
-                )}
+                {(m.phone || m.phone2) && <PhoneLinks m={m} />}
                 <div className="truncate">
                   <a
                     href={`mailto:${m.email}`}

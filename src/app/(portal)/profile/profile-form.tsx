@@ -41,6 +41,9 @@ export function ProfileForm({
 
   // profile fields (name + email are managed by Clerk, read-only here)
   const [phone, setPhone] = useState(profile.phone ?? "");
+  const [phoneLabel, setPhoneLabel] = useState(profile.phone_label ?? "");
+  const [phone2, setPhone2] = useState(profile.phone2 ?? "");
+  const [phone2Label, setPhone2Label] = useState(profile.phone2_label ?? "");
   const [lotNumber, setLotNumber] = useState(profile.lot_number ?? "");
   const [address, setAddress] = useState(profile.address ?? "");
 
@@ -61,7 +64,14 @@ export function ProfileForm({
   function handleSave() {
     setSaved(false);
     startTransition(async () => {
-      await updateProfile({ phone, lotNumber, address });
+      await updateProfile({
+        phone,
+        phoneLabel,
+        phone2,
+        phone2Label,
+        lotNumber,
+        address,
+      });
 
       for (const cf of cfState) {
         await updateCustomFieldValue({
@@ -113,12 +123,50 @@ export function ProfileForm({
               <Label htmlFor="phone" className="text-muted-foreground text-xs">
                 Phone
               </Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="phone_label"
+                  className="w-28 shrink-0"
+                  list="phone-labels"
+                  placeholder="Label"
+                  aria-label="Phone label"
+                  value={phoneLabel}
+                  onChange={(e) => setPhoneLabel(e.target.value)}
+                />
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="phone2" className="text-muted-foreground text-xs">
+                Second phone (optional)
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="phone2_label"
+                  className="w-28 shrink-0"
+                  list="phone-labels"
+                  placeholder="Label"
+                  aria-label="Second phone label"
+                  value={phone2Label}
+                  onChange={(e) => setPhone2Label(e.target.value)}
+                />
+                <Input
+                  id="phone2"
+                  type="tel"
+                  value={phone2}
+                  onChange={(e) => setPhone2(e.target.value)}
+                />
+              </div>
+              <datalist id="phone-labels">
+                <option value="Cell" />
+                <option value="Home" />
+                <option value="Work" />
+              </datalist>
             </div>
             <div className="space-y-1.5">
               <Label

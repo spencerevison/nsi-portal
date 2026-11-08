@@ -16,6 +16,9 @@ function revalidateProfileChange() {
 
 export async function updateProfile(input: {
   phone: string;
+  phoneLabel: string;
+  phone2: string;
+  phone2Label: string;
   lotNumber: string;
   address: string;
 }): Promise<ActionResult> {
@@ -28,6 +31,9 @@ export async function updateProfile(input: {
     .from("app_user")
     .update({
       phone: input.phone.trim() || null,
+      phone_label: input.phoneLabel.trim() || null,
+      phone2: input.phone2.trim() || null,
+      phone2_label: input.phone2Label.trim() || null,
       lot_number: input.lotNumber.trim() || null,
       address: input.address.trim() || null,
       profile_confirmed_at: now,

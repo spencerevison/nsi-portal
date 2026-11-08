@@ -15,6 +15,9 @@ export type DirectoryMember = {
   last_name: string;
   email: string;
   phone: string | null;
+  phone_label: string | null;
+  phone2: string | null;
+  phone2_label: string | null;
   lot_number: string | null;
   address: string | null;
   avatar_url: string | null;
@@ -28,6 +31,9 @@ export type ProfileData = {
   first_name: string;
   last_name: string;
   phone: string | null;
+  phone_label: string | null;
+  phone2: string | null;
+  phone2_label: string | null;
   lot_number: string | null;
   address: string | null;
   notify_new_post: boolean;
@@ -58,7 +64,7 @@ export async function listDirectoryMembers(): Promise<DirectoryMember[]> {
   const { data: members, error: membersErr } = await supabaseAdmin
     .from("app_user")
     .select(
-      `id, first_name, last_name, email, phone, lot_number, address, avatar_url,
+      `id, first_name, last_name, email, phone, phone_label, phone2, phone2_label, lot_number, address, avatar_url,
        role:role_id ( name )`,
     )
     .eq("active", true)
@@ -112,6 +118,9 @@ export async function listDirectoryMembers(): Promise<DirectoryMember[]> {
       last_name: m.last_name,
       email: m.email,
       phone: m.phone,
+      phone_label: m.phone_label,
+      phone2: m.phone2,
+      phone2_label: m.phone2_label,
       lot_number: m.lot_number,
       address: m.address,
       avatar_url: m.avatar_url,
@@ -127,7 +136,7 @@ export async function getProfileData(
   const { data: user, error } = await supabaseAdmin
     .from("app_user")
     .select(
-      "id, email, first_name, last_name, phone, lot_number, address, notify_new_post, notify_replies",
+      "id, email, first_name, last_name, phone, phone_label, phone2, phone2_label, lot_number, address, notify_new_post, notify_replies",
     )
     .eq("id", userId)
     .single();

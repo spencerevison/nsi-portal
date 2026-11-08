@@ -11,6 +11,7 @@ import {
 import { Label } from "@/components/ui/label";
 import type { DirectoryMember, CustomField } from "@/lib/directory";
 import type { DirectoryFamilySummary, FamilyEntry } from "@/lib/family-data";
+import { PhoneLinks } from "@/components/phone-links";
 import { MemberAvatar } from "./member-avatar";
 
 function EntryLine({
@@ -119,15 +120,10 @@ export function MemberSheet({
               {/* contact */}
               <div className="space-y-1.5">
                 <Label className="text-muted-foreground text-xs">Contact</Label>
-                {member.phone && (
-                  <p className="text-sm">
-                    <a
-                      href={`tel:${member.phone}`}
-                      className="decoration-muted-foreground/30 underline underline-offset-2"
-                    >
-                      {member.phone}
-                    </a>
-                  </p>
+                {(member.phone || member.phone2) && (
+                  <div className="text-sm">
+                    <PhoneLinks m={member} />
+                  </div>
                 )}
                 <p className="text-sm">
                   <a
