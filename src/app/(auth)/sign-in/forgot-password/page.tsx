@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
   }[step];
 
   return (
-    <main className="bg-cream-100 flex min-h-screen items-center justify-center px-6 py-8">
+    <main className="force-light bg-cream-100 flex min-h-screen items-center justify-center px-6 py-8">
       <section className="w-full max-w-[380px]">
         <div className="mb-8">
           <NsiMark variant="onpaper" />

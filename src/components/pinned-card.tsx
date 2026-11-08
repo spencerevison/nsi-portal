@@ -74,7 +74,7 @@ export function PinnedCard({
   return (
     <article
       className={cn(
-        "relative isolate rounded-xl px-6 pt-5.5 shadow-(--paper-shadow) transition-shadow duration-200 hover:shadow-(--paper-shadow-hover)",
+        "force-light relative isolate rounded-xl px-6 pt-5.5 shadow-(--paper-shadow) transition-shadow duration-200 hover:shadow-(--paper-shadow-hover)",
         isListing ? "pb-5 pl-7" : "pb-4.5",
       )}
       style={{

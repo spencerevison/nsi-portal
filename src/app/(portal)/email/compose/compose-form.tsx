@@ -105,7 +105,7 @@ export function ComposeForm({
           className={cn(
             "flex items-start justify-between gap-2 rounded-lg border p-3 text-sm",
             result.ok
-              ? "border-green-200 bg-green-50 text-green-800"
+              ? "border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950/30 dark:text-green-300"
               : "border-destructive/20 bg-destructive/5 text-destructive",
           )}
         >

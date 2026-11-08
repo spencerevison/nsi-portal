@@ -180,6 +180,21 @@
   --accent-900: #e7eeea;
 }
 
+/* auth pages sit on a fixed cream surface, so keep their text tokens light
+   even when the rest of the app is in dark mode */
+.force-light {
+  color-scheme: light;
+  --foreground: oklch(0.145 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --accent-50: #e7eeea;
+  --accent-100: #bbcfc4;
+  --accent-200: #7fa898;
+  --accent-400: #3d6e5e;
+  --accent-600: #22444e;
+  --accent-800: #162d34;
+  --accent-900: #0c1b1f;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

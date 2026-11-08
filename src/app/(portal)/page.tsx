@@ -332,7 +332,7 @@ export default async function HomePage() {
                       href={item.folderHref}
                       className="hover:bg-muted/50 flex items-center gap-3 px-4 py-3 transition-colors"
                     >
-                      <div className="bg-cream-200 text-accent-600 flex size-7 items-center justify-center rounded-md">
+                      <div className="bg-cream-200 text-accent-600 dark:bg-accent-200 flex size-7 items-center justify-center rounded-md">
                         <Upload aria-hidden="true" className="size-3.5" />
                       </div>
                       <div className="min-w-0 flex-1">

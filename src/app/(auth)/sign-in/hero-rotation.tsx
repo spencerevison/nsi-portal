@@ -100,7 +100,7 @@ function Split({ photo }: { photo: Photo | null }) {
           </>
         ) : null}
       </aside>
-      <main className="bg-cream-100 flex items-center justify-center px-6 py-8 md:p-12">
+      <main className="force-light bg-cream-100 flex items-center justify-center px-6 py-8 md:p-12">
         <SignInCard />
       </main>
     </div>
@@ -128,7 +128,7 @@ function Immersive({ photo }: { photo: Photo }) {
         }}
       />
       <div
-        className="relative z-[2] w-full max-w-[420px] px-6 pt-7 pb-6 md:px-10 md:pt-10 md:pb-8"
+        className="force-light relative z-[2] w-full max-w-[420px] px-6 pt-7 pb-6 md:px-10 md:pt-10 md:pb-8"
         style={{
           background: "rgba(251, 248, 242, 0.88)",
           backdropFilter: "blur(20px) saturate(1.2)",
